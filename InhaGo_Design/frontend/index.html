@@ -8,4 +8,53 @@
 <section id="friend-page" class="page"><h1>친구</h1><div class="panel"><p>👤 김인하 <span class="score-tag">매너 96점</span></p><p>👤 박지민 <span class="score-tag">매너 88점</span></p><p>👤 이수연 <span class="score-tag">매너 91점</span></p><p class="notice">친구 요청 및 연결은 서버 연동 후 제공됩니다.</p></div></section>
 <section id="profile-page" class="page"><h1>마이페이지</h1><div class="profile-top panel"><img src="assets/rider.svg" alt="마스코트 프로필"><div><h2>인하고</h2><p class="muted">@inha_go · 인하대학교</p><p>캠퍼스에서 좋은 사람들과 함께해요!</p></div></div><div class="score-card panel"><div class="score-heading"><span>👑 내 매너 점수</span><span class="score-tag">시연 데이터</span></div><div class="score-number"><strong id="score">92</strong><span>/100</span></div><div class="progress"><div id="score-bar"></div></div><p id="score-label">좋은 매너를 유지하고 있어요!</p><p class="muted">모임 참여 후 받은 평가를 바탕으로 산정하는 기능을 구상 중입니다.</p></div><div class="stats"><div><b id="joined-count">0</b><span>참여 모임</span></div><div><b id="created-count">0</b><span>작성 모임</span></div><div><b id="review-count">0</b><span>남긴 후기</span></div></div><div class="panel"><h2>모임 후기 남기기 <small>(데모)</small></h2><p class="muted">참여한 모임이 있으면 후기를 남길 수 있어요. 아래 점수는 이 브라우저에만 저장됩니다.</p><form id="review-form"><label>평가할 모임<select id="review-meeting" required></select></label><label>평가<select id="review-type"><option value="5">😊 친절하고 약속을 잘 지켰어요 (+5)</option><option value="3">👍 소통이 원활했어요 (+3)</option><option value="0">😐 보통이었어요 (+0)</option><option value="-5">⚠️ 약속을 지키지 않았어요 (-5)</option></select></label><button class="primary" type="submit">후기 제출</button></form><button class="secondary" id="reset-demo">시연 데이터 초기화</button></div></section></main>
 <aside><div class="aside-title"><h2>주변 모임</h2><small>시연용 목록</small></div><div id="cards"></div><button class="primary wide" data-page="create">＋ 모임 만들기</button><div class="mini-score"><span>🤝 내 매너 점수</span><b id="aside-score">92 / 100</b><button data-page="profile">상세 보기 →</button></div></aside></div></div>
-<dialog id="modal"><div class="modal-inner"><button class="close" id="close-modal" aria-label="닫기">×</button><div class="modal-icon" id="modal-icon"></div><h2 id="modal-title"></h2><p id="modal-place"></p><p id="modal-desc"></p><p id="modal-count"></p><button class="primary wide" id="join">참여하기</button></div></dialog><div id="toast" role="status" aria-live="polite"></div><script src="js/main.js"></script></body></html>
+<dialog id="modal"><div class="modal-inner"><button class="close" id="close-modal" aria-label="닫기">×</button><div class="modal-icon" id="modal-icon"></div><h2 id="modal-title"></h2><p id="modal-place"></p><p id="modal-desc"></p><p id="modal-count"></p><button class="primary wide" id="join">참여하기</button></div></dialog><div id="toast" role="status" aria-live="polite"></div>
+<div id="auth-panel" style="position:fixed;inset:0;background:#eef4ff;z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:white;padding:36px;border-radius:20px;width:360px;max-width:90%;box-shadow:0 8px 30px #0001;">
+    <h2>📍 InhaGo</h2>
+    <p>인하대학교 이메일 인증</p>
+
+    <input id="school-email" type="email"
+      placeholder="학교 이메일"
+      style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0;">
+
+    <button id="send-code" type="button">인증번호 받기</button>
+
+    <input id="school-code" type="text"
+      placeholder="인증번호 입력"
+      style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0;">
+
+    <button id="verify-code" type="button">인증하기</button>
+
+    <p id="auth-message" role="status"></p>
+  </div>
+</div>
+
+<script type="module">
+  import { sendVerificationCode, verifyCode } from './js/auth.js';
+
+  const emailInput = document.getElementById('school-email');
+  const codeInput = document.getElementById('school-code');
+  const message = document.getElementById('auth-message');
+
+  document.getElementById('send-code').onclick = async () => {
+    message.textContent = '인증 이메일을 요청하는 중...';
+    try {
+      message.textContent = await sendVerificationCode(emailInput.value);
+    } catch (error) {
+      message.textContent = error.message;
+    }
+  };
+
+  document.getElementById('verify-code').onclick = async () => {
+    message.textContent = '인증번호 확인 중...';
+    try {
+      await verifyCode(emailInput.value, codeInput.value);
+      message.textContent = '인증 성공!';
+      document.getElementById('auth-panel').style.display = 'none';
+    } catch (error) {
+      message.textContent = error.message;
+    }
+  };
+</script>
+<script type="module" src="js/supabase.js"></script><script src="js/main.js"></script></body></html>
