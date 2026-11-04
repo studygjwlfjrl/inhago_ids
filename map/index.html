@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IDS 캠퍼스 지도</title><link rel="stylesheet" href="./map.css"></head>
+<body><main class="map-app"><header><strong>IDS 캠퍼스 지도</strong><button id="locate" type="button">내 위치</button></header>
+<nav id="filters" aria-label="모임 카테고리"><button data-category="all" class="active">전체</button><button data-category="meal">밥약</button><button data-category="taxi">택시팟</button><button data-category="study">스터디</button><button data-category="exercise">운동</button></nav>
+<div id="map" role="region" aria-label="인하대학교 캠퍼스 지도"></div>
+<p id="status" role="status" aria-live="polite"></p>
+<section id="sheet" class="sheet" hidden aria-label="모임 정보"><button id="close-sheet" type="button" aria-label="닫기">×</button><h2 id="meeting-title"></h2><p id="meeting-info"></p></section>
+</main><script src="./map.js"></script></body></html>
