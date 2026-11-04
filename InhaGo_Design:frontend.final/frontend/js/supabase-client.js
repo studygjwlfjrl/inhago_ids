@@ -1,28 +1,14 @@
 
-/* InhaGo Supabase Client Configuration */
+/* InhaGo Shared Supabase Client */
 
-(() => {
-  "use strict";
+(async () => {
+  try {
+    const { supabase } = await import("./supabase.js");
 
-  // Supabase Project URL
-  const SUPABASE_URL =
-    "https://vhburqlerlunlljcbwcs.supabase.co";
+    window.inhagoSupabase = supabase;
 
-  // Supabase Publishable Key
-  const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_aI0Cf5fO35PYetn9532F-w_MJNTnE09";
-
-  // Check if Supabase library is loaded
-  if (!window.supabase) {
-    console.error("Supabase library is not loaded.");
-    return;
+    console.log("InhaGo shared Supabase client initialized.");
+  } catch (error) {
+    console.error("Supabase initialization failed:", error);
   }
-
-  // Create shared Supabase client
-  window.inhagoSupabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-  );
-
-  console.log("InhaGo Supabase client initialized.");
 })();
