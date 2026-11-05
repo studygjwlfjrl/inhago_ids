@@ -49,8 +49,6 @@ const icons = {
 
 let map;
 let markers = [];
-let myLocationMarker;
-
 const status = document.getElementById("status");
 
 // Google 지도 생성
@@ -73,10 +71,76 @@ async function initMap() {
     showMarkers("all");
     setupButtons();
 
+    // 지도 생성 성공 후 자동 GPS 추적 시작
+    startLocationTracking();
+
   } catch (error) {
     status.textContent = "지도를 불러오지 못했습니다.";
     console.error(error);
   }
+}
+
+
+let myLocationMarker = null;
+let locationWatchId = null;
+let hasCenteredOnUser = false;
+
+function startLocationTracking() {
+  if (!navigator.geolocation) {
+    console.error("이 브라우저는 위치 서비스를 지원하지 않습니다.");
+    return;
+  }
+
+  // 중복 위치 추적 방지
+  if (locationWatchId !== null) return;
+
+  locationWatchId = navigator.geolocation.watchPosition(
+    (position) => {
+      const myPosition = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+
+      // 처음 위치를 가져왔을 때 마커 생성
+      if (!myLocationMarker) {
+        myLocationMarker = new google.maps.Marker({
+          position: myPosition,
+          map: map,
+          title: "내 현재 위치",
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 9,
+            fillColor: "#4285F4",
+            fillOpacity: 1,
+            strokeColor: "#FFFFFF",
+            strokeWeight: 3
+          }
+        });
+      } else {
+        // 위치가 바뀌면 기존 마커 이동
+        myLocationMarker.setPosition(myPosition);
+      }
+
+      // 처음 한 번만 내 위치로 지도 이동
+      if (!hasCenteredOnUser) {
+        map.setCenter(myPosition);
+        map.setZoom(17);
+        hasCenteredOnUser = true;
+      }
+
+      console.log("현재 위치 업데이트:", myPosition);
+    },
+
+    (error) => {
+      console.error("GPS 오류:", error.code, error.message);
+    },
+
+    {
+      enableHighAccuracy: true,
+      maximumAge: 1000,
+      timeout: 15000
+    }
+  );
 }
 
 // 모임 마커 표시
@@ -231,5 +295,6 @@ function loadGoogleMaps() {
 
   document.head.appendChild(script);
 }
+
 
 loadGoogleMaps();

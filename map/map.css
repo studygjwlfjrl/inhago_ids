@@ -1,1 +1,72 @@
-:root{font-family:system-ui,-apple-system,sans-serif;color:#172033}*{box-sizing:border-box}body{margin:0;background:#f6f8fb}.map-app{position:relative;max-width:1100px;height:100dvh;min-height:480px;margin:auto;background:white;overflow:hidden}header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px}button{cursor:pointer;border:1px solid #dce2ea;background:white;border-radius:20px;padding:9px 13px}#filters{display:flex;gap:8px;overflow:auto;padding:8px 14px}#filters button{white-space:nowrap}#filters .active{background:#1769e0;color:white;border-color:#1769e0}#map{height:calc(100% - 116px);background:#e7edf4}#status{position:absolute;top:105px;left:16px;right:16px;pointer-events:none;color:#a12626;font-size:13px}.sheet{position:absolute;bottom:0;left:0;right:0;background:white;padding:22px 24px 32px;border-radius:24px 24px 0 0;box-shadow:0 -5px 28px #0002}.sheet h2{margin:0 35px 12px 0;font-size:20px}.sheet p{white-space:pre-line;line-height:1.7}#close-sheet{position:absolute;right:18px;top:14px;font-size:24px;border:0}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+}
+
+button {
+  padding: 10px 15px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: white;
+}
+
+#filters {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+#filters button.active {
+  background: #2563eb;
+  color: white;
+}
+
+#map {
+  width: 100%;
+  height: calc(100dvh - 120px);
+  min-height: 350px;
+}
+
+#status {
+  position: absolute;
+  top: 115px;
+  left: 15px;
+  color: #b91c1c;
+  background: white;
+  z-index: 5;
+}
+
+#bottomSheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  padding: 25px;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px #0002;
+  z-index: 10;
+}
+
+#bottomSheet[hidden] {
+  display: none;
+}
+
+#meetingInfo {
+  white-space: pre-line;
+  line-height: 1.8;
+}
