@@ -1,8 +1,58 @@
 
-/* InhaGo 친구 관리 기능 - 데모 버전 */
+import { supabaseDev } from "./supabase-dev.js";
 
 (() => {
   "use strict";
+
+  async function checkSupabaseConnection() {
+    const { data: { user }, error } =
+      await supabaseDev.auth.getUser();
+
+    if (error) {
+      console.error("Supabase 인증 확인 오류:", error.message);
+      return;
+    }
+
+    if (user) {
+      console.log("친구 관리 Supabase 연결 성공!");
+      console.log("현재 사용자 ID:", user.id);
+    } else {
+      console.log("Supabase 연결됨 - 로그인이 필요합니다.");
+    }
+  }
+
+  checkSupabaseConnection();
+
+  // Supabase에서 실제 친구 목록 조회
+  async function loadSupabaseFriends() {
+    const { data: { user }, error: authError } =
+      await supabaseDev.auth.getUser();
+
+    if (authError || !user) {
+      console.log("친구 목록 조회: 로그인 필요");
+      return;
+    }
+
+    const { data, error } = await supabaseDev
+      .from("friendships")
+      .select("id, requester_id, receiver_id, status")
+      .or(
+        `requester_id.eq.${user.id},receiver_id.eq.${user.id}`
+      )
+      .eq("status", "accepted");
+
+    if (error) {
+      console.error("친구 목록 조회 실패:", error.message);
+      return;
+    }
+
+    console.log("Supabase 친구 목록:", data);
+    console.log("친구 수:", data.length);
+
+    return data;
+  }
+
+  loadSupabaseFriends();
 
   const STORAGE_KEY = "inhago_friends_demo_v1";
 
@@ -105,6 +155,29 @@
   }
 
   function handleAction(action, userId) {
+
+      // Supabase 친구 요청
+     if (action === "request-supabase") {
+      sendSupabaseFriendRequest(userId);
+      return;
+     }
+
+
+    if (action === "remove-supabase") {
+      const friendship = supabaseFriendships.find(item =>
+        item.requester_id === userId ||
+        item.receiver_id === userId
+      );
+
+      if (!friendship) {
+        notify("친구 관계를 찾을 수 없습니다.");
+        return;
+      }
+
+      removeSupabaseFriend(friendship.id);
+      return;
+    }
+
     const isFriend = data.friends.includes(userId);
     const request = data.requests.find(
       item => item.userId === userId
@@ -183,6 +256,329 @@
         createUserRow(user, getButtons(user))
       );
     });
+  }
+
+
+  // 개발용 계정 표시명
+  function getDevUserName(userId) {
+    const names = {
+      "693e8c4a-4774-4ae8-9aef-0d82d28f4b8e": "테스트 사용자 A",
+      "037d8d7a-58f0-4d1b-beff-5ef7b956f3bf": "테스트 사용자 B"
+    };
+
+    return names[userId] || "사용자";
+  }
+
+  // Supabase 친구 요청 거절
+  async function rejectSupabaseFriendRequest(friendshipId) {
+    const { data: { user }, error: authError } =
+      await supabaseDev.auth.getUser();
+
+    if (authError || !user) {
+      notify("로그인이 필요합니다.");
+      return;
+    }
+
+    const { data, error } = await supabaseDev
+      .from("friendships")
+      .update({ status: "rejected" })
+      .eq("id", friendshipId)
+      .eq("receiver_id", user.id)
+      .eq("status", "pending")
+      .select("id, status");
+
+    if (error) {
+      console.error("친구 요청 거절 실패:", error.message);
+      notify("친구 요청 거절에 실패했습니다.");
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      notify("거절할 친구 요청이 없습니다.");
+      return;
+    }
+
+    console.log("친구 요청 거절 성공:", data);
+    notify("친구 요청을 거절했습니다.");
+
+    await renderSupabaseReceivedRequests();
+  }
+
+  // Supabase 친구 요청 수락
+  async function acceptSupabaseFriendRequest(friendshipId) {
+    const { data: { user }, error: authError } =
+      await supabaseDev.auth.getUser();
+
+    if (authError || !user) {
+      notify("로그인이 필요합니다.");
+      return;
+    }
+
+    const { data, error } = await supabaseDev
+      .from("friendships")
+      .update({ status: "accepted" })
+      .eq("id", friendshipId)
+      .eq("receiver_id", user.id)
+      .eq("status", "pending")
+      .select("id, status");
+
+    if (error) {
+      console.error("친구 요청 수락 실패:", error.message);
+      notify("친구 요청 수락에 실패했습니다.");
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      notify("수락할 친구 요청을 찾을 수 없습니다.");
+      return;
+    }
+
+    console.log("친구 요청 수락 성공:", data);
+    notify("친구 요청을 수락했습니다.");
+
+    await renderSupabaseFriends();
+  }
+
+  // Supabase 친구 요청 전송
+  async function sendSupabaseFriendRequest(receiverId) {
+    const { data: { user }, error: authError } =
+      await supabaseDev.auth.getUser();
+
+    if (authError || !user) {
+      notify("로그인이 필요합니다.");
+      return;
+    }
+
+    if (user.id === receiverId) {
+      notify("자기 자신에게 친구 요청을 보낼 수 없습니다.");
+      return;
+    }
+
+    const { data, error } = await supabaseDev
+      .from("friendships")
+      .insert({
+        requester_id: user.id,
+        receiver_id: receiverId,
+        status: "pending"
+      })
+      .select();
+
+    if (error) {
+      console.error("친구 요청 실패:", error.message);
+      notify("친구 요청에 실패했습니다.");
+      return;
+    }
+
+    console.log("친구 요청 성공:", data);
+    notify("친구 요청을 보냈습니다.");
+
+    await renderSupabaseFriends();
+  }
+
+  // Supabase 친구 삭제
+  async function removeSupabaseFriend(friendshipId) {
+    const confirmed = confirm(
+      "정말 이 친구를 삭제하시겠습니까?"
+    );
+
+    if (!confirmed) return;
+
+    const { error } = await supabaseDev
+      .from("friendships")
+      .delete()
+      .eq("id", friendshipId)
+      .eq("status", "accepted");
+
+    if (error) {
+      console.error("친구 삭제 실패:", error.message);
+      notify("친구 삭제에 실패했습니다.");
+      return;
+    }
+
+    notify("친구가 삭제되었습니다.");
+    await renderSupabaseFriends();
+  }
+
+  let supabaseFriendships = [];
+
+
+  // 개발용 A 계정 친구 요청 버튼
+  async function renderDevFriendRequestButton() {
+    const container = document.getElementById(
+      "friend-search-results"
+    );
+
+    if (!container) return;
+
+    const { data: { user } } =
+      await supabaseDev.auth.getUser();
+
+    if (!user) return;
+
+    const accountA =
+      "693e8c4a-4774-4ae8-9aef-0d82d28f4b8e";
+
+    const accountB =
+      "037d8d7a-58f0-4d1b-beff-5ef7b956f3bf";
+
+    // B 계정에서만 개발용 버튼 표시
+    if (user.id !== accountB) return;
+
+    const { data, error } = await supabaseDev
+      .from("friendships")
+      .select("id")
+      .or(
+        `and(requester_id.eq.${accountA},receiver_id.eq.${accountB}),and(requester_id.eq.${accountB},receiver_id.eq.${accountA})`
+      );
+
+    if (error) {
+      console.error("친구 관계 확인 실패:", error.message);
+      return;
+    }
+
+    // 이미 친구 관계나 요청이 있다면 버튼 표시 안 함
+    if (data.length > 0) return;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "friend-btn";
+    button.textContent = "테스트 사용자 A에게 친구 요청";
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      await sendSupabaseFriendRequest(accountA);
+      button.remove();
+    });
+
+    container.appendChild(button);
+  }
+
+  // Supabase에서 받은 친구 요청 표시
+  async function renderSupabaseReceivedRequests() {
+    const container =
+      document.getElementById("friend-requests");
+
+    if (!container) return;
+
+    const { data: { user }, error: authError } =
+      await supabaseDev.auth.getUser();
+
+    if (authError || !user) return;
+
+    const { data, error } = await supabaseDev
+      .from("friendships")
+      .select("id, requester_id")
+      .eq("receiver_id", user.id)
+      .eq("status", "pending");
+
+    if (error) {
+      console.error("받은 친구 요청 조회 실패:", error.message);
+      return;
+    }
+
+    container.replaceChildren();
+
+    if (data.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "muted";
+      empty.textContent = "받은 친구 요청이 없습니다.";
+      container.appendChild(empty);
+      return;
+    }
+
+    data.forEach(request => {
+      const row = document.createElement("div");
+      row.className = "friend-item";
+
+      const info = document.createElement("div");
+      info.className = "friend-info";
+
+      const name = document.createElement("strong");
+      name.textContent =
+        getDevUserName(request.requester_id);
+
+      const acceptButton =
+        document.createElement("button");
+
+      acceptButton.type = "button";
+      acceptButton.className = "friend-btn";
+      acceptButton.textContent = "수락";
+
+      acceptButton.addEventListener("click", async () => {
+        acceptButton.disabled = true;
+
+        await acceptSupabaseFriendRequest(request.id);
+        await renderSupabaseReceivedRequests();
+      });
+
+      
+      // 거절 버튼 생성
+      const rejectButton = document.createElement("button");
+
+      rejectButton.type = "button";
+      rejectButton.className = "friend-btn secondary";
+      rejectButton.textContent = "거절";
+
+      rejectButton.addEventListener("click", async () => {
+        const confirmed = confirm(
+          "이 친구 요청을 거절하시겠습니까?"
+        );
+
+        if (!confirmed) return;
+
+        rejectButton.disabled = true;
+        await rejectSupabaseFriendRequest(request.id);
+      });
+
+      // 수락 / 거절 버튼을 나란히 배치
+      const actions = document.createElement("div");
+      actions.className = "friend-actions";
+
+      actions.append(acceptButton, rejectButton);
+
+      info.appendChild(name);
+      row.append(info, actions);
+      container.appendChild(row);
+
+    });
+  }
+
+  // Supabase 친구 목록 화면 표시
+  async function renderSupabaseFriends() {
+    const container = document.getElementById("friend-list");
+    if (!container) return;
+
+    const { data: { user } } =
+      await supabaseDev.auth.getUser();
+
+    if (!user) return;
+
+    const friendships = await loadSupabaseFriends();
+    if (!friendships) return;
+    supabaseFriendships = friendships;
+
+    const friends = friendships.map(item => {
+      const friendId =
+        item.requester_id === user.id
+          ? item.receiver_id
+          : item.requester_id;
+
+      return {
+        id: friendId,
+        name: getDevUserName(friendId),
+        studentId: "개발용 계정"
+      };
+    });
+
+    
+    renderList("friend-list", friends, user => [
+      {
+        label: "친구 삭제",
+        action: "remove-supabase",
+        secondary: true
+      }
+    ]);
+
   }
 
   function renderFriends() {
@@ -268,7 +664,143 @@
     }
 
     renderFriends();
+    renderSupabaseFriends();
+    renderDevFriendRequestButton();
+    renderSupabaseReceivedRequests();
+    renderSupabaseSentRequests();
   }
+
+async function loadSupabaseSentRequests() {
+  const {
+    data: { user },
+    error: authError
+  } = await supabaseDev.auth.getUser();
+
+  if (authError || !user) {
+    console.error("로그인 사용자 확인 실패");
+    return [];
+  }
+
+  const { data, error } = await supabaseDev
+    .from("friendships")
+    .select("id, requester_id, receiver_id, status")
+    .eq("requester_id", user.id)
+    .eq("status", "pending");
+
+  if (error) {
+    console.error("보낸 친구 요청 조회 실패:", error.message);
+    return [];
+  }
+
+  console.log("보낸 친구 요청:", data);
+
+  return data || [];
+}
+
+async function cancelSupabaseFriendRequest(friendshipId) {
+  const {
+    data: { user },
+    error: authError
+  } = await supabaseDev.auth.getUser();
+
+  if (authError || !user) {
+    alert("로그인이 필요합니다.");
+    return;
+  }
+
+  const { data, error } = await supabaseDev
+    .from("friendships")
+    .delete()
+    .eq("id", friendshipId)
+    .eq("requester_id", user.id)
+    .eq("status", "pending")
+    .select("id");
+
+  if (error) {
+    console.error("친구 요청 취소 실패:", error.message);
+    alert("친구 요청 취소에 실패했습니다.");
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    alert("취소할 친구 요청을 찾을 수 없습니다.");
+    return;
+  }
+
+  alert("친구 요청을 취소했습니다.");
+
+  await renderSupabaseSentRequests();
+}
+
+
+async function renderSupabaseSentRequests() {
+  const container = document.getElementById(
+    "friend-sent-requests"
+  );
+
+  if (!container) return;
+
+  container.textContent = "불러오는 중...";
+
+  const requests = await loadSupabaseSentRequests();
+
+  container.innerHTML = "";
+
+  if (requests.length === 0) {
+    container.textContent = "보낸 친구 요청이 없습니다.";
+    return;
+  }
+
+  requests.forEach((request) => {
+    const row = document.createElement("div");
+    row.className = "friend-row";
+
+    const info = document.createElement("div");
+    info.className = "friend-info";
+
+    const name = document.createElement("strong");
+    name.textContent = getDevUserName(
+      request.receiver_id
+    );
+
+    const status = document.createElement("span");
+    status.textContent = "수락 대기 중";
+
+
+    // 요청 취소 버튼 생성
+    const cancelButton = document.createElement("button");
+
+    cancelButton.type = "button";
+    cancelButton.className = "friend-btn secondary";
+    cancelButton.textContent = "요청 취소";
+
+    cancelButton.addEventListener("click", async () => {
+      const confirmed = confirm(
+        "보낸 친구 요청을 취소하시겠습니까?"
+      );
+
+      if (!confirmed) return;
+
+      cancelButton.disabled = true;
+      cancelButton.textContent = "취소 중...";
+
+      
+      try {
+       await cancelSupabaseFriendRequest(request.id);
+     } finally {
+       cancelButton.disabled = false;
+       cancelButton.textContent = "요청 취소";
+     }
+
+    });
+
+    // 기존 사용자 정보와 취소 버튼 표시
+    info.append(name, status);
+    row.append(info, cancelButton);
+    container.appendChild(row);
+
+  });
+}
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);

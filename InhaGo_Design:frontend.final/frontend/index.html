@@ -1,4 +1,5 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>InhaGo | 캠퍼스에서 만나요</title><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/friend.css"><link rel="stylesheet" href="css/message.css"><link rel="stylesheet" href="css/chat.css"></head><body>
+
 <div class="app"><header><a class="brand" href="#" data-page="home">InhaGo<span>📍</span></a><label class="search">⌕ <input id="search" placeholder="장소, 모임, 사람을 검색해보세요" aria-label="모임 검색"></label><button class="account" data-page="profile"><img src="assets/rider.svg" alt="인덕이 스타일 마스코트"> <span>인하고 · <b id="header-score">92</b>점</span></button></header>
 <div class="shell"><nav class="sidebar"><button data-page="home" class="active">⌂ <span>홈</span></button><button data-page="search">⌕ <span>검색</span></button><button data-page="create">⊕ <span>모임 만들기</span></button><button data-page="message">☏ <span>메시지</span></button><button data-page="chat">💬 <span>모임 채팅</span></button><button data-page="friend">♧ <span>친구</span></button><button data-page="profile">♙ <span>마이페이지</span></button><div class="greeting"><img src="assets/rider.svg" alt="인덕이 스타일 마스코트"><strong>캠퍼스에서 새로운 만남!</strong><small>오늘도 안전하고 매너 있게 🚲</small></div></nav>
 <main><section id="home" class="page active"><div class="map"><div class="weather">☀️ 캠퍼스 탐험</div><button class="pin food" style="top:38%;left:32%" data-id="0" aria-label="밥약 모임">🍚</button><button class="pin exercise" style="top:60%;left:20%" data-id="1" aria-label="운동 모임">🏀</button><button class="pin study" style="top:22%;left:63%" data-id="2" aria-label="스터디 모임">📚</button><button class="pin taxi" style="top:55%;left:83%" data-id="3" aria-label="택시팟 모임">🚕</button><div class="player"><img src="assets/rider.svg" alt="내 캐릭터"><span>내 캐릭터</span></div><div class="legend">🍚 밥약　🏀 운동　📚 스터디　🚕 택시팟</div></div><div class="map-note">이 지도는 디자인 시연용 일러스트입니다. 실제 GPS 위치는 사용하지 않습니다.</div></section>
@@ -124,12 +125,14 @@
     <div class="friend-section">
       <h2>받은 친구 요청</h2>
       <div id="friend-requests"></div>
-    </div>
 
-    <!-- 보낸 친구 요청 -->
-    <div class="friend-section">
-      <h2>보낸 친구 요청</h2>
-      <div id="friend-sent"></div>
+<div class="friend-sent-section">
+  <h3>보낸 친구 요청</h3>
+  <div id="friend-sent-requests">
+    <p>보낸 친구 요청을 불러오는 중...</p>
+  </div>
+</div>
+
     </div>
 
     <!-- 친구 목록 -->
@@ -151,4 +154,4 @@
 <dialog id="modal"><div class="modal-inner"><button class="close" id="close-modal" aria-label="닫기">×</button><div class="modal-icon" id="modal-icon"></div><h2 id="modal-title"></h2><p id="modal-place"></p><p id="modal-desc"></p><p id="modal-count"></p><button class="primary wide" id="join">참여하기</button></div></dialog><div id="toast" role="status" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/supabase-client.js"></script>
-<script src="js/main.js"></script><script src="js/friend.js"></script><script src="js/message.js"></script><script src="js/chat.js"></script></body></html>
+<script src="js/main.js"></script><script type="module" src="js/friend.js"></script><script src="js/message.js"></script><script src="js/chat.js"></script>
