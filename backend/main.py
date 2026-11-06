@@ -36,7 +36,9 @@ def get_meetings():
         }
 
     except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="모임 목록을 불러오지 못했습니다."
-        )
+    import logging
+    logging.exception("모임 목록 조회 중 오류 발생")
+    raise HTTPException(
+        status_code=500,
+        detail="모임 목록을 불러오지 못했습니다."
+    )
