@@ -421,8 +421,8 @@ import { supabaseDev } from "./supabase-dev.js";
     const accountB =
       "037d8d7a-58f0-4d1b-beff-5ef7b956f3bf";
 
-    // B 계정에서만 개발용 버튼 표시
-    if (user.id !== accountB) return;
+        // A 또는 B 계정에서만 개발용 버튼 표시
+    if (user.id !== accountA && user.id !== accountB) return;
 
     const { data, error } = await supabaseDev
       .from("friendships")
@@ -439,18 +439,27 @@ import { supabaseDev } from "./supabase-dev.js";
     // 이미 친구 관계나 요청이 있다면 버튼 표시 안 함
     if (data.length > 0) return;
 
+    
+    const targetId = user.id === accountA ? accountB : accountA;
+    const targetName = user.id === accountA ? "B" : "A";
+
     const button = document.createElement("button");
     button.type = "button";
     button.className = "friend-btn";
-    button.textContent = "테스트 사용자 A에게 친구 요청";
+    button.textContent = `테스트 사용자 ${targetName}에게 친구 요청`;
 
     button.addEventListener("click", async () => {
       button.disabled = true;
-      await sendSupabaseFriendRequest(accountA);
-      button.remove();
+
+      try {
+        await sendSupabaseFriendRequest(targetId);
+      } finally {
+        button.disabled = false;
+      }
     });
 
     container.appendChild(button);
+
   }
 
   // Supabase에서 받은 친구 요청 표시
