@@ -1,54 +1,20 @@
 
-/* InhaGo 모임별 채팅 기능 - 데모 버전 */
+/* InhaGo 모임별 채팅 기능 - Supabase + Realtime */
+
+import { supabaseDev } from "./supabase-dev.js";
 
 (() => {
   "use strict";
 
-  const MEETING_KEY = "inhago_step3_demo_v2";
-  const CHAT_KEY = "inhago_chat_demo_v1";
-
   let currentRoomId = null;
+  let currentUserId = null;
+  let joinedMeetings = [];
+  let refreshVersion = 0;
+  let messageVersion = 0;
 
-  function loadJSON(key, fallback) {
-    try {
-      const value = JSON.parse(localStorage.getItem(key));
-      return value ?? fallback;
-    } catch (error) {
-      console.warn("데이터 불러오기 실패:", error);
-      return fallback;
-    }
-  }
-
-  function getMeetings() {
-    const state = loadJSON(MEETING_KEY, {});
-    return Array.isArray(state.meetings)
-      ? state.meetings
-      : [];
-  }
-
-  function getJoinedMeetings() {
-    const state = loadJSON(MEETING_KEY, {});
-    const meetings = getMeetings();
-    const joined = Array.isArray(state.joined)
-      ? state.joined
-      : [];
-
-    return meetings.filter(meeting =>
-      joined.includes(meeting.id)
-    );
-  }
-
-  function loadChats() {
-    const data = loadJSON(CHAT_KEY, {});
-    return data && typeof data === "object" &&
-      !Array.isArray(data) ? data : {};
-  }
-
-  let chats = loadChats();
-
-  function saveChats() {
-    localStorage.setItem(CHAT_KEY, JSON.stringify(chats));
-  }
+  // Realtime 관련 상태
+  let realtimeChannel = null;
+  let realtimeVersion = 0;
 
   function showNotice(text) {
     const toast = document.getElementById("toast");
@@ -64,58 +30,232 @@
     }, 2600);
   }
 
+  function showEmpty(container, text) {
+    container.replaceChildren();
+
+    const empty = document.createElement("p");
+    empty.className = "chat-empty";
+    empty.textContent = text;
+
+    container.appendChild(empty);
+  }
+
   function formatTime(date) {
     return new Date(date).toLocaleString("ko-KR");
   }
 
-  function renderRooms() {
-    const container = document.getElementById("chat-room-list");
-    if (!container) return;
+  async function getCurrentUser() {
+    const { data, error } =
+      await supabaseDev.auth.getUser();
 
-    container.replaceChildren();
-
-    const meetings = getJoinedMeetings();
-
-    if (meetings.length === 0) {
-      const empty = document.createElement("p");
-      empty.className = "chat-empty";
-      empty.textContent =
-        "참여한 모임이 없습니다. 먼저 모임에 참여해 주세요.";
-      container.appendChild(empty);
-      return;
+    if (error || !data.user) {
+      console.error("채팅 로그인 확인 실패:", error);
+      return null;
     }
 
-    meetings.forEach(meeting => {
-      const item = document.createElement("div");
-      item.className = "chat-room-item";
-
-      const info = document.createElement("div");
-      info.className = "chat-room-info";
-
-      const title = document.createElement("strong");
-      title.textContent = meeting.title;
-
-      const place = document.createElement("small");
-      place.textContent = `장소: ${meeting.place}`;
-
-      info.append(title, place);
-
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "chat-btn";
-      button.textContent = "채팅방 입장";
-
-      button.addEventListener("click", () => {
-        openRoom(meeting.id);
-      });
-
-      item.append(info, button);
-      container.appendChild(item);
-    });
+    return data.user;
   }
 
-  function openRoom(roomId) {
-    const meeting = getJoinedMeetings().find(
+  async function loadJoinedMeetings() {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      currentUserId = null;
+      return [];
+    }
+
+    currentUserId = user.id;
+
+    const { data: participationData, error: participationError } =
+      await supabaseDev
+        .from("meeting_participants")
+        .select("meeting_id")
+        .eq("user_id", user.id)
+        .eq("status", "joined");
+
+    if (participationError) {
+      throw participationError;
+    }
+
+    const meetingIds = [
+      ...new Set(
+        (participationData ?? []).map(
+          item => item.meeting_id
+        )
+      )
+    ];
+
+    const { data: createdMeetings, error: createdError } =
+      await supabaseDev
+        .from("meetings")
+        .select("id, title, location_name, creator_id")
+        .eq("creator_id", user.id);
+
+    if (createdError) {
+      throw createdError;
+    }
+
+    let participatingMeetings = [];
+
+    if (meetingIds.length > 0) {
+      const { data, error } = await supabaseDev
+        .from("meetings")
+        .select("id, title, location_name, creator_id")
+        .in("id", meetingIds);
+
+      if (error) {
+        throw error;
+      }
+
+      participatingMeetings = data ?? [];
+    }
+
+    const meetingMap = new Map();
+
+    [
+      ...participatingMeetings,
+      ...(createdMeetings ?? [])
+    ].forEach(meeting => {
+      meetingMap.set(meeting.id, meeting);
+    });
+
+    return [...meetingMap.values()];
+  }
+
+  async function renderRooms() {
+    const container =
+      document.getElementById("chat-room-list");
+
+    if (!container) return;
+
+    const version = ++refreshVersion;
+
+    showEmpty(container, "채팅방을 불러오는 중입니다.");
+
+    try {
+      const meetings = await loadJoinedMeetings();
+
+      if (version !== refreshVersion) return;
+
+      joinedMeetings = meetings;
+      container.replaceChildren();
+
+      if (meetings.length === 0) {
+        showEmpty(
+          container,
+          "참여한 모임이 없습니다. 먼저 모임에 참여해 주세요."
+        );
+        return;
+      }
+
+      meetings.forEach(meeting => {
+        const item = document.createElement("div");
+        item.className = "chat-room-item";
+
+        const info = document.createElement("div");
+        info.className = "chat-room-info";
+
+        const title = document.createElement("strong");
+        title.textContent = meeting.title;
+
+        const place = document.createElement("small");
+        place.textContent =
+          `장소: ${meeting.location_name}`;
+
+        info.append(title, place);
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "chat-btn";
+        button.textContent = "채팅방 입장";
+
+        button.addEventListener("click", () => {
+          openRoom(meeting.id);
+        });
+
+        item.append(info, button);
+        container.appendChild(item);
+      });
+    } catch (error) {
+      console.error("채팅방 조회 실패:", error);
+
+      if (version !== refreshVersion) return;
+
+      joinedMeetings = [];
+      showEmpty(
+        container,
+        "채팅방을 불러오지 못했습니다."
+      );
+    }
+  }
+
+  // 기존 Realtime 구독 해제
+  function unsubscribeRealtime() {
+    realtimeVersion++;
+
+    if (realtimeChannel) {
+      supabaseDev.removeChannel(realtimeChannel);
+      realtimeChannel = null;
+    }
+  }
+
+  // 새 채팅방 Realtime 구독
+  function subscribeRealtime(roomId) {
+    unsubscribeRealtime();
+
+    const version = realtimeVersion;
+
+    const channel = supabaseDev
+      .channel(`chat-room-${roomId}-${version}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_messages",
+          filter: `meeting_id=eq.${roomId}`
+        },
+        payload => {
+          if (
+            version !== realtimeVersion ||
+            currentRoomId !== roomId
+          ) {
+            return;
+          }
+
+          console.log(
+            "실시간 채팅 메시지 수신:",
+            payload.new
+          );
+
+          // 서버에서 메시지를 다시 조회하여
+          // 기존 메시지와 함께 정렬
+          renderMessages();
+        }
+      )
+      .subscribe(status => {
+        if (version !== realtimeVersion) return;
+
+        console.log(
+          "채팅 Realtime 상태:",
+          status
+        );
+
+        if (
+          status === "CHANNEL_ERROR" ||
+          status === "TIMED_OUT"
+        ) {
+          console.error(
+            "채팅 실시간 연결에 문제가 발생했습니다."
+          );
+        }
+      });
+
+    realtimeChannel = channel;
+  }
+
+  async function openRoom(roomId) {
+    const meeting = joinedMeetings.find(
       item => item.id === roomId
     );
 
@@ -127,40 +267,85 @@
     currentRoomId = roomId;
 
     const room = document.getElementById("chat-room");
-    const title = document.getElementById("chat-room-title");
+    const title =
+      document.getElementById("chat-room-title");
 
     if (room) room.hidden = false;
     if (title) title.textContent = meeting.title;
 
-    renderMessages();
+    // 채팅방을 열면 Realtime 구독 시작
+    subscribeRealtime(roomId);
+
+    await renderMessages();
   }
 
-  function renderMessages() {
-    const container = document.getElementById("chat-messages");
-    if (!container || currentRoomId === null) return;
+  async function renderMessages() {
+    const container =
+      document.getElementById("chat-messages");
+
+    if (!container || !currentRoomId) return;
+
+    const roomId = currentRoomId;
+    const version = ++messageVersion;
+
+    showEmpty(
+      container,
+      "메시지를 불러오는 중입니다."
+    );
+
+    const { data, error } = await supabaseDev
+      .from("chat_messages")
+      .select(
+        "id, meeting_id, sender_id, content, created_at"
+      )
+      .eq("meeting_id", roomId)
+      .order("created_at", { ascending: true })
+      .limit(100);
+
+    if (
+      roomId !== currentRoomId ||
+      version !== messageVersion
+    ) {
+      return;
+    }
+
+    if (error) {
+      console.error("채팅 메시지 조회 실패:", error);
+      showEmpty(
+        container,
+        "메시지를 불러오지 못했습니다."
+      );
+      return;
+    }
+
+    const messages = data ?? [];
 
     container.replaceChildren();
 
-    const messages = chats[String(currentRoomId)] || [];
-
     if (messages.length === 0) {
-      const empty = document.createElement("p");
-      empty.className = "chat-empty";
-      empty.textContent = "아직 메시지가 없습니다.";
-      container.appendChild(empty);
+      showEmpty(
+        container,
+        "아직 메시지가 없습니다."
+      );
       return;
     }
 
     messages.forEach(message => {
       const wrapper = document.createElement("div");
-      wrapper.className = "chat-message mine";
+
+      wrapper.className =
+        message.sender_id === currentUserId
+          ? "chat-message mine"
+          : "chat-message";
 
       const bubble = document.createElement("div");
       bubble.className = "chat-bubble";
       bubble.textContent = message.content;
 
       const time = document.createElement("small");
-      time.textContent = formatTime(message.createdAt);
+      time.textContent = formatTime(
+        message.created_at
+      );
 
       wrapper.append(bubble, time);
       container.appendChild(wrapper);
@@ -169,57 +354,79 @@
     container.scrollTop = container.scrollHeight;
   }
 
-  function sendMessage(event) {
+  async function sendMessage(event) {
     event.preventDefault();
 
-    if (currentRoomId === null) return;
-
-    const allowed = getJoinedMeetings().some(
-      meeting => meeting.id === currentRoomId
-    );
-
-    if (!allowed) {
-      showNotice("참여한 모임만 메시지를 보낼 수 있습니다.");
+    if (!currentRoomId) {
+      showNotice("채팅방을 먼저 선택해 주세요.");
       return;
     }
 
     const input = document.getElementById("chat-input");
+    const button = event.currentTarget.querySelector(
+      'button[type="submit"]'
+    );
+
     if (!input) return;
 
     const content = input.value.trim();
-
     if (!content) return;
 
-    const key = String(currentRoomId);
+    const roomId = currentRoomId;
 
-    if (!Array.isArray(chats[key])) {
-      chats[key] = [];
+    if (button) button.disabled = true;
+
+    try {
+      const user = await getCurrentUser();
+
+      if (!user) {
+        showNotice("로그인이 필요합니다.");
+        return;
+      }
+
+      const { error } = await supabaseDev
+        .from("chat_messages")
+        .insert({
+          meeting_id: roomId,
+          sender_id: user.id,
+          content
+        });
+
+      if (error) {
+        console.error("채팅 전송 실패:", error);
+        showNotice("메시지 전송에 실패했습니다.");
+        return;
+      }
+
+      input.value = "";
+      showNotice("메시지를 보냈습니다.");
+
+      if (currentRoomId === roomId) {
+        await renderMessages();
+      }
+    } catch (error) {
+      console.error("채팅 처리 오류:", error);
+      showNotice("채팅 처리 중 오류가 발생했습니다.");
+    } finally {
+      if (button) button.disabled = false;
     }
-
-    chats[key].push({
-      id: crypto.randomUUID(),
-      sender: "me",
-      content,
-      createdAt: new Date().toISOString()
-    });
-
-    saveChats();
-    input.value = "";
-
-    renderMessages();
-    showNotice("메시지를 보냈습니다. (데모)");
   }
 
   function init() {
     const form = document.getElementById("chat-form");
-
     if (!form) return;
 
     form.addEventListener("submit", sendMessage);
 
     document.querySelectorAll('[data-page="chat"]')
       .forEach(button => {
-        button.addEventListener("click", renderRooms);
+        button.addEventListener("click", () => {
+          renderRooms();
+
+          if (currentRoomId) {
+            renderMessages();
+          }
+        });
       });
 
     renderRooms();
