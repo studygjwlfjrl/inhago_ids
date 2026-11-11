@@ -1,10 +1,21 @@
 import logging
+from datetime import datetime
+from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from database import get_supabase, get_user_supabase
 
 app = FastAPI(title="InhaGo API")
 security = HTTPBearer()
+class MeetingCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=100)
+    description: str = ""
+    category: str = Field(min_length=1)
+    location_name: str = Field(min_length=1)
+    latitude: float | None = None
+    longitude: float | None = None
+    meeting_time: datetime
+    max_participants: int = Field(ge=2)
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
@@ -68,3 +79,32 @@ def get_meetings(
             status_code=500,
             detail="모임 목록을 불러오지 못했습니다."
     )
+
+
+@app.post("/meetings", status_code=201)
+def create_meeting(
+    meeting: MeetingCreate,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    user=Depends(get_current_user)
+):
+    try:
+        supabase = get_user_supabase(credentials.credentials)
+
+        data = meeting.model_dump(mode="json")
+        data["creator_id"] = str(user.id)
+        data["status"] = "open"
+
+        response = (
+            supabase.table("meetings")
+            .insert(data)
+            .execute()
+        )
+
+        return {"meeting": response.data[0]}
+
+    except Exception:
+        logging.exception("모임 생성 중 오류 발생")
+        raise HTTPException(
+            status_code=500,
+            detail="모임을 생성하지 못했습니다."
+        )
