@@ -218,8 +218,6 @@ import { supabaseDev } from "./supabase-dev.js";
     const friendId = currentFriendId;
     const version = ++messageVersion;
 
-    showEmpty(container, "메시지를 불러오는 중...");
-
     // A -> B, B -> A 메시지를 함께 조회
     const { data, error } = await supabaseDev
       .from("direct_messages")
@@ -249,21 +247,48 @@ import { supabaseDev } from "./supabase-dev.js";
       return;
     }
 
-    container.replaceChildren();
 
-    const messages = data ?? [];
+const messages = data ?? [];
 
-    if (messages.length === 0) {
-      showEmpty(
-        container,
-        "아직 메시지가 없습니다."
-      );
-      return;
-    }
+if (messages.length === 0) {
+  showEmpty(container, "아직 메시지가 없습니다.");
+  return;
+}
 
-    messages.forEach(message => {
-      appendMessage(container, message);
-    });
+// 기존 메시지 중 이미 표시된 메시지는 유지
+const existingMessages = new Map();
+
+container.querySelectorAll("[data-message-id]")
+  .forEach(element => {
+    existingMessages.set(
+      element.dataset.messageId,
+      element
+    );
+  });
+
+// 이전에 표시된 안내 문구만 제거
+container.querySelectorAll(".message-empty")
+  .forEach(element => element.remove());
+
+// 새 메시지만 화면에 추가
+messages.forEach(message => {
+  const messageId = String(message.id);
+
+  if (existingMessages.has(messageId)) {
+    return;
+  }
+
+  const beforeCount = container.children.length;
+
+  appendMessage(container, message);
+
+  const newElement = container.children[beforeCount];
+
+  if (newElement) {
+    newElement.dataset.messageId = messageId;
+  }
+});
+
 
     container.scrollTop = container.scrollHeight;
   }

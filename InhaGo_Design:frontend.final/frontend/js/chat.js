@@ -228,10 +228,53 @@ import { supabaseDev } from "./supabase-dev.js";
             payload.new
           );
 
-          // 서버에서 메시지를 다시 조회하여
-          // 기존 메시지와 함께 정렬
-          renderMessages();
-        }
+          
+const message = payload.new;
+
+const container =
+  document.getElementById("chat-messages");
+
+if (!container || !message?.id) return;
+
+// 이미 표시된 메시지인지 확인
+const messageId = String(message.id);
+
+const exists = [...container.querySelectorAll(
+  "[data-message-id]"
+)].some(element => element.dataset.messageId === messageId);
+
+if (exists) return;
+
+// 빈 채팅방 안내 문구 제거
+container.querySelectorAll(".chat-empty")
+  .forEach(element => element.remove());
+
+// 새 메시지만 추가
+const wrapper = document.createElement("div");
+
+wrapper.className =
+  message.sender_id === currentUserId
+    ? "chat-message mine"
+    : "chat-message";
+
+wrapper.dataset.messageId = messageId;
+
+const bubble = document.createElement("div");
+bubble.className = "chat-bubble";
+bubble.textContent = message.content;
+
+const time = document.createElement("small");
+time.textContent = formatTime(message.created_at);
+
+wrapper.append(bubble, time);
+container.appendChild(wrapper);
+ 
+// 새 메시지가 도착하면 채팅창 맨 아래로 이동
+requestAnimationFrame(() => {
+  container.scrollTop = container.scrollHeight;
+});
+   
+}
       )
       .subscribe(status => {
         if (version !== realtimeVersion) return;
@@ -264,7 +307,21 @@ import { supabaseDev } from "./supabase-dev.js";
       return;
     }
 
-    currentRoomId = roomId;
+   
+  if (currentRoomId !== roomId) {
+    // 다른 채팅방으로 이동할 때만 메시지 초기화
+    messageVersion++;
+
+    const messages =
+     document.getElementById("chat-messages");
+
+    if (messages) {
+     messages.replaceChildren();
+    }
+  }
+
+ currentRoomId = roomId;
+
 
     const room = document.getElementById("chat-room");
     const title =
@@ -279,6 +336,7 @@ import { supabaseDev } from "./supabase-dev.js";
     await renderMessages();
   }
 
+
   async function renderMessages() {
     const container =
       document.getElementById("chat-messages");
@@ -288,18 +346,11 @@ import { supabaseDev } from "./supabase-dev.js";
     const roomId = currentRoomId;
     const version = ++messageVersion;
 
-    showEmpty(
-      container,
-      "메시지를 불러오는 중입니다."
-    );
-
     const { data, error } = await supabaseDev
       .from("chat_messages")
-      .select(
-        "id, meeting_id, sender_id, content, created_at"
-      )
+      .select("id, meeting_id, sender_id, content, created_at")
       .eq("meeting_id", roomId)
-      .order("created_at", { ascending: true })
+      .order("created_at", { ascending: false })
       .limit(100);
 
     if (
@@ -318,19 +369,35 @@ import { supabaseDev } from "./supabase-dev.js";
       return;
     }
 
-    const messages = data ?? [];
-
-    container.replaceChildren();
+    const messages = (data ?? []).reverse();
 
     if (messages.length === 0) {
-      showEmpty(
-        container,
-        "아직 메시지가 없습니다."
-      );
+      if (!container.querySelector("[data-message-id]")) {
+        showEmpty(container, "아직 메시지가 없습니다.");
+      }
       return;
     }
 
+    // 기존 메시지 ID 확인
+    const existingMessages = new Set();
+
+    container.querySelectorAll("[data-message-id]")
+      .forEach(element => {
+        existingMessages.add(element.dataset.messageId);
+      });
+
+    // 안내 문구만 제거
+    container.querySelectorAll(".chat-empty")
+      .forEach(element => element.remove());
+
+    // 새로운 메시지만 추가
     messages.forEach(message => {
+      const messageId = String(message.id);
+
+      if (existingMessages.has(messageId)) {
+        return;
+      }
+
       const wrapper = document.createElement("div");
 
       wrapper.className =
@@ -338,21 +405,26 @@ import { supabaseDev } from "./supabase-dev.js";
           ? "chat-message mine"
           : "chat-message";
 
+      wrapper.dataset.messageId = messageId;
+
       const bubble = document.createElement("div");
       bubble.className = "chat-bubble";
       bubble.textContent = message.content;
 
       const time = document.createElement("small");
-      time.textContent = formatTime(
-        message.created_at
-      );
+      time.textContent = formatTime(message.created_at);
 
       wrapper.append(bubble, time);
       container.appendChild(wrapper);
-    });
+});
 
+
+    // 채팅방에 처음 입장했을 때 맨 아래로 이동
     container.scrollTop = container.scrollHeight;
   }
+
+
+
 
   async function sendMessage(event) {
     event.preventDefault();
@@ -401,9 +473,12 @@ import { supabaseDev } from "./supabase-dev.js";
       input.value = "";
       showNotice("메시지를 보냈습니다.");
 
-      if (currentRoomId === roomId) {
-        await renderMessages();
-      }
+      
+if (currentRoomId === roomId) {
+  // Realtime 이벤트에서 메시지를 갱신하므로
+  // 여기서는 중복 조회하지 않음
+}
+
     } catch (error) {
       console.error("채팅 처리 오류:", error);
       showNotice("채팅 처리 중 오류가 발생했습니다.");
