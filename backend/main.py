@@ -1,7 +1,7 @@
-
+import logging
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from database import get_supabase
+from database import get_supabase, get_user_supabase
 
 app = FastAPI(title="InhaGo API")
 security = HTTPBearer()
@@ -38,10 +38,12 @@ def home():
 
 
 @app.get("/meetings")
-def get_meetings(user=Depends(get_current_user)):
+def get_meetings(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    user=Depends(get_current_user)
+):
     try:
-        supabase = get_supabase()
-
+        supabase = get_user_supabase(credentials.credentials)
         response = (
             supabase.table("meetings")
             .select(
@@ -60,7 +62,7 @@ def get_meetings(user=Depends(get_current_user)):
         }
 
     except Exception:
-        import logging
+        
         logging.exception("모임 목록 조회 중 오류 발생")
         raise HTTPException(
             status_code=500,
