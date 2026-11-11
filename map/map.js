@@ -84,6 +84,7 @@ async function initMap() {
 let myLocationMarker = null;
 let locationWatchId = null;
 let hasCenteredOnUser = false;
+let currentPosition = null;
 
 function startLocationTracking() {
   if (!navigator.geolocation) {
@@ -101,24 +102,31 @@ function startLocationTracking() {
         lng: position.coords.longitude
       };
 
+      currentPosition = myPosition;
+      status.textContent = "";
+
       // 처음 위치를 가져왔을 때 마커 생성
       if (!myLocationMarker) {
-        myLocationMarker = new google.maps.Marker({
-          position: myPosition,
-          map: map,
-          title: "내 현재 위치",
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 9,
-            fillColor: "#4285F4",
-            fillOpacity: 1,
-            strokeColor: "#FFFFFF",
-            strokeWeight: 3
-          }
-        });
+        const blueDot = document.createElement("div");
+
+        blueDot.style.width = "18px";
+        blueDot.style.height = "18px";
+        blueDot.style.backgroundColor = "#4285f4";
+        blueDot.style.border = "3px solid white";
+        blueDot.style.borderRadius = "50%";
+        blueDot.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+        blueDot.style.boxSizing = "border-box";
+
+        myLocationMarker =
+          new google.maps.marker.AdvancedMarkerElement({
+            position: myPosition,
+            map: map,
+            title: "내 현재 위치",
+            content: blueDot
+          });
       } else {
         // 위치가 바뀌면 기존 마커 이동
-        myLocationMarker.setPosition(myPosition);
+        myLocationMarker.position = myPosition;
       }
 
       // 처음 한 번만 내 위치로 지도 이동
@@ -132,13 +140,22 @@ function startLocationTracking() {
     },
 
     (error) => {
-      console.error("GPS 오류:", error.code, error.message);
+      console.error("GPS 오류 코드:", error.code);
+      console.error("GPS 오류 메시지:", error.message);
+
+      if (error.code === 1){
+        status.textContent = "위치 접근 권한이 거부되었습니다.";
+      } else if (error.code === 2) {
+        status.textContent = "현재 위치를 확인할 수 없습니다.";
+      } else if (error.code === 3) {
+        status.textContent = "위치 확인 시간이 초과되었습니다.";
+  }
     },
 
     {
-      enableHighAccuracy: true,
-      maximumAge: 1000,
-      timeout: 15000
+      enableHighAccuracy: false,
+      maximumAge: 10000,
+      timeout: 30000
     }
   );
 }
@@ -176,10 +193,11 @@ function showMarkers(category) {
             lng: item.lng
           },
           content: pin,
-          title: item.title
+          title: item.title,
+          gmpClickable: true
         });
 
-      marker.addListener("click", () => {
+      marker.addEventListener("gmp-click", () => {
         openBottomSheet(item);
       });
 
@@ -199,53 +217,14 @@ function openBottomSheet(item) {
   document.getElementById("bottomSheet").hidden = false;
 }
 
-// GPS 현재 위치
 function getMyLocation() {
-  if (!navigator.geolocation) {
-    status.textContent = "GPS를 지원하지 않는 브라우저입니다.";
-    return;
+  if (currentPosition) {
+    map.panTo(currentPosition);
+    map.setZoom(17);
+  } else {
+    status.textContent = "현재 위치를 확인하는 중입니다.";
+    startLocationTracking();
   }
-
-  status.textContent = "위치를 확인하는 중입니다.";
-
-  navigator.geolocation.getCurrentPosition(
-    position => {
-      const current = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
-
-      if (myLocationMarker) {
-        myLocationMarker.setMap(null);
-      }
-
-      myLocationMarker = new google.maps.Marker({
-        map: map,
-        position: current,
-        title: "현재 위치",
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 9,
-          fillColor: "#2563eb",
-          fillOpacity: 1,
-          strokeColor: "#ffffff",
-          strokeWeight: 3
-        }
-      });
-
-      map.panTo(current);
-      status.textContent = "";
-    },
-    error => {
-      status.textContent =
-        "위치를 확인할 수 없습니다. 위치 권한을 확인하세요.";
-      console.error(error);
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 10000
-    }
-  );
 }
 
 // 버튼 이벤트
@@ -272,8 +251,7 @@ function setupButtons() {
 
 // Google Maps API 로드
 function loadGoogleMaps() {
-  const params = new URLSearchParams(location.search);
-  const apiKey = params.get("key");
+  const apiKey = window.MAP_CONFIG?.apiKey;
 
   if (!apiKey) {
     status.textContent = "Google Maps API 키가 필요합니다.";
