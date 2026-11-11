@@ -6,51 +6,68 @@
 <section id="search-page" class="page"><h1>모임 검색</h1><p class="muted">상단 검색창에서 모임을 검색할 수 있어요.</p><div id="search-results" class="results"></div></section>
 <section id="create-page" class="page"><h1>모임 만들기</h1><p class="muted">새로운 모임을 등록해 보세요.</p><form id="create-form" class="panel form"><label>모임 이름<input name="title" required maxlength="50" placeholder="예: 본관 앞 점심 같이 먹어요"></label><label>종류<select name="type"><option value="food">🍚 밥약</option><option value="exercise">🏀 운동</option><option value="study">📚 스터디</option><option value="taxi">🚕 택시팟</option></select></label><label>장소<input name="place" required placeholder="예: 본관 앞"></label><label>모집 인원<input name="max" type="number" min="2" max="20" value="4" required></label><label>소개<textarea name="desc" rows="3" placeholder="모임을 소개해 주세요"></textarea></label><button class="primary" type="submit">모임 등록하기</button></form></section>
 
+
+<!-- 1:1 실시간 채팅 화면 -->
 <section id="message-page" class="page">
   <h1>메시지</h1>
 
   <div class="message-container">
 
-    <!-- 쪽지 작성 -->
+    <!-- 친구 목록 -->
     <div class="message-section">
-      <h2>1:1 쪽지 보내기</h2>
+      <h2>1:1 채팅</h2>
+      <p class="muted">
+        대화할 친구를 선택해 주세요.
+      </p>
 
-      <form id="message-form" class="message-form">
-        <label for="message-recipient">받는 친구</label>
-        <select id="message-recipient" required></select>
+      <div id="dm-friend-list"></div>
+    </div>
 
-        <label for="message-content">쪽지 내용</label>
-        <textarea
-          id="message-content"
-          placeholder="친구에게 보낼 쪽지를 입력하세요."
+    <!-- 선택한 친구와의 채팅방 -->
+    <div
+      id="dm-room"
+      class="message-section"
+      hidden
+    >
+      <h2 id="dm-room-title">
+        1:1 채팅방
+      </h2>
+
+      <div
+        id="dm-messages"
+        class="chat-messages"
+        role="log"
+        aria-label="1:1 채팅 메시지"
+        aria-live="polite"
+      ></div>
+
+      <form id="dm-form" class="chat-form">
+        <input
+          id="dm-input"
+          type="text"
+          placeholder="메시지를 입력하세요."
           maxlength="1000"
+          aria-label="1:1 채팅 메시지 입력"
           required
-        ></textarea>
+        >
 
-        <button class="message-btn" type="submit">
-          쪽지 보내기
+        <button
+          class="chat-btn"
+          type="submit"
+        >
+          전송
         </button>
       </form>
     </div>
 
-    <!-- 받은 쪽지 -->
-    <div class="message-section">
-      <h2>받은 쪽지함</h2>
-      <div id="received-messages"></div>
-    </div>
-
-    <!-- 보낸 쪽지 -->
-    <div class="message-section">
-      <h2>보낸 쪽지함</h2>
-      <div id="sent-messages"></div>
-    </div>
-
-    
-<p class="notice">친구 요청이 수락된 사용자에게만 쪽지를 보낼 수 있습니다.</p>
-
+    <p class="notice">
+      친구 요청이 수락된 사용자와
+      1:1 채팅을 할 수 있습니다.
+    </p>
 
   </div>
 </section>
+
 
 
 <!-- 모임별 채팅 화면 -->
@@ -154,4 +171,4 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/main.js"></script><script type="module" src="js/friend.js"></script>
-<script type="module" src="js/message.js"></script><script src="js/chat.js"></script>
+<script type="module" src="js/message.js"></script><script type="module" src="js/chat.js"></script>
