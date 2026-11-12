@@ -1,174 +1,657 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>InhaGo | 캠퍼스에서 만나요</title><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/friend.css"><link rel="stylesheet" href="css/message.css"><link rel="stylesheet" href="css/chat.css"></head><body>
 
-<div class="app"><header><a class="brand" href="#" data-page="home">InhaGo<span>📍</span></a><label class="search">⌕ <input id="search" placeholder="장소, 모임, 사람을 검색해보세요" aria-label="모임 검색"></label><button class="account" data-page="profile"><img src="assets/rider.svg" alt="인덕이 스타일 마스코트"> <span>인하고 · <b id="header-score">92</b>점</span></button></header>
-<div class="shell"><nav class="sidebar"><button data-page="home" class="active">⌂ <span>홈</span></button><button data-page="search">⌕ <span>검색</span></button><button data-page="create">⊕ <span>모임 만들기</span></button><button data-page="message">☏ <span>메시지</span></button><button data-page="chat">💬 <span>모임 채팅</span></button><button data-page="friend">♧ <span>친구</span></button><button data-page="profile">♙ <span>마이페이지</span></button><div class="greeting"><img src="assets/rider.svg" alt="인덕이 스타일 마스코트"><strong>캠퍼스에서 새로운 만남!</strong><small>오늘도 안전하고 매너 있게 🚲</small></div></nav>
-<main><section id="home" class="page active"><div class="map"><div class="weather">☀️ 캠퍼스 탐험</div><button class="pin food" style="top:38%;left:32%" data-id="0" aria-label="밥약 모임">🍚</button><button class="pin exercise" style="top:60%;left:20%" data-id="1" aria-label="운동 모임">🏀</button><button class="pin study" style="top:22%;left:63%" data-id="2" aria-label="스터디 모임">📚</button><button class="pin taxi" style="top:55%;left:83%" data-id="3" aria-label="택시팟 모임">🚕</button><div class="player"><img src="assets/rider.svg" alt="내 캐릭터"><span>내 캐릭터</span></div><div class="legend">🍚 밥약　🏀 운동　📚 스터디　🚕 택시팟</div></div><div class="map-note">이 지도는 디자인 시연용 일러스트입니다. 실제 GPS 위치는 사용하지 않습니다.</div></section>
-<section id="search-page" class="page"><h1>모임 검색</h1><p class="muted">상단 검색창에서 모임을 검색할 수 있어요.</p><div id="search-results" class="results"></div></section>
-<section id="create-page" class="page"><h1>모임 만들기</h1><p class="muted">새로운 모임을 등록해 보세요.</p><form id="create-form" class="panel form"><label>모임 이름<input name="title" required maxlength="50" placeholder="예: 본관 앞 점심 같이 먹어요"></label><label>종류<select name="type"><option value="food">🍚 밥약</option><option value="exercise">🏀 운동</option><option value="study">📚 스터디</option><option value="taxi">🚕 택시팟</option></select></label><label>장소<input name="place" required placeholder="예: 본관 앞"></label><label>모집 인원<input name="max" type="number" min="2" max="20" value="4" required></label><label>소개<textarea name="desc" rows="3" placeholder="모임을 소개해 주세요"></textarea></label><button class="primary" type="submit">모임 등록하기</button></form></section>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <title>InhaGo | 캠퍼스에서 만나요</title>
 
-<!-- 1:1 실시간 채팅 화면 -->
-<section id="message-page" class="page">
-  <h1>메시지</h1>
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/friend.css">
+  <link rel="stylesheet" href="css/message.css">
+  <link rel="stylesheet" href="css/chat.css">
+</head>
 
-  <div class="message-container">
+<body>
+  <div class="app">
 
-    <!-- 친구 목록 -->
-    <div class="message-section">
-      <h2>1:1 채팅</h2>
-      <p class="muted">
-        대화할 친구를 선택해 주세요.
-      </p>
+    <!-- 상단 헤더 -->
+    <header>
+      <a class="brand" href="#" data-page="home">
+        InhaGo<span>📍</span>
+      </a>
 
-      <div id="dm-friend-list"></div>
-    </div>
-
-    <!-- 선택한 친구와의 채팅방 -->
-    <div
-      id="dm-room"
-      class="message-section"
-      hidden
-    >
-      <h2 id="dm-room-title">
-        1:1 채팅방
-      </h2>
-
-      <div
-        id="dm-messages"
-        class="chat-messages"
-        role="log"
-        aria-label="1:1 채팅 메시지"
-        aria-live="polite"
-      ></div>
-
-      <form id="dm-form" class="chat-form">
+      <label class="search">
+        ⌕
         <input
-          id="dm-input"
-          type="text"
-          placeholder="메시지를 입력하세요."
-          maxlength="1000"
-          aria-label="1:1 채팅 메시지 입력"
-          required
+          id="search"
+          placeholder="장소, 모임, 사람을 검색해보세요"
+          aria-label="모임 검색"
         >
+      </label>
 
-        <button
-          class="chat-btn"
-          type="submit"
+      <button class="account" data-page="profile">
+        <img
+          src="assets/rider.svg"
+          alt="인덕이 스타일 마스코트"
         >
-          전송
+        <span>
+          인하고 · <b id="header-score">92</b>점
+        </span>
+      </button>
+    </header>
+
+    <div class="shell">
+
+      <!-- 사이드바 / 모바일 하단 메뉴 -->
+      <nav class="sidebar" aria-label="주 메뉴">
+
+        <button data-page="home" class="active" aria-label="홈">
+          <i data-lucide="house"></i>
+          <span>홈</span>
         </button>
-      </form>
-    </div>
 
-    <p class="notice">
-      친구 요청이 수락된 사용자와
-      1:1 채팅을 할 수 있습니다.
-    </p>
-
-  </div>
-</section>
-
-
-
-<!-- 모임별 채팅 화면 -->
-<section id="chat-page" class="page">
-  <h1>모임 채팅</h1>
-
-  <div class="chat-container">
-
-    <!-- 참여한 모임 목록 -->
-    <div class="chat-section">
-      <h2>내 채팅방</h2>
-      <div id="chat-room-list"></div>
-    </div>
-
-    <!-- 선택한 채팅방 -->
-    <div id="chat-room" class="chat-section" hidden>
-      <h2 id="chat-room-title">채팅방</h2>
-
-      <div
-        id="chat-messages"
-        class="chat-messages"
-        role="log"
-        aria-label="채팅 메시지"
-        aria-live="polite"
-      ></div>
-
-      <form id="chat-form" class="chat-form">
-        <input
-          id="chat-input"
-          type="text"
-          placeholder="메시지를 입력하세요."
-          maxlength="1000"
-          aria-label="채팅 메시지 입력"
-          required
-        >
-
-        <button class="chat-btn" type="submit">
-          전송
+        <button data-page="search" aria-label="검색">
+          <i data-lucide="search"></i>
+          <span>검색</span>
         </button>
-      </form>
+
+        <button data-page="create" aria-label="모임 만들기">
+          <i data-lucide="circle-plus"></i>
+          <span>모임 만들기</span>
+        </button>
+
+        <button data-page="message" aria-label="메시지">
+          <i data-lucide="mail"></i>
+          <span>메시지</span>
+        </button>
+
+        <button data-page="chat" aria-label="모임 채팅">
+          <i data-lucide="messages-square"></i>
+          <span>모임 채팅</span>
+        </button>
+
+        <button data-page="friend" aria-label="친구">
+          <i data-lucide="users-round"></i>
+          <span>친구</span>
+        </button>
+
+        <button data-page="profile" aria-label="마이페이지">
+          <i data-lucide="circle-user-round"></i>
+          <span>마이페이지</span>
+        </button>
+
+        <div class="greeting">
+          <img
+            src="assets/rider.svg"
+            alt="인덕이 스타일 마스코트"
+          >
+          <strong>캠퍼스에서 새로운 만남!</strong>
+          <small>오늘도 안전하고 매너 있게 🚲</small>
+        </div>
+
+      </nav>
+
+      <!-- 메인 콘텐츠 -->
+      <main>
+
+        <!-- 홈 화면 -->
+        <section id="home" class="page active">
+
+          <div class="map">
+            <div class="weather">☀️ 캠퍼스 탐험</div>
+
+            <!-- 밥약 모임 -->
+            <button
+              class="pin food"
+              style="top:38%; left:32%"
+              data-id="0"
+              aria-label="밥약 모임"
+            >
+              <i data-lucide="utensils"></i>
+            </button>
+
+            <!-- 운동 모임 -->
+            <button
+              class="pin exercise"
+              style="top:60%; left:20%"
+              data-id="1"
+              aria-label="운동 모임"
+            >
+              <i data-lucide="dumbbell"></i>
+            </button>
+
+            <!-- 스터디 모임 -->
+            <button
+              class="pin study"
+              style="top:22%; left:63%"
+              data-id="2"
+              aria-label="스터디 모임"
+            >
+              <i data-lucide="book-open"></i>
+            </button>
+
+            <!-- 택시팟 모임 -->
+            <button
+              class="pin taxi"
+              style="top:55%; left:83%"
+              data-id="3"
+              aria-label="택시팟 모임"
+            >
+              <i data-lucide="car-front"></i>
+            </button>
+
+            <!-- 플레이어 -->
+            <div class="player">
+              <img src="assets/rider.svg" alt="내 캐릭터">
+              <span>내 캐릭터</span>
+            </div>
+
+            <!-- 지도 범례 -->
+            <div class="legend">
+              <span><i data-lucide="utensils"></i> 밥약</span>
+              <span><i data-lucide="dumbbell"></i> 운동</span>
+              <span><i data-lucide="book-open"></i> 스터디</span>
+              <span><i data-lucide="car-front"></i> 택시팟</span>
+            </div>
+          </div>
+
+          <div class="map-note">
+            이 지도는 디자인 시연용 일러스트입니다.
+            실제 GPS 위치는 사용하지 않습니다.
+          </div>
+        </section>
+
+        <!-- 모임 검색 -->
+        <section id="search-page" class="page">
+          <h1>모임 검색</h1>
+          <p class="muted">
+            상단 검색창에서 모임을 검색할 수 있어요.
+          </p>
+          <div id="search-results" class="results"></div>
+        </section>
+
+        <!-- 모임 만들기 -->
+        <section id="create-page" class="page">
+          <h1>모임 만들기</h1>
+          <p class="muted">
+            새로운 모임을 등록해 보세요.
+          </p>
+
+          <form id="create-form" class="panel form">
+
+            <label>
+              모임 이름
+              <input
+                name="title"
+                required
+                maxlength="50"
+                placeholder="예: 본관 앞 점심 같이 먹어요"
+              >
+            </label>
+
+            <label>
+              종류
+              <!-- 기존 main.js와 연결되는 선택값 -->
+              <select
+                name="type"
+                id="meeting-type"
+                class="meeting-type-native"
+                aria-label="모임 종류"
+              >
+                <option value="food">밥약</option>
+                <option value="exercise">운동</option>
+                <option value="study">스터디</option>
+                <option value="taxi">택시팟</option>
+              </select>
+
+              <!-- Lucide 아이콘 선택 버튼 -->
+              <div
+                class="meeting-type-options"
+                role="group"
+                aria-label="모임 종류 선택"
+              >
+                <button
+                  type="button"
+                  class="meeting-type-option selected"
+                  data-type="food"
+                  aria-pressed="true"
+                >
+                  <i data-lucide="utensils"></i>
+                  <span>밥약</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="meeting-type-option"
+                  data-type="exercise"
+                  aria-pressed="false"
+                >
+                  <i data-lucide="dumbbell"></i>
+                  <span>운동</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="meeting-type-option"
+                  data-type="study"
+                  aria-pressed="false"
+                >
+                  <i data-lucide="book-open"></i>
+                  <span>스터디</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="meeting-type-option"
+                  data-type="taxi"
+                  aria-pressed="false"
+                >
+                  <i data-lucide="car-front"></i>
+                  <span>택시팟</span>
+                </button>
+              </div>
+            </label>
+
+            <label>
+              장소
+              <input
+                name="place"
+                required
+                placeholder="예: 본관 앞"
+              >
+            </label>
+
+            <label>
+              모집 인원
+              <input
+                name="max"
+                type="number"
+                min="2"
+                max="20"
+                value="4"
+                required
+              >
+            </label>
+
+            <label>
+              소개
+              <textarea
+                name="desc"
+                rows="3"
+                placeholder="모임을 소개해 주세요"
+              ></textarea>
+            </label>
+
+            <button class="primary" type="submit">
+              모임 등록하기
+            </button>
+          </form>
+        </section>
+
+        <!-- 1:1 실시간 채팅 -->
+        <section id="message-page" class="page">
+          <h1>메시지</h1>
+
+          <div class="message-container">
+
+            <div class="message-section">
+              <h2>1:1 채팅</h2>
+              <p class="muted">
+                대화할 친구를 선택해 주세요.
+              </p>
+              <div id="dm-friend-list"></div>
+            </div>
+
+            <div
+              id="dm-room"
+              class="message-section"
+              hidden
+            >
+              <h2 id="dm-room-title">1:1 채팅방</h2>
+
+              <div
+                id="dm-messages"
+                class="chat-messages"
+                role="log"
+                aria-label="1:1 채팅 메시지"
+                aria-live="polite"
+              ></div>
+
+              <form id="dm-form" class="chat-form">
+                <input
+                  id="dm-input"
+                  type="text"
+                  placeholder="메시지를 입력하세요."
+                  maxlength="1000"
+                  aria-label="1:1 채팅 메시지 입력"
+                  required
+                >
+
+                <button class="chat-btn" type="submit">
+                  전송
+                </button>
+              </form>
+            </div>
+
+            <p class="notice">
+              친구 요청이 수락된 사용자와
+              1:1 채팅을 할 수 있습니다.
+            </p>
+          </div>
+        </section>
+
+        <!-- 모임별 채팅 -->
+        <section id="chat-page" class="page">
+          <h1>모임 채팅</h1>
+
+          <div class="chat-container">
+
+            <div class="chat-section">
+              <h2>내 채팅방</h2>
+              <div id="chat-room-list"></div>
+            </div>
+
+            <div
+              id="chat-room"
+              class="chat-section"
+              hidden
+            >
+              <h2 id="chat-room-title">채팅방</h2>
+
+              <div
+                id="chat-messages"
+                class="chat-messages"
+                role="log"
+                aria-label="채팅 메시지"
+                aria-live="polite"
+              ></div>
+
+              <form id="chat-form" class="chat-form">
+                <input
+                  id="chat-input"
+                  type="text"
+                  placeholder="메시지를 입력하세요."
+                  maxlength="1000"
+                  aria-label="채팅 메시지 입력"
+                  required
+                >
+
+                <button class="chat-btn" type="submit">
+                  전송
+                </button>
+              </form>
+            </div>
+
+            <p class="notice">
+              현재 모임 채팅은 시연용입니다.
+              실제 실시간 채팅은 Supabase 연동 후 제공됩니다.
+            </p>
+          </div>
+        </section>
+
+        <!-- 친구 -->
+        <section id="friend-page" class="page">
+          <h1>친구</h1>
+
+          <div class="friend-container">
+
+            <div class="friend-section">
+              <h2>친구 검색</h2>
+
+              <div class="friend-search">
+                <input
+                  id="friend-search-input"
+                  type="text"
+                  placeholder="닉네임 또는 학번 검색"
+                  aria-label="친구 검색"
+                >
+              </div>
+
+              <div id="friend-search-results"></div>
+            </div>
+
+            <div class="friend-section">
+              <h2>받은 친구 요청</h2>
+              <div id="friend-requests"></div>
+
+              <div class="friend-sent-section">
+                <h3>보낸 친구 요청</h3>
+                <div id="friend-sent-requests">
+                  <p>보낸 친구 요청을 불러오는 중...</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="friend-section">
+              <h2>내 친구 목록</h2>
+              <div id="friend-list"></div>
+            </div>
+
+            <p class="notice">
+              현재 친구 관리 기능은 시연용입니다.
+              실제 사용자 연결은 Supabase 연동 후 제공됩니다.
+            </p>
+          </div>
+        </section>
+
+        <!-- 마이페이지 -->
+        <section id="profile-page" class="page">
+          <h1>마이페이지</h1>
+
+          <div class="profile-top panel">
+            <img
+              src="assets/rider.svg"
+              alt="마스코트 프로필"
+            >
+
+            <div>
+              <h2>인하고</h2>
+              <p class="muted">@inha_go · 인하대학교</p>
+              <p>캠퍼스에서 좋은 사람들과 함께해요!</p>
+            </div>
+          </div>
+
+          <div class="score-card panel">
+            <div class="score-heading">
+              <span>👑 내 매너 점수</span>
+              <span class="score-tag">시연 데이터</span>
+            </div>
+
+            <div class="score-number">
+              <strong id="score">92</strong>
+              <span>/100</span>
+            </div>
+
+            <div class="progress">
+              <div id="score-bar"></div>
+            </div>
+
+            <p id="score-label">
+              좋은 매너를 유지하고 있어요!
+            </p>
+
+            <p class="muted">
+              모임 참여 후 받은 평가를 바탕으로
+              산정하는 기능을 구상 중입니다.
+            </p>
+          </div>
+
+          <div class="stats">
+            <div>
+              <b id="joined-count">0</b>
+              <span>참여 모임</span>
+            </div>
+
+            <div>
+              <b id="created-count">0</b>
+              <span>작성 모임</span>
+            </div>
+
+            <div>
+              <b id="review-count">0</b>
+              <span>남긴 후기</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>모임 후기 남기기 <small>(데모)</small></h2>
+
+            <p class="muted">
+              참여한 모임이 있으면 후기를 남길 수 있어요.
+              아래 점수는 이 브라우저에만 저장됩니다.
+            </p>
+
+            <form id="review-form">
+              <label>
+                평가할 모임
+                <select id="review-meeting" required></select>
+              </label>
+
+              <label>
+                평가
+                <select id="review-type">
+                  <option value="5">
+                    😊 친절하고 약속을 잘 지켰어요 (+5)
+                  </option>
+                  <option value="3">
+                    👍 소통이 원활했어요 (+3)
+                  </option>
+                  <option value="0">
+                    😐 보통이었어요 (+0)
+                  </option>
+                  <option value="-5">
+                    ⚠️ 약속을 지키지 않았어요 (-5)
+                  </option>
+                </select>
+              </label>
+
+              <button class="primary" type="submit">
+                후기 제출
+              </button>
+            </form>
+
+            <button class="secondary" id="reset-demo">
+              시연 데이터 초기화
+            </button>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- 오른쪽 주변 모임 목록 -->
+      <aside>
+        <div class="aside-title">
+          <h2>주변 모임</h2>
+          <small>시연용 목록</small>
+        </div>
+
+        <div id="cards"></div>
+
+        <button class="primary wide" data-page="create">
+          ＋ 모임 만들기
+        </button>
+
+        <div class="mini-score">
+          <span>🤝 내 매너 점수</span>
+          <b id="aside-score">92 / 100</b>
+
+          <button data-page="profile">
+            상세 보기 →
+          </button>
+        </div>
+      </aside>
+
     </div>
-
-    <p class="notice">
-      현재 모임 채팅은 시연용입니다.
-      실제 실시간 채팅은 Supabase 연동 후 제공됩니다.
-    </p>
-
   </div>
-</section>
 
-<section id="friend-page" class="page">
-  <h1>친구</h1>
+  <!-- 모임 상세 모달 -->
+  <dialog id="modal">
+    <div class="modal-inner">
 
-  <div class="friend-container">
+      <button
+        class="close"
+        id="close-modal"
+        aria-label="닫기"
+      >×</button>
 
-    <!-- 친구 검색 -->
-    <div class="friend-section">
-      <h2>친구 검색</h2>
-      <div class="friend-search">
-        <input
-          id="friend-search-input"
-          type="text"
-          placeholder="닉네임 또는 학번 검색"
-          aria-label="친구 검색"
-        >
-      </div>
-      <div id="friend-search-results"></div>
+      <div class="modal-icon" id="modal-icon"></div>
+      <h2 id="modal-title"></h2>
+      <p id="modal-place"></p>
+      <p id="modal-desc"></p>
+      <p id="modal-count"></p>
+
+      <button class="primary wide" id="join">
+        참여하기
+      </button>
     </div>
+  </dialog>
 
-    <!-- 받은 친구 요청 -->
-    <div class="friend-section">
-      <h2>받은 친구 요청</h2>
-      <div id="friend-requests"></div>
+  <!-- 알림 -->
+  <div id="toast" role="status" aria-live="polite"></div>
 
-<div class="friend-sent-section">
-  <h3>보낸 친구 요청</h3>
-  <div id="friend-sent-requests">
-    <p>보낸 친구 요청을 불러오는 중...</p>
-  </div>
-</div>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/supabase-client.js"></script>
 
-    </div>
+  <!-- 기존 기능 -->
+  <script src="js/main.js"></script>
+  <script type="module" src="js/friend.js"></script>
+  <script type="module" src="js/message.js"></script>
+  <script type="module" src="js/chat.js"></script>
 
-    <!-- 친구 목록 -->
-    <div class="friend-section">
-      <h2>내 친구 목록</h2>
-      <div id="friend-list"></div>
-    </div>
+  <!-- Lucide 아이콘 -->
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 
-    <p class="notice">
-      현재 친구 관리 기능은 시연용입니다.
-      실제 사용자 연결은 Supabase 연동 후 제공됩니다.
-    </p>
+  <script>
+    if (window.lucide) {
+      lucide.createIcons();
+    } else {
+      console.error("Lucide 아이콘을 불러오지 못했습니다.");
+    }
+  </script>
 
-  </div>
-</section>
+  <!-- 모임 종류 선택 -->
+  <script>
+    (() => {
+      const select = document.getElementById("meeting-type");
+      const options = document.querySelectorAll(".meeting-type-option");
 
-<section id="profile-page" class="page"><h1>마이페이지</h1><div class="profile-top panel"><img src="assets/rider.svg" alt="마스코트 프로필"><div><h2>인하고</h2><p class="muted">@inha_go · 인하대학교</p><p>캠퍼스에서 좋은 사람들과 함께해요!</p></div></div><div class="score-card panel"><div class="score-heading"><span>👑 내 매너 점수</span><span class="score-tag">시연 데이터</span></div><div class="score-number"><strong id="score">92</strong><span>/100</span></div><div class="progress"><div id="score-bar"></div></div><p id="score-label">좋은 매너를 유지하고 있어요!</p><p class="muted">모임 참여 후 받은 평가를 바탕으로 산정하는 기능을 구상 중입니다.</p></div><div class="stats"><div><b id="joined-count">0</b><span>참여 모임</span></div><div><b id="created-count">0</b><span>작성 모임</span></div><div><b id="review-count">0</b><span>남긴 후기</span></div></div><div class="panel"><h2>모임 후기 남기기 <small>(데모)</small></h2><p class="muted">참여한 모임이 있으면 후기를 남길 수 있어요. 아래 점수는 이 브라우저에만 저장됩니다.</p><form id="review-form"><label>평가할 모임<select id="review-meeting" required></select></label><label>평가<select id="review-type"><option value="5">😊 친절하고 약속을 잘 지켰어요 (+5)</option><option value="3">👍 소통이 원활했어요 (+3)</option><option value="0">😐 보통이었어요 (+0)</option><option value="-5">⚠️ 약속을 지키지 않았어요 (-5)</option></select></label><button class="primary" type="submit">후기 제출</button></form><button class="secondary" id="reset-demo">시연 데이터 초기화</button></div></section></main>
-<aside><div class="aside-title"><h2>주변 모임</h2><small>시연용 목록</small></div><div id="cards"></div><button class="primary wide" data-page="create">＋ 모임 만들기</button><div class="mini-score"><span>🤝 내 매너 점수</span><b id="aside-score">92 / 100</b><button data-page="profile">상세 보기 →</button></div></aside></div></div>
-<dialog id="modal"><div class="modal-inner"><button class="close" id="close-modal" aria-label="닫기">×</button><div class="modal-icon" id="modal-icon"></div><h2 id="modal-title"></h2><p id="modal-place"></p><p id="modal-desc"></p><p id="modal-count"></p><button class="primary wide" id="join">참여하기</button></div></dialog><div id="toast" role="status" aria-live="polite"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="js/supabase-client.js"></script>
-<script src="js/main.js"></script><script type="module" src="js/friend.js"></script>
-<script type="module" src="js/message.js"></script><script type="module" src="js/chat.js"></script>
+      if (!select || !options.length) return;
+
+      function refresh() {
+        options.forEach((button) => {
+          const active = button.dataset.type === select.value;
+
+          button.classList.toggle("selected", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      }
+
+      options.forEach((button) => {
+        button.addEventListener("click", () => {
+          select.value = button.dataset.type;
+
+          select.dispatchEvent(
+            new Event("change", { bubbles: true })
+          );
+
+          refresh();
+        });
+      });
+
+      select.addEventListener("change", refresh);
+
+      document.getElementById("create-form")
+        ?.addEventListener("reset", () => {
+          requestAnimationFrame(refresh);
+        });
+
+      refresh();
+    })();
+  </script>
+
+</body>
+</html>
