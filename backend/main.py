@@ -16,6 +16,15 @@ class MeetingCreate(BaseModel):
     longitude: float | None = None
     meeting_time: datetime
     max_participants: int = Field(ge=2)
+    class MeetingUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=100)
+    description: str | None = None
+    category: str | None = Field(default=None, min_length=1)
+    location_name: str | None = Field(default=None, min_length=1)
+    latitude: float | None = None
+    longitude: float | None = None
+    meeting_time: datetime | None = None
+    max_participants: int | None = Field(default=None, ge=2)
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
@@ -149,3 +158,54 @@ def join_meeting(
             detail="모임 참여에 실패했습니다."
         )
 
+@app.patch("/meetings/{meeting_id}")
+def update_meeting(
+    meeting_id: str,
+    updates: MeetingUpdate,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    user=Depends(get_current_user)
+):
+    try:
+        supabase = get_user_supabase(credentials.credentials)
+
+        # 수정할 항목만 추출
+        data = updates.model_dump(exclude_unset=True, mode="json")
+
+        if not data:
+            raise HTTPException(
+                status_code=400,
+                detail="수정할 내용을 입력해주세요."
+            )
+
+        
+
+        # 모임장이면서 아직 열려 있는 모임만 수정 가능
+        response = (
+            supabase.table("meetings")
+            .update(data)
+            .eq("id", meeting_id)
+            .eq("creator_id", str(user.id))
+            .eq("status", "open")
+            .select("*")
+            .execute()
+        )
+
+        if not response.data:
+            raise HTTPException(
+                status_code=404,
+                detail="수정 가능한 모임이 없거나 권한이 없습니다."
+            )
+
+        return {
+            "message": "모임 수정이 완료되었습니다.",
+            "meeting": response.data[0]
+        }
+
+    except HTTPException:
+        raise
+    except Exception:
+        logging.exception("모임 수정 중 오류 발생")
+        raise HTTPException(
+            status_code=500,
+            detail="모임 수정에 실패했습니다."
+        )
