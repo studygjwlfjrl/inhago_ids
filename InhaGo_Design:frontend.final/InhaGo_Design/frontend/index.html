@@ -163,5 +163,35 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // 다음 단계에서 Supabase 인증 기능을 연결합니다.
+  const SUPABASE_URL = 'https://vhburqlerlunlljcbwcs.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_aI0Cf5fO35PYetn9532F-w_MJNTnE09';
+
+  const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  document.getElementById('login-button').onclick = async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const status = document.getElementById('login-status');
+
+    status.textContent = '로그인 중...';
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      status.textContent = '로그인 실패: ' + error.message;
+      return;
+    }
+
+    status.textContent = '로그인 성공!';
+
+    if (typeof loadMeetingsFromAPI === 'function') {
+      await loadMeetingsFromAPI(data.session.access_token);
+    }
+  };
 </script>
