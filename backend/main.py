@@ -213,3 +213,38 @@ def update_meeting(
             status_code=500,
             detail="모임 수정에 실패했습니다."
         )
+
+@app.delete("/meetings/{meeting_id}/leave")
+def leave_meeting(
+    meeting_id: str,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    user=Depends(get_current_user)
+):
+    try:
+        supabase = get_user_supabase(credentials.credentials)
+
+        response = (
+            supabase.table("meeting_participants")
+            .delete()
+            .eq("meeting_id", meeting_id)
+            .eq("user_id", str(user.id))
+            .select("id")
+            .execute()
+        )
+
+        if not response.data:
+            raise HTTPException(
+                status_code=404,
+                detail="참여 중인 모임을 찾을 수 없습니다."
+            )
+
+        return {"message": "모임 탈퇴가 완료되었습니다."}
+
+    except HTTPException:
+        raise
+    except Exception:
+        logging.exception("모임 탈퇴 중 오류 발생")
+        raise HTTPException(
+            status_code=500,
+            detail="모임 탈퇴에 실패했습니다."
+        )
