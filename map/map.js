@@ -72,7 +72,9 @@ async function initMap() {
     setupButtons();
 
     // 지도 생성 성공 후 자동 GPS 추적 시작
+    if (window.inhaGoLoggedIn === true) {
     startLocationTracking();
+    }
 
   } catch (error) {
     status.textContent = "지도를 불러오지 못했습니다.";
@@ -274,5 +276,10 @@ function loadGoogleMaps() {
   document.head.appendChild(script);
 }
 
+window.addEventListener("inhaGoLoginSuccess", () => {
+    if (typeof map !== "undefined" && map) {
+        startLocationTracking();
+    }
+});
 
 loadGoogleMaps();
