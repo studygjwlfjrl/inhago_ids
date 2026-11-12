@@ -16,7 +16,9 @@ class MeetingCreate(BaseModel):
     longitude: float | None = None
     meeting_time: datetime
     max_participants: int = Field(ge=2)
-    class MeetingUpdate(BaseModel):
+
+
+class MeetingUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=100)
     description: str | None = None
     category: str | None = Field(default=None, min_length=1)
@@ -25,6 +27,8 @@ class MeetingCreate(BaseModel):
     longitude: float | None = None
     meeting_time: datetime | None = None
     max_participants: int | None = Field(default=None, ge=2)
+
+
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
