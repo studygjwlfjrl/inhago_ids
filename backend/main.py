@@ -111,97 +111,41 @@ def create_meeting(
 
 
 
+   
 @app.post("/meetings/{meeting_id}/join")
 def join_meeting(
     meeting_id: str,
     credentials: HTTPAuthorizationCredentials = Depends(security),
     user=Depends(get_current_user)
 ):
-    supabase = get_user_supabase(credentials.credentials)
+    try:
+        supabase = get_user_supabase(credentials.credentials)
 
-    # 참여하려는 모임이 존재하는지 확인
-    response = (
-        supabase.table("meetings")
-        .select("id, creator_id, status, max_participants")
-        .eq("id", meeting_id)
-        .execute()
-    )
-
-    if not response.data:
-        raise HTTPException(
-            status_code=404,
-            detail="존재하지 않는 모임입니다."
+        response = (
+            supabase.rpc(
+                "join_meeting_safe",
+                {"p_meeting_id": meeting_id}
+            )
+            .execute()
         )
 
-    meeting = response.data[0]
-
-    if meeting["status"] != "open":
-        raise HTTPException(
-            status_code=400,
-            detail="현재 모집 중인 모임이 아닙니다."
-        )
-
-    # 이미 참여 기록이 있는지 확인
-    participant_response = (
-        supabase.table("meeting_participants")
-        .select("id, status")
-        .eq("meeting_id", meeting_id)
-        .eq("user_id", str(user.id))
-        .execute()
-    )
-
-    if participant_response.data:
-        participant = participant_response.data[0]
-
-        if participant["status"] == "joined":
+        if not response.data:
             raise HTTPException(
-                status_code=409,
-                detail="이미 참여 중인 모임입니다."
+                status_code=500,
+                detail="모임 참여 결과를 확인할 수 없습니다."
             )
 
+        return {
+            "message": "모임 참여가 완료되었습니다.",
+            "participant": response.data
+        }
 
-    # 현재 참여 중인 인원 확인
-    members_response = (
-        supabase.table("meeting_participants")
-        .select("id")
-        .eq("meeting_id", meeting_id)
-        .eq("status", "joined")
-        .execute()
-    )
-
-    current_count = len(members_response.data)
-
-    # 정원이 가득 찼는지 확인
-    if current_count >= meeting["max_participants"]:
+    except HTTPException:
+        raise
+    except Exception:
+        logging.exception("모임 참여 중 오류 발생")
         raise HTTPException(
-            status_code=409,
-            detail="모임 정원이 가득 찼습니다."
+            status_code=500,
+            detail="모임 참여에 실패했습니다."
         )
 
-
-    # 모임 참여 기록 저장
-    if participant_response.data:
-        # 이전에 탈퇴한 사용자라면 다시 참여
-        result = (
-            supabase.table("meeting_participants")
-            .update({"status": "joined"})
-            .eq("id", participant["id"])
-            .eq("user_id", str(user.id))
-            .execute()
-        )
-    else:
-        # 처음 참여하는 사용자라면 새 기록 생성
-        result = (
-            supabase.table("meeting_participants")
-            .insert({
-                "meeting_id": meeting_id,
-                "user_id": str(user.id),
-                "status": "joined"
-            })
-            .execute()
-        )
-
-    return {
-        "message": "모임 참여가 완료되었습니다.",
-        "participant": result.data[0]
-    }
