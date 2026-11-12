@@ -40,7 +40,7 @@ const meetings = [
   }
 ];
 
-const icons = {
+const mapIcons = {
   meal: "🍚",
   taxi: "🚕",
   study: "📚",
@@ -176,7 +176,7 @@ function showMarkers(category) {
     .forEach(item => {
 
       const pin = document.createElement("div");
-      pin.textContent = icons[item.category];
+      pin.textContent = mapIcons[item.category];
       pin.style.cssText = `
         font-size: 25px;
         background: white;
