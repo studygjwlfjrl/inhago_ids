@@ -248,3 +248,43 @@ def leave_meeting(
             status_code=500,
             detail="모임 탈퇴에 실패했습니다."
         )
+
+
+@app.patch("/meetings/{meeting_id}/cancel")
+def cancel_meeting(
+    meeting_id: str,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    user=Depends(get_current_user)
+):
+    try:
+        supabase = get_user_supabase(credentials.credentials)
+
+        response = (
+            supabase.table("meetings")
+            .update({"status": "cancelled"})
+            .eq("id", meeting_id)
+            .eq("creator_id", str(user.id))
+            .eq("status", "open")
+            .select("id,title,status")
+            .execute()
+        )
+
+        if not response.data:
+            raise HTTPException(
+                status_code=404,
+                detail="취소할 수 있는 모임이 없거나 모임장이 아닙니다."
+            )
+
+        return {
+            "message": "모임 취소가 완료되었습니다.",
+            "meeting": response.data[0]
+        }
+
+    except HTTPException:
+        raise
+    except Exception:
+        logging.exception("모임 취소 중 오류 발생")
+        raise HTTPException(
+            status_code=500,
+            detail="모임 취소에 실패했습니다."
+        )
