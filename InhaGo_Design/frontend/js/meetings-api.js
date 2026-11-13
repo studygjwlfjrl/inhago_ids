@@ -1,5 +1,5 @@
 import { supabase } from "./supabase.js";
-const API_BASE = window.INHAGO_API_BASE || (location.hostname === "localhost" || location.hostname === "127.0.0.1" ? "http://127.0.0.1:8000" : "");
+const API_BASE = window.INHAGO_API_BASE || "http://127.0.0.1:8000";
 async function request(path, options = {}) {
   const { data: { session }, error } = await supabase.auth.getSession();
   if (error || !session) throw new Error("로그인이 필요합니다.");
