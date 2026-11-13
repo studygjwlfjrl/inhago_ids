@@ -78,7 +78,7 @@ def get_meetings(
             .select(
                 "id,title,description,category,"
                 "location_name,latitude,longitude,"
-                "meeting_time,max_participants,status"
+                "meeting_time,max_participants,status,creator_id"
             )
             .eq("status", "open")
             .gte("meeting_time", datetime.now(timezone.utc).isoformat())
