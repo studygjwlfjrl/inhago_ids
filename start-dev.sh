@@ -44,10 +44,11 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 (cd "$BACKEND" && exec "$PYTHON" -m uvicorn main:app --reload --host 127.0.0.1 --port 8000) &
 BACK_PID=$!
-(cd "$FRONTEND" && exec "$PYTHON" -m http.server 5500 --bind 127.0.0.1) &
+(cd "$ROOT" && exec "$PYTHON" -m http.server 5500 --bind 127.0.0.1) &
 FRONT_PID=$!
 echo "InhaGo 개발 서버 실행"
-echo "프론트엔드: http://127.0.0.1:5500"
+echo "프론트엔드: http://127.0.0.1:5500/InhaGo_Design/frontend/"
 echo "백엔드:    http://127.0.0.1:8000/docs"
+echo "지도 설정: $ROOT/map/config.js (로컬 파일, Git에 미포함)"
 echo "종료: Control + C"
 wait "$BACK_PID"
