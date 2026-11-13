@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -76,7 +76,7 @@ def get_meetings(
                 "meeting_time,max_participants,status"
             )
             .eq("status", "open")
-            .gte("meeting_time", "now()")
+            .gte("meeting_time", datetime.now(timezone.utc).isoformat())
             .order("meeting_time")
             .execute()
         )
