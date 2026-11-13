@@ -6,7 +6,91 @@
 <section id="create-page" class="page"><h1>모임 만들기</h1><p class="muted">새로운 모임을 등록해 보세요.</p><form id="create-form" class="panel form"><label>모임 이름<input name="title" required maxlength="50" placeholder="예: 본관 앞 점심 같이 먹어요"></label><label>종류<select name="type"><option value="food">🍚 밥약</option><option value="exercise">🏀 운동</option><option value="study">📚 스터디</option><option value="taxi">🚕 택시팟</option></select></label><label>장소<input name="place" required placeholder="예: 본관 앞"></label><label>모집 인원<input name="max" type="number" min="2" max="20" value="4" required></label><label>소개<textarea name="desc" rows="3" placeholder="모임을 소개해 주세요"></textarea></label><button class="primary" type="submit">모임 등록하기</button></form></section>
 <section id="message-page" class="page"><h1>메시지</h1><div class="panel"><p>💬 <b>스터디 모임 (4)</b></p><p class="muted">내일 도서관 앞에서 만나요!</p><hr><p>💬 <b>밥약 모임 (3)</b></p><p class="muted">오늘 점심 같이 먹을까요?</p><p class="notice">메시지는 디자인 시연용이며 실제로 전송되지 않습니다.</p></div></section>
 <section id="friend-page" class="page"><h1>친구</h1><div class="panel"><p>👤 김인하 <span class="score-tag">매너 96점</span></p><p>👤 박지민 <span class="score-tag">매너 88점</span></p><p>👤 이수연 <span class="score-tag">매너 91점</span></p><p class="notice">친구 요청 및 연결은 서버 연동 후 제공됩니다.</p></div></section>
-<section id="profile-page" class="page"><h1>마이페이지</h1><div class="profile-top panel"><img src="assets/rider.svg" alt="마스코트 프로필"><div><h2>인하고</h2><p class="muted">@inha_go · 인하대학교</p><p>캠퍼스에서 좋은 사람들과 함께해요!</p></div></div><div class="score-card panel"><div class="score-heading"><span>👑 내 매너 점수</span><span class="score-tag">시연 데이터</span></div><div class="score-number"><strong id="score">92</strong><span>/100</span></div><div class="progress"><div id="score-bar"></div></div><p id="score-label">좋은 매너를 유지하고 있어요!</p><p class="muted">모임 참여 후 받은 평가를 바탕으로 산정하는 기능을 구상 중입니다.</p></div><div class="stats"><div><b id="joined-count">0</b><span>참여 모임</span></div><div><b id="created-count">0</b><span>작성 모임</span></div><div><b id="review-count">0</b><span>남긴 후기</span></div></div><div class="panel"><h2>모임 후기 남기기 <small>(데모)</small></h2><p class="muted">참여한 모임이 있으면 후기를 남길 수 있어요. 아래 점수는 이 브라우저에만 저장됩니다.</p><form id="review-form"><label>평가할 모임<select id="review-meeting" required></select></label><label>평가<select id="review-type"><option value="5">😊 친절하고 약속을 잘 지켰어요 (+5)</option><option value="3">👍 소통이 원활했어요 (+3)</option><option value="0">😐 보통이었어요 (+0)</option><option value="-5">⚠️ 약속을 지키지 않았어요 (-5)</option></select></label><button class="primary" type="submit">후기 제출</button></form><button class="secondary" id="reset-demo">시연 데이터 초기화</button>
+<section id="profile-page" class="page"><h1>마이페이지</h1>
+<div class="profile-top panel">
+  <img src="assets/rider.svg" alt="마스코트 프로필">
+
+  <div>
+    <h2 id="profile-real-name">이름 미설정</h2>
+    <p class="muted">인하대학교 인증 회원</p>
+    <p>캠퍼스에서 좋은 사람들과 함께해요!</p>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>👤 내 이름 설정</h2>
+
+  <p class="muted">
+    모임 참여자와 매너 학점 평가 화면에 표시할
+    실제 이름을 입력해 주세요.
+    입력한 이름은 다른 사용자에게 공개됩니다.
+  </p>
+
+  <form id="real-name-form">
+    <label for="real-name-input">이름</label>
+
+    <input
+      id="real-name-input"
+      type="text"
+      placeholder="예: 김인하"
+      minlength="2"
+      maxlength="20"
+      required
+    >
+
+    <button class="primary" type="submit">
+      이름 저장하기
+    </button>
+  </form>
+
+  <p id="real-name-message" class="muted"></p>
+</div>
+<div class="score-card panel"><div class="score-heading"><span>👑 내 매너 점수</span><span class="score-tag">실제 매너 점수</span></div><div class="score-number"><strong id="score">92</strong><span>/100</span></div><div class="progress"><div id="score-bar"></div></div><p id="score-label">좋은 매너를 유지하고 있어요!</p><p class="muted">모임 참여 후 다른 사용자에게 받은 학점 평가를 바탕으로 산정됩니다.</p></div><div class="stats"><div><b id="joined-count">0</b><span>참여 모임</span></div><div><b id="created-count">0</b><span>작성 모임</span></div><div><b id="review-count">0</b><span>남긴 후기</span></div></div>
+<div class="panel">
+  <h2>🐧 참여자 매너 학점 평가</h2>
+  <p class="muted">
+    완료된 모임에서 함께 활동한 참여자를
+    A+부터 F까지 개별적으로 평가할 수 있습니다.
+  </p>
+
+  <form id="review-form">
+
+    <label>
+      평가할 모임
+      <select id="review-meeting" required>
+        <option value="">모임을 선택하세요</option>
+      </select>
+    </label>
+
+    <label>
+      평가할 참여자
+      <select id="review-person" required>
+        <option value="">참여자를 선택하세요</option>
+      </select>
+    </label>
+
+    <label>
+      매너 학점
+      <select id="review-type" required>
+        <option value="A+">A+ (4.5)</option>
+        <option value="A0">A0 (4.0)</option>
+        <option value="B+">B+ (3.5)</option>
+        <option value="B0">B0 (3.0)</option>
+        <option value="C+">C+ (2.5)</option>
+        <option value="C0">C0 (2.0)</option>
+        <option value="D+">D+ (1.5)</option>
+        <option value="D0">D0 (1.0)</option>
+        <option value="F">F (0.0)</option>
+      </select>
+    </label>
+
+    <button class="primary" type="submit">
+      학점 평가 제출하기
+    </button>
+
+  </form>
+
+  <p id="review-message" class="muted"></p>
 </div>
 
 <button id="logout-button" class="secondary" type="button">
@@ -44,6 +128,21 @@
     logout
   } from './js/auth.js';
   import { supabase } from './js/supabase.js';
+
+async function loadMeetings() {
+  const { data, error } = await supabase
+    .from('meetings')
+    .select('id, title, description, category, location_name, max_participants, creator_id, status')
+    .eq('status', 'open');
+
+  if (error) {
+    console.error('모임 불러오기 실패:', error.message);
+    return;
+  }
+
+  console.log('Supabase 모임 목록:', data);
+}
+
 
   const authPanel = document.getElementById('auth-panel');
   const message = document.getElementById('auth-message');
@@ -90,6 +189,7 @@ if (profileError) {
 } else {
   console.log('Supabase 매너 점수:', profile.manner_score);
   window.setMannerScore(profile.manner_score);
+  await loadMeetings();
 }
 
     } catch (error) {
@@ -119,6 +219,6 @@ if (profileError) {
 
 </script>
 
-<script src="js/main.js"></script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>
