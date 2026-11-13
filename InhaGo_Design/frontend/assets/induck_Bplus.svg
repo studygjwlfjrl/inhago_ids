@@ -1,0 +1,72 @@
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 160 180"
+     role="img"
+     aria-label="B+ 학점의 미소 짓는 인덕이">
+
+  <defs>
+    <linearGradient id="hood" x2="1" y2="1">
+      <stop stop-color="#367ef2"/>
+      <stop offset="1" stop-color="#123e99"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 그림자 -->
+  <ellipse cx="80" cy="168" rx="55" ry="8"
+           fill="#9bb9d9" opacity=".35"/>
+
+  <!-- 몸통 -->
+  <path d="M35 111Q26 74 42 52Q56 24 80 27Q112 22 125 54Q142 80 125 116L135 150Q80 172 25 150Z"
+        fill="url(#hood)" stroke="#194b9e" stroke-width="3"/>
+
+  <!-- 얼굴 -->
+  <path d="M44 62Q47 39 81 40Q116 39 119 70Q122 109 83 123Q41 121 40 86Z"
+        fill="#fffdf4"/>
+
+  <!-- 동그란 눈 -->
+  <ellipse cx="59" cy="83" rx="6" ry="8" fill="#1c3153"/>
+  <ellipse cx="102" cy="83" rx="6" ry="8" fill="#1c3153"/>
+
+  <!-- 분홍 볼 -->
+  <ellipse cx="49" cy="101" rx="11" ry="6"
+           fill="#ffb7bc" opacity=".8"/>
+  <ellipse cx="111" cy="101" rx="11" ry="6"
+           fill="#ffb7bc" opacity=".8"/>
+
+  <!-- 노란 부리 -->
+  <path d="M69 93Q80 84 92 93Q82 109 80 108Q77 107 69 93Z"
+        fill="#ffbb25" stroke="#ee9c17" stroke-width="2"/>
+
+  <!-- 살짝 올라간 입꼬리 -->
+  <path d="M75 99Q80 103 85 99"
+        fill="none" stroke="#d96d29"
+        stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- 머리 장식 -->
+  <path d="M67 29Q73 14 80 20Q86 7 94 20Q103 12 106 30"
+        fill="#1d58b8" stroke="#1d58b8"
+        stroke-linecap="round" stroke-width="7"/>
+
+  <!-- 이마 학점 표시 -->
+  <rect x="65" y="47" width="30" height="20"
+        rx="4" fill="#ffffff"
+        stroke="#d83c29" stroke-width="2"/>
+
+  <text x="80" y="61" font-size="13"
+        font-weight="900" font-family="sans-serif"
+        text-anchor="middle" fill="#c92c20">B+</text>
+
+  <!-- 팔 -->
+  <path d="M36 119Q18 119 18 140Q20 153 37 145M123 119Q143 120 143 139Q141 150 125 144"
+        fill="#fffdf4" stroke="#d8e7fa" stroke-width="3"/>
+
+  <!-- INHA -->
+  <text x="80" y="148" font-size="16"
+        font-weight="900" font-family="sans-serif"
+        text-anchor="middle" fill="white">INHA</text>
+
+  <!-- 작은 반짝이 -->
+  <path d="M128 49L130 53L134 55L130 57L128 61L126 57L122 55L126 53Z"
+        fill="#ffc83d"/>
+
+</svg>

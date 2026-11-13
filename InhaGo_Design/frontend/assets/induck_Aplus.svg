@@ -1,0 +1,99 @@
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 160 180"
+     role="img"
+     aria-label="A+ 학점의 활짝 웃는 인덕이">
+
+  <defs>
+    <linearGradient id="hood" x2="1" y2="1">
+      <stop stop-color="#367ef2"/>
+      <stop offset="1" stop-color="#123e99"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 그림자 -->
+  <ellipse cx="80" cy="168" rx="55" ry="8"
+           fill="#9bb9d9" opacity=".35"/>
+
+  <!-- 파란 몸통 -->
+  <path d="M35 111Q26 74 42 52Q56 24 80 27Q112 22 125 54Q142 80 125 116L135 150Q80 172 25 150Z"
+        fill="url(#hood)"
+        stroke="#194b9e"
+        stroke-width="3"/>
+
+  <!-- 흰 얼굴 -->
+  <path d="M44 62Q47 39 81 40Q116 39 119 70Q122 109 83 123Q41 121 40 86Z"
+        fill="#fffdf4"/>
+
+  <!-- 활짝 웃는 눈 -->
+  <path d="M52 84Q59 73 66 84"
+        fill="none"
+        stroke="#1c3153"
+        stroke-width="4"
+        stroke-linecap="round"/>
+
+  <path d="M95 84Q102 73 109 84"
+        fill="none"
+        stroke="#1c3153"
+        stroke-width="4"
+        stroke-linecap="round"/>
+
+  <!-- 분홍 볼 -->
+  <ellipse cx="49" cy="101" rx="11" ry="6"
+           fill="#ffb7bc" opacity=".8"/>
+
+  <ellipse cx="111" cy="101" rx="11" ry="6"
+           fill="#ffb7bc" opacity=".8"/>
+
+  <!-- 웃는 입이 있는 부리 -->
+  <path d="M69 93Q80 84 92 93Q82 109 80 108Q77 107 69 93Z"
+        fill="#ffbb25"
+        stroke="#ee9c17"
+        stroke-width="2"/>
+
+  <path d="M74 98Q80 109 86 98Z"
+        fill="#d96d29"/>
+
+  <!-- 머리 위 파란 장식 -->
+  <path d="M67 29Q73 14 80 20Q86 7 94 20Q103 12 106 30"
+        fill="#1d58b8"
+        stroke="#1d58b8"
+        stroke-linecap="round"
+        stroke-width="7"/>
+
+  <!-- 이마의 학점 표시판 -->
+  <rect x="65" y="47" width="30" height="20"
+        rx="4"
+        fill="#ffffff"
+        stroke="#d83c29"
+        stroke-width="2"/>
+
+  <text x="80" y="61"
+        font-size="13"
+        font-weight="900"
+        font-family="sans-serif"
+        text-anchor="middle"
+        fill="#c92c20">A+</text>
+
+  <!-- 양쪽 팔 -->
+  <path d="M36 119Q18 119 18 140Q20 153 37 145M123 119Q143 120 143 139Q141 150 125 144"
+        fill="#fffdf4"
+        stroke="#d8e7fa"
+        stroke-width="3"/>
+
+  <!-- INHA 글씨 -->
+  <text x="80" y="148"
+        font-size="16"
+        font-weight="900"
+        font-family="sans-serif"
+        text-anchor="middle"
+        fill="white">INHA</text>
+
+  <!-- A+ 반짝이 -->
+  <path d="M128 45L131 51L137 54L131 57L128 63L125 57L119 54L125 51Z"
+        fill="#ffc83d"/>
+
+  <path d="M31 49L33 53L37 55L33 57L31 61L29 57L25 55L29 53Z"
+        fill="#ffc83d"/>
+
+</svg>
