@@ -23,13 +23,16 @@ if ! "$PYTHON" -c "import uvicorn, fastapi" >/dev/null 2>&1; then
   echo "FastAPI 의존성이 없습니다. backend 가상환경을 만들고 requirements.txt를 설치하세요."
   exit 1
 fi
-if ! "$PYTHON" -c "import socket; s=socket.socket(); s.bind(('127.0.0.1',8000)); s.close()" >/dev/null 2>&1; then
-  echo "8000 포트를 이미 사용 중입니다. 기존 FastAPI를 종료하고 다시 실행하세요."
-  exit 1
-fi
-if ! "$PYTHON" -c "import socket; s=socket.socket(); s.bind(('127.0.0.1',5500)); s.close()" >/dev/null 2>&1; then
-  echo "5500 포트를 이미 사용 중입니다. 기존 프론트엔드 서버를 종료하고 다시 실행하세요."
-  exit 1
+# Do not pre-bind ports: some macOS Python environments deny the probe even
+# when the port is free. Let uvicorn/http.server report actual bind errors.
+if command -v lsof >/dev/null 2>&1; then
+  for PORT in 8000 5500; do
+    if lsof -nP -iTCP:"$PORT" -sTCP:LISTEN | grep -q LISTEN; then
+      echo "주의: $PORT 포트에서 이미 서버가 실행 중입니다."
+      echo "기존 서버를 종료한 뒤 다시 실행해 주세요."
+      exit 1
+    fi
+  done
 fi
 cleanup() {
   trap - EXIT INT TERM
@@ -47,4 +50,4 @@ echo "InhaGo 개발 서버 실행"
 echo "프론트엔드: http://127.0.0.1:5500"
 echo "백엔드:    http://127.0.0.1:8000/docs"
 echo "종료: Control + C"
-wait -n "$BACK_PID" "$FRONT_PID" 2>/dev/null || wait "$BACK_PID"
+wait "$BACK_PID"
