@@ -1,11 +1,704 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>InhaGo | 캠퍼스에서 만나요</title><link rel="stylesheet" href="css/style.css"></head><body>
-<div class="app"><header><a class="brand" href="#" data-page="home">InhaGo<span>📍</span></a><label class="search">⌕ <input id="search" placeholder="장소, 모임, 사람을 검색해보세요" aria-label="모임 검색"></label><button class="account" data-page="profile"><img src="assets/rider.svg" alt="인덕이 스타일 마스코트"> <span>인하고 · <b id="header-score">92</b>점</span></button></header>
-<div class="shell"><nav class="sidebar"><button data-page="home" class="active">⌂ <span>홈</span></button><button data-page="search">⌕ <span>검색</span></button><button data-page="create">⊕ <span>모임 만들기</span></button><button data-page="message">☏ <span>메시지</span></button><button data-page="friend">♧ <span>친구</span></button><button data-page="profile">♙ <span>마이페이지</span></button><div class="greeting"><img src="assets/rider.svg" alt="인덕이 스타일 마스코트"><strong>캠퍼스에서 새로운 만남!</strong><small>오늘도 안전하고 매너 있게 🚲</small></div></nav>
-<main><section id="home" class="page active"><div class="map"><div class="weather">☀️ 캠퍼스 탐험</div><button class="pin food" style="top:38%;left:32%" data-id="0" aria-label="밥약 모임">🍚</button><button class="pin exercise" style="top:60%;left:20%" data-id="1" aria-label="운동 모임">🏀</button><button class="pin study" style="top:22%;left:63%" data-id="2" aria-label="스터디 모임">📚</button><button class="pin taxi" style="top:55%;left:83%" data-id="3" aria-label="택시팟 모임">🚕</button><div class="player"><img src="assets/rider.svg" alt="내 캐릭터"><span>내 캐릭터</span></div><div class="legend">🍚 밥약　🏀 운동　📚 스터디　🚕 택시팟</div></div><div class="map-note">이 지도는 디자인 시연용 일러스트입니다. 실제 GPS 위치는 사용하지 않습니다.</div></section>
-<section id="search-page" class="page"><h1>모임 검색</h1><p class="muted">상단 검색창에서 모임을 검색할 수 있어요.</p><div id="search-results" class="results"></div></section>
-<section id="create-page" class="page"><h1>모임 만들기</h1><p class="muted">새로운 모임을 등록해 보세요.</p><form id="create-form" class="panel form"><label>모임 이름<input name="title" required maxlength="50" placeholder="예: 본관 앞 점심 같이 먹어요"></label><label>종류<select name="type"><option value="food">🍚 밥약</option><option value="exercise">🏀 운동</option><option value="study">📚 스터디</option><option value="taxi">🚕 택시팟</option></select></label><label>장소<input name="place" required placeholder="예: 본관 앞"></label><label>모집 인원<input name="max" type="number" min="2" max="20" value="4" required></label><label>소개<textarea name="desc" rows="3" placeholder="모임을 소개해 주세요"></textarea></label><button class="primary" type="submit">모임 등록하기</button></form></section>
-<section id="message-page" class="page"><h1>메시지</h1><div class="panel"><p>💬 <b>스터디 모임 (4)</b></p><p class="muted">내일 도서관 앞에서 만나요!</p><hr><p>💬 <b>밥약 모임 (3)</b></p><p class="muted">오늘 점심 같이 먹을까요?</p><p class="notice">메시지는 디자인 시연용이며 실제로 전송되지 않습니다.</p></div></section>
-<section id="friend-page" class="page"><h1>친구</h1><div class="panel"><p>👤 김인하 <span class="score-tag">매너 96점</span></p><p>👤 박지민 <span class="score-tag">매너 88점</span></p><p>👤 이수연 <span class="score-tag">매너 91점</span></p><p class="notice">친구 요청 및 연결은 서버 연동 후 제공됩니다.</p></div></section>
-<section id="profile-page" class="page"><h1>마이페이지</h1><div class="profile-top panel"><img src="assets/rider.svg" alt="마스코트 프로필"><div><h2>인하고</h2><p class="muted">@inha_go · 인하대학교</p><p>캠퍼스에서 좋은 사람들과 함께해요!</p></div></div><div class="score-card panel"><div class="score-heading"><span>👑 내 매너 점수</span><span class="score-tag">시연 데이터</span></div><div class="score-number"><strong id="score">92</strong><span>/100</span></div><div class="progress"><div id="score-bar"></div></div><p id="score-label">좋은 매너를 유지하고 있어요!</p><p class="muted">모임 참여 후 받은 평가를 바탕으로 산정하는 기능을 구상 중입니다.</p></div><div class="stats"><div><b id="joined-count">0</b><span>참여 모임</span></div><div><b id="created-count">0</b><span>작성 모임</span></div><div><b id="review-count">0</b><span>남긴 후기</span></div></div><div class="panel"><h2>모임 후기 남기기 <small>(데모)</small></h2><p class="muted">참여한 모임이 있으면 후기를 남길 수 있어요. 아래 점수는 이 브라우저에만 저장됩니다.</p><form id="review-form"><label>평가할 모임<select id="review-meeting" required></select></label><label>평가<select id="review-type"><option value="5">😊 친절하고 약속을 잘 지켰어요 (+5)</option><option value="3">👍 소통이 원활했어요 (+3)</option><option value="0">😐 보통이었어요 (+0)</option><option value="-5">⚠️ 약속을 지키지 않았어요 (-5)</option></select></label><button class="primary" type="submit">후기 제출</button></form><button class="secondary" id="reset-demo">시연 데이터 초기화</button></div></section></main>
-<aside><div class="aside-title"><h2>주변 모임</h2><small>시연용 목록</small></div><div id="cards"></div><button class="primary wide" data-page="create">＋ 모임 만들기</button><div class="mini-score"><span>🤝 내 매너 점수</span><b id="aside-score">92 / 100</b><button data-page="profile">상세 보기 →</button></div></aside></div></div>
-<dialog id="modal"><div class="modal-inner"><button class="close" id="close-modal" aria-label="닫기">×</button><div class="modal-icon" id="modal-icon"></div><h2 id="modal-title"></h2><p id="modal-place"></p><p id="modal-desc"></p><p id="modal-count"></p><button class="primary wide" id="join">참여하기</button></div></dialog><div id="toast" role="status" aria-live="polite"></div><script src="js/main.js"></script></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>InhaGo | 캠퍼스에서 만나요</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/friend.css">
+    <link rel="stylesheet" href="css/message.css">
+    <link rel="stylesheet" href="css/chat.css">
+</head>
+
+<body>
+    <div class="app">
+
+        <!-- 헤더 -->
+        <header>
+            <a class="brand" href="#" data-page="home">
+                InhaGo<span>📍</span>
+            </a>
+
+            <label class="search">
+                ⌕
+                <input
+                    id="search"
+                    placeholder="장소, 모임, 사람을 검색해보세요"
+                    aria-label="모임 검색"
+                >
+            </label>
+
+            <button class="account" data-page="profile">
+                <img
+                    src="assets/rider.svg"
+                    alt="인덕이 스타일 마스코트"
+                >
+                <span>
+                    <span id="header-user-name">인하고</span>
+                    · <b id="header-score">92</b>점
+                </span>
+            </button>
+        </header>
+
+        <div class="shell">
+
+            <!-- 사이드바 -->
+            <nav class="sidebar">
+                <button data-page="home" class="active">
+                    ⌂ <span>홈</span>
+                </button>
+
+                <button data-page="search">
+                    ⌕ <span>검색</span>
+                </button>
+
+                <button data-page="create">
+                    ⊕ <span>모임 만들기</span>
+                </button>
+
+                <button data-page="message">
+                    ☏ <span>메시지</span>
+                </button>
+
+                
+        <button data-page="chat" aria-label="모임 채팅">
+          <i data-lucide="messages-square"></i>
+          <span>모임 채팅</span>
+        </button>
+
+<button data-page="friend">
+                    ♧ <span>친구</span>
+                </button>
+
+                <button data-page="profile">
+                    ♙ <span>마이페이지</span>
+                </button>
+
+                <div class="greeting">
+                    <img
+                        src="assets/rider.svg"
+                        alt="인덕이 스타일 마스코트"
+                    >
+                    <strong>캠퍼스에서 새로운 만남!</strong>
+                    <small>오늘도 안전하고 매너 있게 🚲</small>
+                </div>
+            </nav>
+
+            <!-- 메인 콘텐츠 -->
+            <main>
+
+
+                <!-- 홈 페이지 -->
+                <section id="home" class="page active">
+                    <div class="map-container">
+
+                        <!-- 실제 Google Maps -->
+                        <div id="map"></div>
+
+                        <!-- GPS 버튼 -->
+                        <button id="locationBtn" type="button">
+                            📍 내 위치
+                        </button>
+
+                        <!-- 지도 상태 메시지 -->
+                        <div id="status" role="status"></div>
+
+                        <!-- 모임 카테고리 -->
+                        <div id="filters">
+                            <button data-category="all" class="active">전체</button>
+                            <button data-category="meal">🍚 밥약</button>
+                            <button data-category="taxi">🚕 택시팟</button>
+                            <button data-category="study">📚 스터디</button>
+                            <button data-category="exercise">🏃 운동</button>
+                        </div>
+
+                    </div>
+                </section>
+
+
+                <!-- 검색 페이지 -->
+                <section id="search-page" class="page">
+                    <h1>모임 검색</h1>
+
+                    <p class="muted">
+                        상단 검색창에서 모임을 검색할 수 있어요.
+                    </p>
+
+                    <div id="search-results" class="results"></div>
+                </section>
+
+                <!-- 모임 만들기 페이지 -->
+                <section id="create-page" class="page">
+                    <h1>모임 만들기</h1>
+
+                    <p class="muted">
+                        새로운 모임을 등록해 보세요.
+                    </p>
+
+                    <form id="create-form" class="panel form">
+
+                        <label>
+                            모임 이름
+                            <input
+                                name="title"
+                                required
+                                maxlength="50"
+                                placeholder="예: 본관 앞 점심 같이 먹어요"
+                            >
+                        </label>
+
+                        <label>
+                            종류
+                            <select name="type">
+                                <option value="food">🍚 밥약</option>
+                                <option value="exercise">🏀 운동</option>
+                                <option value="study">📚 스터디</option>
+                                <option value="taxi">🚕 택시팟</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            장소
+                            <input
+                                name="place"
+                                required
+                                placeholder="예: 본관 앞"
+                            >
+                        </label>
+
+                        <label>
+                            모집 인원
+                            <input
+                                name="max"
+                                type="number"
+                                min="2"
+                                max="20"
+                                value="4"
+                                required
+                            >
+                        </label>
+                        <label>
+                            모임 날짜 및 시간
+                            <input
+                                name="meeting_time"
+                                type="datetime-local"
+                                required
+                            >
+                        </label>
+
+                        <label>
+                            소개
+                            <textarea
+                                name="desc"
+                                rows="3"
+                                placeholder="모임을 소개해 주세요"
+                            ></textarea>
+                        </label>
+
+                        <button class="primary" type="submit">
+                            모임 등록하기
+                        </button>
+                    </form>
+                </section>
+
+                <!-- 메시지 페이지 -->
+                <section id="message-page" class="page">
+          <h1>메시지</h1>
+
+          <div class="message-container">
+
+            <div class="message-section">
+              <h2>1:1 채팅</h2>
+              <p class="muted">
+                대화할 친구를 선택해 주세요.
+              </p>
+              <div id="dm-friend-list"></div>
+            </div>
+
+            <div
+              id="dm-room"
+              class="message-section"
+              hidden
+            >
+              <h2 id="dm-room-title">1:1 채팅방</h2>
+
+              <div
+                id="dm-messages"
+                class="chat-messages"
+                role="log"
+                aria-label="1:1 채팅 메시지"
+                aria-live="polite"
+              ></div>
+
+              <form id="dm-form" class="chat-form">
+                <input
+                  id="dm-input"
+                  type="text"
+                  placeholder="메시지를 입력하세요."
+                  maxlength="1000"
+                  aria-label="1:1 채팅 메시지 입력"
+                  required
+                >
+
+                <button class="chat-btn" type="submit">
+                  전송
+                </button>
+              </form>
+            </div>
+
+            <p class="notice">
+              친구 요청이 수락된 사용자와
+              1:1 채팅을 할 수 있습니다.
+            </p>
+          </div>
+        </section>
+
+                <!-- 친구 페이지 -->
+                <section id="chat-page" class="page">
+          <h1>모임 채팅</h1>
+
+          <div class="chat-container">
+
+            <div class="chat-section">
+              <h2>내 채팅방</h2>
+              <div id="chat-room-list"></div>
+            </div>
+
+            <div
+              id="chat-room"
+              class="chat-section"
+              hidden
+            >
+              <h2 id="chat-room-title">채팅방</h2>
+
+              <div
+                id="chat-messages"
+                class="chat-messages"
+                role="log"
+                aria-label="채팅 메시지"
+                aria-live="polite"
+              ></div>
+
+              <form id="chat-form" class="chat-form">
+                <input
+                  id="chat-input"
+                  type="text"
+                  placeholder="메시지를 입력하세요."
+                  maxlength="1000"
+                  aria-label="채팅 메시지 입력"
+                  required
+                >
+
+                <button class="chat-btn" type="submit">
+                  전송
+                </button>
+              </form>
+            </div>
+
+            <p class="notice">
+              현재 모임 채팅은 시연용입니다.
+              실제 실시간 채팅은 Supabase 연동 후 제공됩니다.
+            </p>
+          </div>
+        </section>
+
+<section id="friend-page" class="page">
+          <h1>친구</h1>
+
+          <div class="friend-container">
+
+            <div class="friend-section">
+              <h2>친구 검색</h2>
+
+              <div class="friend-search">
+                <input
+                  id="friend-search-input"
+                  type="text"
+                  placeholder="닉네임 또는 학번 검색"
+                  aria-label="친구 검색"
+                >
+              </div>
+
+              <div id="friend-search-results"></div>
+            </div>
+
+            <div class="friend-section">
+              <h2>받은 친구 요청</h2>
+              <div id="friend-requests"></div>
+
+              <div class="friend-sent-section">
+                <h3>보낸 친구 요청</h3>
+                <div id="friend-sent-requests">
+                  <p>보낸 친구 요청을 불러오는 중...</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="friend-section">
+              <h2>내 친구 목록</h2>
+              <div id="friend-list"></div>
+            </div>
+
+            <p class="notice">
+              현재 친구 관리 기능은 시연용입니다.
+              실제 사용자 연결은 Supabase 연동 후 제공됩니다.
+            </p>
+          </div>
+        </section>
+
+                <!-- 마이페이지 -->
+                <section id="profile-page" class="page">
+                    <h1>마이페이지</h1>
+
+                    <!-- 프로필 정보 -->
+                    <div class="profile-top panel">
+                        <img
+                            src="assets/rider.svg"
+                            alt="마스코트 프로필"
+                        >
+
+                        <div>
+                            <h2 id="profile-user-name">인하고</h2>
+                            <p class="muted">@inha_go · 인하대학교</p>
+                            <p>캠퍼스에서 좋은 사람들과 함께해요!</p>
+                        </div>
+                    </div>
+
+                    <!-- 매너 점수 -->
+                    <div class="score-card panel">
+                        <div class="score-heading">
+                            <span>👑 내 매너 점수</span>
+                            <span class="score-tag">시연 데이터</span>
+                        </div>
+
+                        <div class="score-number">
+                            <strong id="score">92</strong>
+                            <span>/100</span>
+                        </div>
+
+                        <div class="progress">
+                            <div id="score-bar"></div>
+                        </div>
+
+                        <p id="score-label">
+                            좋은 매너를 유지하고 있어요!
+                        </p>
+
+                        <p class="muted">
+                            모임 참여 후 받은 평가를 바탕으로
+                            산정하는 기능을 구상 중입니다.
+                        </p>
+                    </div>
+
+                    <!-- 활동 통계 -->
+                    <div class="stats">
+                        <div>
+                            <b id="joined-count">0</b>
+                            <span>참여 모임</span>
+                        </div>
+
+                        <div>
+                            <b id="created-count">0</b>
+                            <span>작성 모임</span>
+                        </div>
+
+                        <div>
+                            <b id="review-count">0</b>
+                            <span>남긴 후기</span>
+                        </div>
+                    </div>
+
+                    <!-- 모임 후기 -->
+                    <div class="panel">
+                        <h2>모임 후기 남기기 <small>(데모)</small></h2>
+
+                        <p class="muted">
+                            참여한 모임이 있으면 후기를 남길 수 있어요.
+                            아래 점수는 이 브라우저에만 저장됩니다.
+                        </p>
+
+                        <form id="review-form">
+                            <label>
+                                평가할 모임
+                                <select
+                                    id="review-meeting"
+                                    required
+                                ></select>
+                            </label>
+
+                            <label>
+                                평가
+                                <select id="review-type">
+                                    <option value="5">
+                                        😊 친절하고 약속을 잘 지켰어요 (+5)
+                                    </option>
+
+                                    <option value="3">
+                                        👍 소통이 원활했어요 (+3)
+                                    </option>
+
+                                    <option value="0">
+                                        😐 보통이었어요 (+0)
+                                    </option>
+
+                                    <option value="-5">
+                                        ⚠️ 약속을 지키지 않았어요 (-5)
+                                    </option>
+                                </select>
+                            </label>
+
+                            <button class="primary" type="submit">
+                                후기 제출
+                            </button>
+                        </form>
+
+                        <button class="secondary" id="reset-demo">
+                            시연 데이터 초기화
+                        </button>
+                    </div>
+
+                    <button id="logout-button" class="secondary" type="button">
+                        로그아웃
+                    </button>
+                </section>
+
+            </main>
+
+            <!-- 오른쪽 주변 모임 패널 -->
+            <aside>
+                <div class="aside-title">
+                    <h2>주변 모임</h2>
+                    <small>시연용 목록</small>
+                </div>
+
+                <div id="cards"></div>
+
+                <button class="primary wide" data-page="create">
+                    ＋ 모임 만들기
+                </button>
+
+                <div class="mini-score">
+                    <span>🤝 내 매너 점수</span>
+                    <b id="aside-score">92 / 100</b>
+
+                    <button data-page="profile">
+                        상세 보기 →
+                    </button>
+                </div>
+            </aside>
+
+        </div>
+    </div>
+
+    <!-- 모임 상세 모달 -->
+    <dialog id="modal">
+        <div class="modal-inner">
+            <button
+                class="close"
+                id="close-modal"
+                aria-label="닫기"
+            >
+                ×
+            </button>
+
+            <div class="modal-icon" id="modal-icon"></div>
+
+            <h2 id="modal-title"></h2>
+            <p id="modal-place"></p>
+            <p id="modal-desc"></p>
+            <p id="modal-count"></p>
+
+            <button class="primary wide" id="join">
+                참여하기
+            </button>
+        </div>
+    </dialog>
+
+    <!-- 알림 메시지 -->
+    <div id="toast" role="status" aria-live="polite"></div>
+
+    <!-- JavaScript 연결 -->
+    <script src="js/main.js"></script>
+
+
+    <!-- 지도 모임 상세 바텀시트 -->
+    <div id="bottomSheet" hidden>
+        <button id="closeBtn" type="button">닫기 ✕</button>
+        <h2 id="meetingTitle"></h2>
+        <p id="meetingInfo"></p>
+    </div>
+
+        <!-- 로그인 화면 -->
+    <div id="auth-panel" style="position:fixed;inset:0;background:#eef4ff;z-index:9999;display:flex;align-items:center;justify-content:center;">
+        <div style="background:white;padding:36px;border-radius:20px;width:360px;max-width:90%;box-shadow:0 8px 30px #0001;text-align:center;">
+            <h2>📍 InhaGo</h2>
+            <p>인하대학교 학생들을 위한 커뮤니티</p>
+
+            <button id="google-login" type="button"
+                style="width:100%;padding:14px;margin-top:20px;background:white;border:1px solid #ddd;border-radius:10px;">
+                Google로 로그인
+            </button>
+
+            <p style="font-size:13px;color:#666;margin-top:20px;">
+                인하대학교 이메일(@inha.edu)만 이용할 수 있습니다.
+            </p>
+
+            <p id="auth-message" role="status"></p>
+        </div>
+    </div>
+
+    <!-- 로그인 기능 -->
+    <script type="module">
+        import {
+            loginWithGoogle,
+            checkLoginStatus,
+            isInhaEmail,
+            logout
+        } from './js/auth.js';
+
+        import { supabase } from './js/supabase.js';
+
+        const authPanel = document.getElementById('auth-panel');
+        const message = document.getElementById('auth-message');
+
+        document.getElementById('google-login').addEventListener('click', async () => {
+            message.textContent = 'Google 로그인 화면으로 이동 중...';
+
+            try {
+                await loginWithGoogle();
+            } catch (error) {
+                message.textContent = error.message;
+            }
+        });
+
+        async function initializeAuth() {
+            try {
+                const user = await checkLoginStatus();
+
+                if (!user) {
+                    authPanel.style.display = 'flex';
+                    return;
+                }
+
+                if (!isInhaEmail(user.email)) {
+                    await logout();
+                    message.textContent = '인하대학교 이메일 계정으로 로그인해 주세요.';
+                    authPanel.style.display = 'flex';
+                    return;
+                }
+
+                authPanel.style.display = 'none';
+
+                // 로그인 완료 상태 저장
+                window.inhaGoLoggedIn = true;
+
+                // 지도에 로그인 완료 알림
+                window.dispatchEvent(new Event("inhaGoLoginSuccess"));
+
+                // Google 계정에서 이름 가져오기
+                const googleFullName =
+                    user.user_metadata?.full_name ||
+                    user.user_metadata?.name ||
+                    null;
+
+                const googleName = googleFullName
+                    ? googleFullName.split('/')[0].trim()
+                    : null;
+                    
+                // 기존 프로필 조회
+                const { data: existingProfile, error: profileReadError } =
+                    await supabase
+                        .from('profiles')
+                        .select('real_name')
+                        .eq('id', user.id)
+                        .maybeSingle();
+
+                if (profileReadError) {
+                    console.error('프로필 조회 실패:', profileReadError.message);
+                }
+
+                // 실명이 비어 있는 경우에만 저장
+                if (!profileReadError && existingProfile && !existingProfile.real_name && googleName) {
+                    const { error: nameError } = await supabase
+                        .from('profiles')
+                        .update({ real_name: googleName })
+                        .eq('id', user.id);
+
+                    if (nameError) {
+                        console.error('실명 저장 실패:', nameError.message);
+                    }
+                }
+
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('manner_score, real_name')
+                    .eq('id', user.id)
+                    .single();
+                
+                if (error) {
+                    console.error('프로필 조회 실패:', error.message);
+                } else if (profile) {
+
+                    // 실명 표시
+                    const realName = profile.real_name
+                        ? profile.real_name.split('/')[0].trim()
+                        : '이름 미등록';
+
+                    const headerName =
+                        document.getElementById('header-user-name');
+
+                    const profileName =
+                        document.getElementById('profile-user-name');
+
+                    if (headerName) {
+                        headerName.textContent = realName;
+                    }
+
+                    if (profileName) {
+                        profileName.textContent = realName;
+                    }
+
+                    // 기존 매너 점수 표시 유지
+                    if (typeof window.setMannerScore === 'function') {
+                        window.setMannerScore(profile.manner_score);
+                    }
+                }
+
+                if (error) {
+                    console.error('매너 점수 조회 실패:', error.message);
+                } else if (profile && typeof window.setMannerScore === 'function') {
+                    window.setMannerScore(profile.manner_score);
+                }
+
+            } catch (error) {
+                message.textContent = error.message;
+                authPanel.style.display = 'flex';
+            }
+        }
+
+        initializeAuth();
+
+        const logoutButton = document.getElementById('logout-button');
+
+        if (logoutButton) {
+            logoutButton.addEventListener('click', async () => {
+                try {
+                    await logout();
+                    window.location.reload();
+                } catch (error) {
+                    alert('로그아웃에 실패했습니다: ' + error.message);
+                }
+            });
+        }
+    </script>
+
+    <!-- 지도 설정 -->
+    <script src="../../map/config.js"></script>
+
+    <!-- 지도 기능 -->
+    <script src="../../map/map.js"></script>
+    <script type="module" src="js/friend.js"></script>
+    <script type="module" src="js/message.js"></script>
+    <script type="module" src="js/chat.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+}
+
+button {
+  padding: 10px 15px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: white;
+}
+
+#filters {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+#filters button.active {
+  background: #2563eb;
+  color: white;
+}
+
+#map {
+  width: 100%;
+  height: calc(100dvh - 120px);
+  min-height: 350px;
+}
+
+#status {
+  position: absolute;
+  top: 115px;
+  left: 15px;
+  color: #b91c1c;
+  background: white;
+  z-index: 5;
+}
+
+#bottomSheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  padding: 25px;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px #0002;
+  z-index: 10;
+}
+
+#bottomSheet[hidden] {
+  display: none;
+}
+
+#meetingInfo {
+  white-space: pre-line;
+  line-height: 1.8;
+}

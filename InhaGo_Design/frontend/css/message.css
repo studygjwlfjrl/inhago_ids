@@ -1,0 +1,95 @@
+
+/* InhaGo 1:1 쪽지 화면 */
+
+.message-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.message-section {
+  background: #f8fbff;
+  border: 1px solid #e4eef8;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.message-section h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  color: #152f56;
+}
+
+.message-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message-form select,
+.message-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d6e4f4;
+  border-radius: 12px;
+  background: white;
+}
+
+.message-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.message-btn {
+  background: #2084f6;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.message-btn:hover {
+  background: #1166d0;
+}
+
+.message-item {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: white;
+  border: 1px solid #e4eef8;
+  border-radius: 14px;
+}
+
+.message-item strong {
+  color: #152f56;
+}
+
+.message-item p {
+  margin: 10px 0;
+  color: #365576;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.message-time {
+  font-size: 12px;
+  color: #7890aa;
+}
+
+.message-empty {
+  color: #7890aa;
+  text-align: center;
+  padding: 20px;
+}
+
+@media (max-width: 700px) {
+  .message-section {
+    padding: 15px;
+  }
+
+  .message-form textarea {
+    min-height: 100px;
+  }
+}
