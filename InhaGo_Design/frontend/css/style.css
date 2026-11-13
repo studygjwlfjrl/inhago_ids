@@ -842,3 +842,60 @@ dialog::backdrop {
         }
     }
 }
+
+/* =========================================
+   feature/design inspired visual refresh
+   Keep existing layout, markup, map and JS intact.
+========================================= */
+:root {
+  --ids-blue: #1677f2;
+  --ids-navy: #101b33;
+  --ids-muted: #64748b;
+  --ids-surface: #ffffff;
+  --ids-border: #e9edf5;
+  --ids-shadow: 0 8px 25px rgba(30, 60, 110, .08);
+}
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: #f1f4fa;
+  color: var(--ids-navy);
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+.brand { color: var(--ids-navy); text-shadow: none; letter-spacing: -1.5px; }
+.brand span { color: var(--ids-blue); }
+.search {
+  border: 1px solid var(--ids-border);
+  box-shadow: var(--ids-shadow);
+  color: var(--ids-muted);
+}
+.search input { color: var(--ids-navy); }
+.search input::placeholder { color: #8190a9; }
+.account { color: var(--ids-navy); }
+.account img { background: #e5dfff; }
+.sidebar, aside, .page:not(#home) {
+  border: 1px solid var(--ids-border);
+  background: var(--ids-surface);
+  box-shadow: var(--ids-shadow);
+}
+.sidebar > button { color: var(--ids-muted); }
+.sidebar > button.active, .sidebar > button:hover {
+  background: #eaf3ff;
+  color: #0867e7;
+}
+.greeting { background: linear-gradient(#fff, #eef4ff); }
+.greeting small { color: var(--ids-muted); }
+.map { box-shadow: var(--ids-shadow); }
+.weather, .legend {
+  border: 1px solid var(--ids-border);
+  box-shadow: var(--ids-shadow);
+}
+.map-note { color: var(--ids-muted); }
+.food { background: #1877d2; }
+.exercise { background: #586d8b; }
+.study { background: #6366c9; }
+.taxi { background: #198d9b; }
