@@ -41,9 +41,6 @@ async function initMap() {
     const { Map } =
       await google.maps.importLibrary("maps");
 
-    const { AdvancedMarkerElement } =
-      await google.maps.importLibrary("marker");
-
     map = new Map(document.getElementById("map"), {
       center: campus,
       zoom: 16,
@@ -93,26 +90,22 @@ function startLocationTracking() {
 
       // 처음 위치를 가져왔을 때 마커 생성
       if (!myLocationMarker) {
-        const blueDot = document.createElement("div");
-
-        blueDot.style.width = "18px";
-        blueDot.style.height = "18px";
-        blueDot.style.backgroundColor = "#4285f4";
-        blueDot.style.border = "3px solid white";
-        blueDot.style.borderRadius = "50%";
-        blueDot.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
-        blueDot.style.boxSizing = "border-box";
-
-        myLocationMarker =
-          new google.maps.marker.AdvancedMarkerElement({
-            position: myPosition,
-            map: map,
-            title: "내 현재 위치",
-            content: blueDot
-          });
+        myLocationMarker = new google.maps.Marker({
+          position: myPosition,
+          map,
+          title: "내 현재 위치",
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 9,
+            fillColor: "#4285f4",
+            fillOpacity: 1,
+            strokeColor: "#ffffff",
+            strokeWeight: 3
+          }
+        });
       } else {
         // 위치가 바뀌면 기존 마커 이동
-        myLocationMarker.position = myPosition;
+        myLocationMarker.setPosition(myPosition);
       }
 
       // 처음 한 번만 내 위치로 지도 이동
@@ -162,31 +155,27 @@ function showMarkers(category) {
     )
     .forEach(item => {
 
-      const pin = document.createElement("div");
-      pin.textContent = mapIcons[item.category];
-      pin.style.cssText = `
-        font-size: 25px;
-        background: white;
-        border-radius: 50%;
-        padding: 8px;
-        box-shadow: 0 2px 8px #0003;
-      `;
-
-      const marker =
-        new google.maps.marker.AdvancedMarkerElement({
-          map: map,
-          position: {
-            lat: item.lat,
-            lng: item.lng
-          },
-          content: pin,
-          title: item.title,
-          gmpClickable: true
-        });
-
-      marker.addEventListener("gmp-click", () => {
-        openBottomSheet(item);
+      // 기본 Marker 사용: 일부 Safari/Maps 조합에서 AdvancedMarkerElement의
+      // gmpClickable 초기화가 내부 오류(b.keys)를 발생시키는 문제 회피.
+      const marker = new google.maps.Marker({
+        map,
+        position: { lat: item.lat, lng: item.lng },
+        title: item.title,
+        label: {
+          text: mapIcons[item.category] || "📍",
+          fontSize: "22px"
+        },
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 22,
+          fillColor: "#ffffff",
+          fillOpacity: 1,
+          strokeColor: "#d6e5f5",
+          strokeWeight: 2
+        }
       });
+
+      marker.addListener("click", () => openBottomSheet(item));
 
       markers.push(marker);
     });
