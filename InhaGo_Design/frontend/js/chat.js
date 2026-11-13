@@ -16,6 +16,37 @@ import { supabase as supabaseDev } from "./supabase.js";
   let realtimeChannel = null;
   let realtimeVersion = 0;
 
+  const senderNames = new Map();
+  async function appendNamedMessage(container, message) {
+    if (!message?.id) return;
+    if ([...container.querySelectorAll("[data-message-id]")].some(el => el.dataset.messageId === String(message.id))) return;
+    container.querySelectorAll(".chat-empty").forEach(el => el.remove());
+    const wrapper = document.createElement("div");
+    wrapper.className = message.sender_id === currentUserId ? "chat-message mine" : "chat-message";
+    wrapper.dataset.messageId = String(message.id);
+    if (message.sender_id !== currentUserId) {
+      const sender = document.createElement("strong");
+      sender.className = "chat-sender-name";
+      sender.textContent = senderNames.get(message.sender_id) || "이름 확인 중...";
+      wrapper.append(sender);
+      if (!senderNames.has(message.sender_id)) {
+        const { data, error } = await supabaseDev.from("profiles").select("real_name").eq("id", message.sender_id).maybeSingle();
+        if (error) console.warn("발신자 이름 조회 실패:", error.message);
+        const name = data?.real_name?.split("/")[0]?.trim() || "이름 미등록";
+        senderNames.set(message.sender_id, name);
+        sender.textContent = name;
+      }
+    }
+    const bubble = document.createElement("div");
+    bubble.className = "chat-bubble";
+    bubble.textContent = message.content;
+    const time = document.createElement("small");
+    time.textContent = formatTime(message.created_at);
+    wrapper.append(bubble, time);
+    container.appendChild(wrapper);
+  }
+
+
   function showNotice(text) {
     const toast = document.getElementById("toast");
     if (!toast) return;
@@ -164,16 +195,20 @@ import { supabase as supabaseDev } from "./supabase.js";
 
         info.append(title, place);
 
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "chat-btn";
-        button.textContent = "채팅방 입장";
-
-        button.addEventListener("click", () => {
-          openRoom(meeting.id);
+        const arrow = document.createElement("span");
+        arrow.className = "chat-room-arrow";
+        arrow.textContent = "›";
+        item.setAttribute("role", "button");
+        item.tabIndex = 0;
+        item.setAttribute("aria-label", meeting.title + " 채팅방 열기");
+        item.addEventListener("click", () => openRoom(meeting.id));
+        item.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openRoom(meeting.id);
+          }
         });
-
-        item.append(info, button);
+        item.append(info, arrow);
         container.appendChild(item);
       });
     } catch (error) {
@@ -230,49 +265,12 @@ import { supabase as supabaseDev } from "./supabase.js";
 
           
 const message = payload.new;
-
-const container =
-  document.getElementById("chat-messages");
-
-if (!container || !message?.id) return;
-
-// 이미 표시된 메시지인지 확인
-const messageId = String(message.id);
-
-const exists = [...container.querySelectorAll(
-  "[data-message-id]"
-)].some(element => element.dataset.messageId === messageId);
-
-if (exists) return;
-
-// 빈 채팅방 안내 문구 제거
-container.querySelectorAll(".chat-empty")
-  .forEach(element => element.remove());
-
-// 새 메시지만 추가
-const wrapper = document.createElement("div");
-
-wrapper.className =
-  message.sender_id === currentUserId
-    ? "chat-message mine"
-    : "chat-message";
-
-wrapper.dataset.messageId = messageId;
-
-const bubble = document.createElement("div");
-bubble.className = "chat-bubble";
-bubble.textContent = message.content;
-
-const time = document.createElement("small");
-time.textContent = formatTime(message.created_at);
-
-wrapper.append(bubble, time);
-container.appendChild(wrapper);
- 
-// 새 메시지가 도착하면 채팅창 맨 아래로 이동
-requestAnimationFrame(() => {
+const container = document.getElementById("chat-messages");
+if (!container) return;
+appendNamedMessage(container, message).then(() => {
   container.scrollTop = container.scrollHeight;
 });
+
    
 }
       )
@@ -400,34 +398,11 @@ requestAnimationFrame(() => {
     container.querySelectorAll(".chat-empty")
       .forEach(element => element.remove());
 
-    // 새로운 메시지만 추가
-    messages.forEach(message => {
-      const messageId = String(message.id);
-
-      if (existingMessages.has(messageId)) {
-        return;
-      }
-
-      const wrapper = document.createElement("div");
-
-      wrapper.className =
-        message.sender_id === currentUserId
-          ? "chat-message mine"
-          : "chat-message";
-
-      wrapper.dataset.messageId = messageId;
-
-      const bubble = document.createElement("div");
-      bubble.className = "chat-bubble";
-      bubble.textContent = message.content;
-
-      const time = document.createElement("small");
-      time.textContent = formatTime(message.created_at);
-
-      wrapper.append(bubble, time);
-      container.appendChild(wrapper);
-});
-
+    // 발신자 이름을 포함해 메시지 렌더링
+    for (const message of messages) {
+      if (roomId !== currentRoomId || version !== messageVersion) return;
+      await appendNamedMessage(container, message);
+    }
 
     // 채팅방에 처음 입장했을 때 맨 아래로 이동
     container.scrollTop = container.scrollHeight;
