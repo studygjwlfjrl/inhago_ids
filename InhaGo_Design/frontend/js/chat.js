@@ -504,6 +504,8 @@ if (currentRoomId === roomId) {
         });
       });
 
+    window.addEventListener("inhaGoMeetingsChanged", renderRooms);
+    window.addEventListener("inhaGoLoginSuccess", renderRooms);
     renderRooms();
   }
 
