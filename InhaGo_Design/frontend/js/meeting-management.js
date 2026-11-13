@@ -2,7 +2,7 @@ import { supabase } from './supabase.js';
 import { getMyMeetings, updateMeeting, cancelMeeting, leaveMeeting, completeMeeting } from './meetings-api.js';
 
 const $ = id => document.getElementById(id);
-let meetings = [], currentUserId = null, editingId = null;
+let meetings = [], currentUserId = null, editingId = null, loadVersion = 0, hasLoaded = false;
 const notify = message => {
   const el = $('toast');
   if (!el) return;
@@ -61,16 +61,20 @@ function render() {
   }
 }
 async function load() {
+  const version = ++loadVersion;
   const container=$('my-meetings-list');
   if(!container)return;
   try {
     const {data:{user}}=await supabase.auth.getUser();
     if(!user){container.textContent='로그인이 필요합니다.';return;}
+    if(version!==loadVersion)return;
     currentUserId=user.id;
     const result=await getMyMeetings();
+    if(version!==loadVersion)return;
     meetings=result.meetings||[];
+    hasLoaded=true;
     render();
-  }catch(e){console.error('내 모임 조회 실패',e);container.textContent='내 모임 조회 실패: '+e.message;}
+  }catch(e){if(version!==loadVersion)return;console.error('내 모임 조회 실패',e);if(hasLoaded){render();const notice=document.createElement('p');notice.className='muted';notice.textContent='서버 연결 문제로 이전 조회 결과를 표시하고 있습니다. '+e.message;container.prepend(notice);}else{container.textContent='내 모임 조회 실패: '+e.message;}}
 }
 function openEdit(m) {
   editingId=m.id;
@@ -99,6 +103,8 @@ $('edit-meeting-form')?.addEventListener('submit',async e=>{
   }catch(error){notify(error.message);}finally{button.disabled=false;}
 });
 window.addEventListener('inhaGoLoginSuccess',load);
+window.addEventListener('inhaGoApiStatus',event=>{if(event.detail.online)load();});
+window.addEventListener('online',load);
 window.addEventListener('inhaGoMeetingsChanged',load);
 document.querySelectorAll('[data-page="profile"]').forEach(el=>el.addEventListener('click',load));
 supabase.auth.getSession().then(({data})=>{if(data.session)load();}).catch(console.error);
