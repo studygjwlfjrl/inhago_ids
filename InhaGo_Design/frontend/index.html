@@ -498,7 +498,8 @@
           </p>
         </div>
 
-        <div class="stats">
+        <div class="panel" style="margin:18px 0"><h2>내 모임 관리</h2><p class="muted">내가 만든 모임은 수정·취소·완료할 수 있고, 참여한 모임에서는 탈퇴할 수 있습니다.</p><div id="my-meetings-list" class="meeting-list"><p class="muted">내 모임을 불러오는 중입니다.</p></div></div>
+\n        <div class="stats">
           <div>
             <b id="joined-count">0</b>
             <span>참여 모임</span>
@@ -594,6 +595,8 @@
       </button>
     </div>
   </dialog>
+
+  <dialog id="edit-meeting-dialog"><form id="edit-meeting-form" class="styled-form" style="padding:22px;min-width:min(90vw,380px)"><h2>모임 수정</h2><input name="title" required maxlength="100" placeholder="모임 이름"><input name="place" required placeholder="장소"><textarea name="description" placeholder="소개"></textarea><input name="meeting_time" type="datetime-local" required><select name="max_participants" required><option value="2">2명</option><option value="3">3명</option><option value="4">4명</option><option value="5">5명</option><option value="6">6명</option><option value="8">8명</option><option value="10">10명</option><option value="15">15명</option><option value="20">20명</option></select><button type="submit" class="primary">저장</button><button type="button" id="edit-meeting-close">닫기</button></form></dialog>
 
   <div
     id="toast"
@@ -744,6 +747,7 @@
     <script type="module" src="js/message.js"></script>
     <script type="module" src="js/chat.js"></script>
     <script type="module" src="js/login-features.js"></script>
+    <script type="module" src="js/meeting-management.js"></script>
 
 </body>
 </html>
