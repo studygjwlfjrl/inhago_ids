@@ -311,7 +311,7 @@
 
           <div class="chat-container">
 
-            <div class="chat-section">
+            <div id="chat-list-view" class="chat-section">
               <h2>내 채팅방</h2>
               <div id="chat-room-list"></div>
             </div>
@@ -321,7 +321,7 @@
               class="chat-section"
               hidden
             >
-              <h2 id="chat-room-title">채팅방</h2>
+              <div class="chat-room-header"><button id="chat-back" type="button" class="chat-back-btn" aria-label="채팅방 목록으로 돌아가기">← 목록</button><h2 id="chat-room-title">채팅방</h2></div>
 
               <div
                 id="chat-messages"
@@ -347,10 +347,7 @@
               </form>
             </div>
 
-            <p class="notice">
-              현재 모임 채팅은 시연용입니다.
-              실제 실시간 채팅은 Supabase 연동 후 제공됩니다.
-            </p>
+            <p class="muted" id="chat-realtime-status" role="status">채팅방을 선택해 주세요.</p>
           </div>
         </section>
 
@@ -444,10 +441,7 @@
               <div id="friend-list"></div>
             </div>
 
-            <p class="notice">
-              현재 친구 관리 기능은 시연용입니다.
-              실제 사용자 연결은 Supabase 연동 후 제공됩니다.
-            </p>
+            
           </div>
         </section>
 
