@@ -319,3 +319,62 @@ def cancel_meeting(
             status_code=500,
             detail="모임 취소에 실패했습니다."
         )
+
+
+@app.patch("/meetings/{meeting_id}/complete")
+def complete_meeting(
+    meeting_id: str,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    user=Depends(get_current_user)
+):
+    """모임장만 지난 모임을 완료 처리할 수 있습니다."""
+    try:
+        supabase = get_user_supabase(credentials.credentials)
+        result = (supabase.table("meetings")
+                  .select("id,meeting_time")
+                  .eq("id", meeting_id)
+                  .eq("creator_id", str(user.id))
+                  .eq("status", "open")
+                  .maybe_single().execute())
+        meeting = result.data
+        if not meeting:
+            raise HTTPException(status_code=404, detail="완료할 모임이 없거나 모임장이 아닙니다.")
+        scheduled = datetime.fromisoformat(meeting["meeting_time"].replace("Z", "+00:00"))
+        if scheduled > datetime.now(timezone.utc):
+            raise HTTPException(status_code=400, detail="모임 예정 시간이 지난 후 완료할 수 있습니다.")
+        response = (supabase.table("meetings")
+                    .update({"status": "completed"})
+                    .eq("id", meeting_id)
+                    .eq("creator_id", str(user.id))
+                    .eq("status", "open")
+                    .select("id,title,status").execute())
+        if not response.data:
+            raise HTTPException(status_code=409, detail="이미 처리된 모임입니다.")
+        return {"message": "모임이 완료되었습니다.", "meeting": response.data[0]}
+    except HTTPException:
+        raise
+    except Exception:
+        logging.exception("모임 완료 처리 실패")
+        raise HTTPException(status_code=500, detail="모임 완료 처리에 실패했습니다.")
+
+
+@app.get("/meetings/mine")
+def get_my_meetings(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    user=Depends(get_current_user)
+):
+    """내가 만든 모임과 참여 중인 모임(지난 모임 포함)."""
+    try:
+        supabase = get_user_supabase(credentials.credentials)
+        created = (supabase.table("meetings")
+                   .select("*").eq("creator_id", str(user.id)).execute()).data or []
+        participations = (supabase.table("meeting_participants")
+                          .select("meeting_id").eq("user_id", str(user.id))
+                          .eq("status", "joined").execute()).data or []
+        ids = list({r["meeting_id"] for r in participations})
+        joined = (supabase.table("meetings").select("*").in_("id", ids).execute()).data if ids else []
+        meetings = {str(m["id"]): m for m in (created + (joined or []))}
+        return {"meetings": sorted(meetings.values(), key=lambda m: m.get("meeting_time") or "", reverse=True)}
+    except Exception:
+        logging.exception("내 모임 목록 조회 실패")
+        raise HTTPException(status_code=500, detail="내 모임을 불러오지 못했습니다.")
