@@ -87,9 +87,20 @@ def get_meetings(
             .execute()
         )
 
-        return {
-            "meetings": response.data
-        }
+        meetings = response.data or []
+        if meetings:
+            ids = [m["id"] for m in meetings]
+            rows = (supabase.table("meeting_participants")
+                .select("meeting_id,user_id")
+                .in_("meeting_id", ids)
+                .eq("status", "joined")
+                .execute()).data or []
+            members = {}
+            for row in rows:
+                members.setdefault(row["meeting_id"], set()).add(row["user_id"])
+            for m in meetings:
+                m["participant_count"] = len(members.get(m["id"], set()) | {m["creator_id"]})
+        return {"meetings": meetings}
 
     except Exception:
         
