@@ -466,7 +466,6 @@
           </div>
         </div>
 
-        <div class="panel" style="margin:18px 0"><h2>내 이름 설정</h2><p class="muted">모임 참여자와 평가 화면에 표시할 이름입니다. 다른 사용자에게 공개됩니다.</p><form id="real-name-form" class="styled-form"><label class="field"><span class="field-title">이름</span><input id="real-name-input" minlength="2" maxlength="20" required placeholder="이름을 입력하세요"></label><button class="primary" type="submit">이름 저장하기</button></form><p id="real-name-message" class="muted" role="status"></p></div>
         <div class="panel score-card">
           <div class="score-heading">
             <strong>내 매너 점수</strong>
@@ -667,9 +666,7 @@
                     user.user_metadata?.name ||
                     null;
 
-                const googleName = googleFullName
-                    ? googleFullName.split('/')[0].trim()
-                    : null;
+                const googleName = googleFullName ? googleFullName.trim() : null;
                     
                 // 기존 프로필 조회
                 const { data: existingProfile, error: profileReadError } =
@@ -683,16 +680,13 @@
                     console.error('프로필 조회 실패:', profileReadError.message);
                 }
 
-                // 실명이 비어 있는 경우에만 저장
-                if (!profileReadError && existingProfile && !existingProfile.real_name && googleName) {
+                // Google 계정의 표시 이름을 프로필에 동기화
+                if (!profileReadError && existingProfile && googleName && existingProfile.real_name !== googleName) {
                     const { error: nameError } = await supabase
                         .from('profiles')
                         .update({ real_name: googleName })
                         .eq('id', user.id);
-
-                    if (nameError) {
-                        console.error('실명 저장 실패:', nameError.message);
-                    }
+                    if (nameError) console.error('Google 이름 동기화 실패:', nameError.message);
                 }
 
                 const { data: profile, error } = await supabase
@@ -707,7 +701,7 @@
 
                     // 실명 표시
                     const realName = profile.real_name
-                        ? profile.real_name.split('/')[0].trim()
+                        ? profile.real_name.trim()
                         : '이름 미등록';
 
                     const headerName =
