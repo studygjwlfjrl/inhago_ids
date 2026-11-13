@@ -1,7 +1,7 @@
 import { supabase } from "./supabase.js";
 
 // Set window.INHAGO_API_BASE before loading modules to override the local API.
-const API_BASE = (window.INHAGO_API_BASE || "http://127.0.0.1:8000").replace(/\\/$/, "");
+const API_BASE = (window.INHAGO_API_BASE || "http://127.0.0.1:8000").replace(/\/$/, "");
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 let apiOnline = null;
 function reportConnection(online) {
