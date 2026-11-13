@@ -155,13 +155,18 @@ def join_meeting(
 
     except HTTPException:
         raise
-    except Exception:
-        logging.exception("모임 참여 중 오류 발생")
+    except Exception as e:
+    if "이미 참여 중인 모임입니다" in str(e):
         raise HTTPException(
-            status_code=500,
-            detail="모임 참여에 실패했습니다."
+            status_code=409,
+            detail="이미 참여 중인 모임입니다."
         )
 
+    logging.exception("모임 참여 중 오류 발생")
+    raise HTTPException(
+        status_code=500,
+        detail="모임 참여에 실패했습니다."
+    )
 @app.patch("/meetings/{meeting_id}")
 def update_meeting(
     meeting_id: str,
