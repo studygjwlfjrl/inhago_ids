@@ -93,3 +93,10 @@
     min-height: 100px;
   }
 }
+
+#dm-list-view[hidden],#dm-room[hidden]{display:none!important}
+.dm-room-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.dm-room-header h2{margin:0}
+.dm-back-btn{border:1px solid #d6e4f4;background:white;color:#152f56;padding:9px 12px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer}
+.dm-sender-name{display:block;font-size:12px;color:#365576;margin-bottom:5px}
+#dm-room .chat-messages{height:min(58vh,580px);min-height:300px}
