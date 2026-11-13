@@ -17,6 +17,8 @@ function updateMascot(score) {
 window.addEventListener('inhaGoMannerScoreChanged', event => updateMascot(event.detail.score));
 const msg = (id, text) => { if ($(id)) $(id).textContent = text; };
 let currentUser = null;
+let reviewMeetingsVersion = 0;
+let reviewPeopleVersion = 0;
 async function loadProfile() {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return;
@@ -49,6 +51,7 @@ $('real-name-form')?.addEventListener('submit', async event => {
   finally { button.disabled = false; }
 });
 async function loadReviewMeetings() {
+  const version = ++reviewMeetingsVersion;
   if (!currentUser) return;
   const meetingSelect = $('review-meeting'), personSelect = $('review-person');
   const previous = meetingSelect.value;
@@ -61,6 +64,7 @@ async function loadReviewMeetings() {
     supabase.from('meetings').select('id,title,status')
       .eq('creator_id', currentUser.id).eq('status', 'completed')
   ]);
+  if (version !== reviewMeetingsVersion) return;
   const err = participationResult.error || createdResult.error;
   if (err) { msg('review-message', '평가 모임 조회 실패: ' + err.message); return; }
   const ids = [...new Set((participationResult.data || []).map(r => r.meeting_id))];
@@ -68,6 +72,7 @@ async function loadReviewMeetings() {
   if (ids.length) {
     const result = await supabase.from('meetings').select('id,title,status')
       .in('id', ids).eq('status', 'completed');
+    if (version !== reviewMeetingsVersion) return;
     if (result.error) { msg('review-message', '완료된 모임 조회 실패: ' + result.error.message); return; }
     participated = result.data || [];
   }
@@ -81,6 +86,7 @@ async function loadReviewMeetings() {
   }
 }
 async function loadReviewPeople() {
+  const version = ++reviewPeopleVersion;
   const id = $('review-meeting').value;
   const personSelect = $('review-person');
   personSelect.replaceChildren(new Option('참여자를 선택하세요', ''));
@@ -90,6 +96,7 @@ async function loadReviewPeople() {
     supabase.from('manner_reviews').select('reviewee_id').eq('meeting_id', id).eq('reviewer_id', currentUser.id),
     supabase.from('meetings').select('creator_id,status').eq('id', id).single()
   ]);
+  if (version !== reviewPeopleVersion || $('review-meeting').value !== id) return;
   const err = membersResult.error || reviewsResult.error || meetingResult.error;
   if (err) { msg('review-message', '평가 대상 조회 실패: ' + err.message); return; }
   if (meetingResult.data.status !== 'completed') {
@@ -109,6 +116,7 @@ async function loadReviewPeople() {
   // 프로필 조회 RLS가 일부 사용자 행을 숨기더라도 평가 대상은 유지합니다.
   const { data: profiles, error: profileError } = await supabase.from('profiles')
     .select('id,real_name').in('id', candidates);
+  if (version !== reviewPeopleVersion || $('review-meeting').value !== id) return;
   if (profileError) console.warn('평가 대상 프로필 일부 조회 실패:', profileError);
   const names = new Map((profiles || []).map(p => [String(p.id), p.real_name]));
   for (const uid of candidates) {
