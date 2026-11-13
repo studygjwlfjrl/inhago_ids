@@ -4,41 +4,25 @@ const campus = {
   lng: 126.6570
 };
 
-// 테스트용 모임 데이터
-const meetings = [
-  {
-    title: "점심 같이 먹어요",
-    category: "meal",
-    lat: 37.4508,
-    lng: 126.6566,
-    place: "학생회관",
-    time: "12:30"
-  },
-  {
-    title: "정문 택시팟",
-    category: "taxi",
-    lat: 37.4498,
-    lng: 126.6559,
-    place: "인하대 정문",
-    time: "18:00"
-  },
-  {
-    title: "알고리즘 스터디",
-    category: "study",
-    lat: 37.4511,
-    lng: 126.6574,
-    place: "도서관 부근",
-    time: "16:00"
-  },
-  {
-    title: "저녁 러닝",
-    category: "exercise",
-    lat: 37.4502,
-    lng: 126.6581,
-    place: "운동장 부근",
-    time: "19:00"
+// 실제 모임 데이터는 로그인 후 API에서 가져옵니다.
+let meetings = [];
+let activeMapCategory = 'all';
+async function refreshMeetings() {
+  try {
+    const { getMeetings } = await import('../InhaGo_Design/frontend/js/meetings-api.js');
+    const response = await getMeetings();
+    meetings = (response.meetings || [])
+      .filter(m => Number.isFinite(Number(m.latitude)) && Number.isFinite(Number(m.longitude)) && m.latitude != null && m.longitude != null)
+      .map(m => ({
+        id: m.id, title: m.title, category: m.category,
+        lat: Number(m.latitude), lng: Number(m.longitude),
+        place: m.location_name, time: new Date(m.meeting_time).toLocaleString('ko-KR')
+      }));
+    if (map) showMarkers(activeMapCategory);
+  } catch (error) {
+    console.error('지도 모임 조회 실패:', error);
   }
-];
+}
 
 const mapIcons = {
   meal: "🍚",
@@ -68,7 +52,7 @@ async function initMap() {
       streetViewControl: false
     });
 
-    showMarkers("all");
+    await refreshMeetings();
     setupButtons();
 
     // 지도 생성 성공 후 자동 GPS 추적 시작
@@ -164,6 +148,7 @@ function startLocationTracking() {
 
 // 모임 마커 표시
 function showMarkers(category) {
+  activeMapCategory = category;
   markers.forEach(marker => {
     marker.map = null;
   });
@@ -239,10 +224,10 @@ function setupButtons() {
       document.getElementById("bottomSheet").hidden = true;
     });
 
-  document.querySelectorAll("[data-category]")
+  document.querySelectorAll("#filters [data-category]")
     .forEach(button => {
       button.addEventListener("click", () => {
-        document.querySelectorAll("[data-category]")
+        document.querySelectorAll("#filters [data-category]")
           .forEach(b => b.classList.remove("active"));
 
         button.classList.add("active");
@@ -276,7 +261,9 @@ function loadGoogleMaps() {
   document.head.appendChild(script);
 }
 
+window.addEventListener("inhaGoMeetingsChanged", refreshMeetings);
 window.addEventListener("inhaGoLoginSuccess", () => {
+    refreshMeetings();
     if (typeof map !== "undefined" && map) {
         startLocationTracking();
     }
