@@ -100,6 +100,6 @@ $('review-form')?.addEventListener('submit',async event=>{
   }catch(error){msg('review-message','평가 저장 실패: '+error.message);}
   finally{button.disabled=false;}
 });
-window.addEventListener('inhaGoLoginSuccess',()=>{loadProfile();loadReviewMeetings();});
-supabase.auth.getSession().then(({data})=>{if(data.session){loadProfile();loadReviewMeetings();}}).catch(console.error);
+window.addEventListener('inhaGoLoginSuccess',async()=>{await loadProfile();await loadReviewMeetings();});
+supabase.auth.getSession().then(async ({data})=>{if(data.session){await loadProfile();await loadReviewMeetings();}}).catch(console.error);
 document.querySelectorAll('[data-page="profile"]').forEach(el=>el.addEventListener('click',()=>{loadProfile();loadReviewMeetings();}));
