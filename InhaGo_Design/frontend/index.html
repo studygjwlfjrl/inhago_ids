@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>InhaGo | 캠퍼스에서 만나요</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/friend.css">
+    <link rel="stylesheet" href="css/message.css">
+    <link rel="stylesheet" href="css/chat.css">
 </head>
 
 <body>
@@ -30,7 +33,10 @@
                     src="assets/rider.svg"
                     alt="인덕이 스타일 마스코트"
                 >
-                <span>인하고 · <b id="header-score">92</b>점</span>
+                <span>
+                    <span id="header-user-name">인하고</span>
+                    · <b id="header-score">92</b>점
+                </span>
             </button>
         </header>
 
@@ -54,7 +60,13 @@
                     ☏ <span>메시지</span>
                 </button>
 
-                <button data-page="friend">
+                
+        <button data-page="chat" aria-label="모임 채팅">
+          <i data-lucide="messages-square"></i>
+          <span>모임 채팅</span>
+        </button>
+
+<button data-page="friend">
                     ♧ <span>친구</span>
                 </button>
 
@@ -165,6 +177,14 @@
                                 required
                             >
                         </label>
+                        <label>
+                            모임 날짜 및 시간
+                            <input
+                                name="meeting_time"
+                                type="datetime-local"
+                                required
+                            >
+                        </label>
 
                         <label>
                             소개
@@ -183,55 +203,148 @@
 
                 <!-- 메시지 페이지 -->
                 <section id="message-page" class="page">
-                    <h1>메시지</h1>
+          <h1>메시지</h1>
 
-                    <div class="panel">
-                        <p>💬 <b>스터디 모임 (4)</b></p>
+          <div class="message-container">
 
-                        <p class="muted">
-                            내일 도서관 앞에서 만나요!
-                        </p>
+            <div class="message-section">
+              <h2>1:1 채팅</h2>
+              <p class="muted">
+                대화할 친구를 선택해 주세요.
+              </p>
+              <div id="dm-friend-list"></div>
+            </div>
 
-                        <hr>
+            <div
+              id="dm-room"
+              class="message-section"
+              hidden
+            >
+              <h2 id="dm-room-title">1:1 채팅방</h2>
 
-                        <p>💬 <b>밥약 모임 (3)</b></p>
+              <div
+                id="dm-messages"
+                class="chat-messages"
+                role="log"
+                aria-label="1:1 채팅 메시지"
+                aria-live="polite"
+              ></div>
 
-                        <p class="muted">
-                            오늘 점심 같이 먹을까요?
-                        </p>
+              <form id="dm-form" class="chat-form">
+                <input
+                  id="dm-input"
+                  type="text"
+                  placeholder="메시지를 입력하세요."
+                  maxlength="1000"
+                  aria-label="1:1 채팅 메시지 입력"
+                  required
+                >
 
-                        <p class="notice">
-                            메시지는 디자인 시연용이며
-                            실제로 전송되지 않습니다.
-                        </p>
-                    </div>
-                </section>
+                <button class="chat-btn" type="submit">
+                  전송
+                </button>
+              </form>
+            </div>
+
+            <p class="notice">
+              친구 요청이 수락된 사용자와
+              1:1 채팅을 할 수 있습니다.
+            </p>
+          </div>
+        </section>
 
                 <!-- 친구 페이지 -->
-                <section id="friend-page" class="page">
-                    <h1>친구</h1>
+                <section id="chat-page" class="page">
+          <h1>모임 채팅</h1>
 
-                    <div class="panel">
-                        <p>
-                            👤 김인하
-                            <span class="score-tag">매너 96점</span>
-                        </p>
+          <div class="chat-container">
 
-                        <p>
-                            👤 박지민
-                            <span class="score-tag">매너 88점</span>
-                        </p>
+            <div class="chat-section">
+              <h2>내 채팅방</h2>
+              <div id="chat-room-list"></div>
+            </div>
 
-                        <p>
-                            👤 이수연
-                            <span class="score-tag">매너 91점</span>
-                        </p>
+            <div
+              id="chat-room"
+              class="chat-section"
+              hidden
+            >
+              <h2 id="chat-room-title">채팅방</h2>
 
-                        <p class="notice">
-                            친구 요청 및 연결은 서버 연동 후 제공됩니다.
-                        </p>
-                    </div>
-                </section>
+              <div
+                id="chat-messages"
+                class="chat-messages"
+                role="log"
+                aria-label="채팅 메시지"
+                aria-live="polite"
+              ></div>
+
+              <form id="chat-form" class="chat-form">
+                <input
+                  id="chat-input"
+                  type="text"
+                  placeholder="메시지를 입력하세요."
+                  maxlength="1000"
+                  aria-label="채팅 메시지 입력"
+                  required
+                >
+
+                <button class="chat-btn" type="submit">
+                  전송
+                </button>
+              </form>
+            </div>
+
+            <p class="notice">
+              현재 모임 채팅은 시연용입니다.
+              실제 실시간 채팅은 Supabase 연동 후 제공됩니다.
+            </p>
+          </div>
+        </section>
+
+<section id="friend-page" class="page">
+          <h1>친구</h1>
+
+          <div class="friend-container">
+
+            <div class="friend-section">
+              <h2>친구 검색</h2>
+
+              <div class="friend-search">
+                <input
+                  id="friend-search-input"
+                  type="text"
+                  placeholder="닉네임 또는 학번 검색"
+                  aria-label="친구 검색"
+                >
+              </div>
+
+              <div id="friend-search-results"></div>
+            </div>
+
+            <div class="friend-section">
+              <h2>받은 친구 요청</h2>
+              <div id="friend-requests"></div>
+
+              <div class="friend-sent-section">
+                <h3>보낸 친구 요청</h3>
+                <div id="friend-sent-requests">
+                  <p>보낸 친구 요청을 불러오는 중...</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="friend-section">
+              <h2>내 친구 목록</h2>
+              <div id="friend-list"></div>
+            </div>
+
+            <p class="notice">
+              현재 친구 관리 기능은 시연용입니다.
+              실제 사용자 연결은 Supabase 연동 후 제공됩니다.
+            </p>
+          </div>
+        </section>
 
                 <!-- 마이페이지 -->
                 <section id="profile-page" class="page">
@@ -245,7 +358,7 @@
                         >
 
                         <div>
-                            <h2>인하고</h2>
+                            <h2 id="profile-user-name">인하고</h2>
                             <p class="muted">@inha_go · 인하대학교</p>
                             <p>캠퍼스에서 좋은 사람들과 함께해요!</p>
                         </div>
@@ -482,11 +595,74 @@
                 // 지도에 로그인 완료 알림
                 window.dispatchEvent(new Event("inhaGoLoginSuccess"));
 
+                // Google 계정에서 이름 가져오기
+                const googleFullName =
+                    user.user_metadata?.full_name ||
+                    user.user_metadata?.name ||
+                    null;
+
+                const googleName = googleFullName
+                    ? googleFullName.split('/')[0].trim()
+                    : null;
+                    
+                // 기존 프로필 조회
+                const { data: existingProfile, error: profileReadError } =
+                    await supabase
+                        .from('profiles')
+                        .select('real_name')
+                        .eq('id', user.id)
+                        .maybeSingle();
+
+                if (profileReadError) {
+                    console.error('프로필 조회 실패:', profileReadError.message);
+                }
+
+                // 실명이 비어 있는 경우에만 저장
+                if (!profileReadError && existingProfile && !existingProfile.real_name && googleName) {
+                    const { error: nameError } = await supabase
+                        .from('profiles')
+                        .update({ real_name: googleName })
+                        .eq('id', user.id);
+
+                    if (nameError) {
+                        console.error('실명 저장 실패:', nameError.message);
+                    }
+                }
+
                 const { data: profile, error } = await supabase
                     .from('profiles')
-                    .select('manner_score')
+                    .select('manner_score, real_name')
                     .eq('id', user.id)
                     .single();
+                
+                if (error) {
+                    console.error('프로필 조회 실패:', error.message);
+                } else if (profile) {
+
+                    // 실명 표시
+                    const realName = profile.real_name
+                        ? profile.real_name.split('/')[0].trim()
+                        : '이름 미등록';
+
+                    const headerName =
+                        document.getElementById('header-user-name');
+
+                    const profileName =
+                        document.getElementById('profile-user-name');
+
+                    if (headerName) {
+                        headerName.textContent = realName;
+                    }
+
+                    if (profileName) {
+                        profileName.textContent = realName;
+                    }
+
+                    // 기존 매너 점수 표시 유지
+                    if (typeof window.setMannerScore === 'function') {
+                        window.setMannerScore(profile.manner_score);
+                    }
+                }
 
                 if (error) {
                     console.error('매너 점수 조회 실패:', error.message);
@@ -521,5 +697,8 @@
 
     <!-- 지도 기능 -->
     <script src="../../map/map.js"></script>
+    <script type="module" src="js/friend.js"></script>
+    <script type="module" src="js/message.js"></script>
+    <script type="module" src="js/chat.js"></script>
 </body>
 </html>

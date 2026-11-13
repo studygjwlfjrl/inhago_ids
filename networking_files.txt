@@ -1,0 +1,18 @@
+D	InhaGo_Design/frontend/css/style.css
+D	InhaGo_Design/frontend/index.html
+D	InhaGo_Design/frontend/js/main.js
+A	InhaGo_Design:frontend.final/README.md
+R100	InhaGo_Design/frontend/assets/campus-map.png	InhaGo_Design:frontend.final/frontend/assets/campus-map.png
+R100	InhaGo_Design/frontend/assets/rider.svg	InhaGo_Design:frontend.final/frontend/assets/rider.svg
+A	InhaGo_Design:frontend.final/frontend/css/chat.css
+A	InhaGo_Design:frontend.final/frontend/css/friend.css
+A	InhaGo_Design:frontend.final/frontend/css/message.css
+A	InhaGo_Design:frontend.final/frontend/css/style.css
+A	InhaGo_Design:frontend.final/frontend/index.html
+A	InhaGo_Design:frontend.final/frontend/js/chat.js
+A	InhaGo_Design:frontend.final/frontend/js/friend.js
+A	InhaGo_Design:frontend.final/frontend/js/main.js
+A	InhaGo_Design:frontend.final/frontend/js/message.js
+A	InhaGo_Design:frontend.final/frontend/js/supabase-client.js
+A	InhaGo_Design:frontend.final/frontend/js/supabase-dev.js
+A	InhaGo_Design:frontend.final/frontend/js/supabase.js
