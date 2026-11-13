@@ -485,8 +485,8 @@ requestAnimationFrame(() => {
 
       
 if (currentRoomId === roomId) {
-  // Realtime 이벤트에서 메시지를 갱신하므로
-  // 여기서는 중복 조회하지 않음
+  // Realtime 구독 여부와 무관하게 본인이 보낸 메시지는 즉시 조회합니다.
+  await renderMessages();
 }
 
     } catch (error) {
