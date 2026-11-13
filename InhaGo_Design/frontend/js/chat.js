@@ -279,10 +279,9 @@ requestAnimationFrame(() => {
       .subscribe(status => {
         if (version !== realtimeVersion) return;
 
-        console.log(
-          "채팅 Realtime 상태:",
-          status
-        );
+        console.log("채팅 Realtime 상태:", status);
+        const indicator = document.getElementById("chat-realtime-status");
+        if (indicator) indicator.textContent = status === "SUBSCRIBED" ? "실시간 채팅 연결됨" : status === "CHANNEL_ERROR" || status === "TIMED_OUT" ? "실시간 연결이 불안정합니다. 다시 입장해 주세요." : "실시간 채팅 연결 중...";
 
         if (
           status === "CHANNEL_ERROR" ||
@@ -295,6 +294,16 @@ requestAnimationFrame(() => {
       });
 
     realtimeChannel = channel;
+  }
+
+  function closeRoom() {
+    unsubscribeRealtime();
+    messageVersion++;
+    currentRoomId = null;
+    document.getElementById("chat-room")?.setAttribute("hidden", "");
+    document.getElementById("chat-list-view")?.removeAttribute("hidden");
+    const status = document.getElementById("chat-realtime-status");
+    if (status) status.textContent = "채팅방을 선택해 주세요.";
   }
 
   async function openRoom(roomId) {
@@ -328,6 +337,7 @@ requestAnimationFrame(() => {
       document.getElementById("chat-room-title");
 
     if (room) room.hidden = false;
+    document.getElementById("chat-list-view")?.setAttribute("hidden", "");
     if (title) title.textContent = meeting.title;
 
     // 채팅방을 열면 Realtime 구독 시작
@@ -492,15 +502,13 @@ if (currentRoomId === roomId) {
     if (!form) return;
 
     form.addEventListener("submit", sendMessage);
+    document.getElementById("chat-back")?.addEventListener("click", closeRoom);
 
     document.querySelectorAll('[data-page="chat"]')
       .forEach(button => {
         button.addEventListener("click", () => {
+          closeRoom();
           renderRooms();
-
-          if (currentRoomId) {
-            renderMessages();
-          }
         });
       });
 
