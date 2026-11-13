@@ -245,9 +245,9 @@
               >
             </label>
 
-            <p class="muted">지도에 모임을 표시하려면 위치 좌표를 입력하세요. 비워두면 목록에만 표시됩니다.</p>
-            <label class="field"><span class="field-title">위도 (선택)</span><input name="latitude" type="number" step="any" min="-90" max="90" placeholder="예: 37.4505"></label>
-            <label class="field"><span class="field-title">경도 (선택)</span><input name="longitude" type="number" step="any" min="-180" max="180" placeholder="예: 126.6570"></label>
+            <button type="button" id="pick-meeting-location" class="primary">📍 지도에서 만날 위치 지정</button>
+            <p id="selected-meeting-location" class="muted" role="status">아직 위치를 지정하지 않았습니다.</p>
+            <input name="latitude" type="hidden"><input name="longitude" type="hidden">
             <label class="field">
               <span class="field-title">
                 최대 참여 인원 <em>*</em>
@@ -594,6 +594,7 @@
     </div>
   </dialog>
 
+  <dialog id="location-picker-dialog" class="location-picker-dialog" aria-labelledby="location-picker-title"><div class="location-picker-panel"><div class="location-picker-header"><h2 id="location-picker-title">만날 위치 지정</h2><button id="location-picker-close" type="button" aria-label="닫기">✕</button></div><p class="muted">지도를 움직여 중앙 핀을 만날 위치에 맞추세요.</p><div class="location-picker-map-wrap"><div id="location-picker-map"></div><div class="location-picker-pin" aria-hidden="true">📍</div></div><p id="location-picker-coordinates" class="muted" role="status">지도 준비 중...</p><button id="location-picker-confirm" class="primary wide" type="button">이 위치로 확정</button></div></dialog>
   <dialog id="edit-meeting-dialog"><form id="edit-meeting-form" class="styled-form" style="padding:22px;min-width:min(90vw,380px)"><h2>모임 수정</h2><input name="title" required maxlength="100" placeholder="모임 이름"><input name="place" required placeholder="장소"><textarea name="description" placeholder="소개"></textarea><input name="meeting_time" type="datetime-local" required><select name="max_participants" required><option value="2">2명</option><option value="3">3명</option><option value="4">4명</option><option value="5">5명</option><option value="6">6명</option><option value="8">8명</option><option value="10">10명</option><option value="15">15명</option><option value="20">20명</option></select><button type="submit" class="primary">저장</button><button type="button" id="edit-meeting-close">닫기</button></form></dialog>
 
   <div
@@ -741,6 +742,7 @@
 
     <!-- 지도 기능 -->
     <script src="../../map/map.js"></script>
+    <script src="js/location-picker.js" defer></script>
     <script type="module" src="js/friend.js"></script>
     <script type="module" src="js/message.js"></script>
     <script type="module" src="js/chat.js"></script>
