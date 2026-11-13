@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: inhago-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: FRONTEND_ORIGINS
+        sync: false
+  - type: web
+    name: inhago-web
+    runtime: static
+    buildCommand: bash deploy/build-frontend.sh
+    staticPublishPath: ./dist
+    envVars:
+      - key: INHAGO_API_BASE
+        sync: false
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
