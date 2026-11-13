@@ -52,9 +52,11 @@ $('real-name-form')?.addEventListener('submit', async event => {
 });
 async function loadReviewMeetings() {
   const version = ++reviewMeetingsVersion;
+  ++reviewPeopleVersion; // Invalidate in-flight people lookups when meeting list refreshes.
   if (!currentUser) return;
   const meetingSelect = $('review-meeting'), personSelect = $('review-person');
   const previous = meetingSelect.value;
+  meetingSelect.disabled = true;
   meetingSelect.replaceChildren(new Option('모임을 선택하세요', ''));
   personSelect.replaceChildren(new Option('참여자를 선택하세요', ''));
   // 모임장은 meeting_participants에 등록되지 않을 수 있으므로 별도로 조회합니다.
@@ -78,6 +80,7 @@ async function loadReviewMeetings() {
   }
   const meetings = [...new Map([...(createdResult.data || []), ...participated].map(m => [String(m.id),m])).values()];
   for (const m of meetings) meetingSelect.add(new Option(m.title, m.id));
+  meetingSelect.disabled = false;
   if (meetings.some(m => String(m.id) === previous)) {
     meetingSelect.value = previous;
     await loadReviewPeople();
@@ -90,6 +93,7 @@ async function loadReviewPeople() {
   const id = $('review-meeting').value;
   const personSelect = $('review-person');
   personSelect.replaceChildren(new Option('참여자를 선택하세요', ''));
+  personSelect.disabled = true;
   if (!id || !currentUser) return;
   const [membersResult, reviewsResult, meetingResult] = await Promise.all([
     supabase.from('meeting_participants').select('user_id').eq('meeting_id', id).eq('status', 'joined'),
@@ -122,6 +126,7 @@ async function loadReviewPeople() {
   for (const uid of candidates) {
     personSelect.add(new Option(names.get(String(uid))?.trim() || '이름 미설정 (' + String(uid).slice(0,8) + ')', uid));
   }
+  personSelect.disabled = false;
   msg('review-message', candidates.length + '명을 평가할 수 있습니다.');
 }
 $('review-meeting')?.addEventListener('change',loadReviewPeople);
@@ -135,8 +140,15 @@ $('review-form')?.addEventListener('submit',async event=>{
   try {
     const {error}=await supabase.from('manner_reviews').insert({meeting_id:meetingId,reviewer_id:currentUser.id,reviewee_id:revieweeId,grade});
     if(error)throw error;
-    msg('review-message',grade+' 학점 평가가 저장되었습니다.');
-    await loadReviewPeople();
+    // Remove the newly rated person immediately, before a network refresh.
+    ++reviewPeopleVersion;
+    const personSelect = $('review-person');
+    for (const option of [...personSelect.options]) {
+      if (option.value === revieweeId) option.remove();
+    }
+    personSelect.value = '';
+    if (personSelect.options.length <= 1) personSelect.disabled = true;
+    if ($('review-meeting').value === meetingId) await loadReviewPeople();
     msg('review-message',grade+' 학점 평가가 저장되었습니다.');
   }catch(error){msg('review-message','평가 저장 실패: '+error.message);}
   finally{button.disabled=false;}
