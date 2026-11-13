@@ -13,6 +13,8 @@ import { supabase as supabaseDev } from "./supabase.js";
   let messageVersion = 0;
   let friendVersion = 0;
   let sending = false;
+  let currentFriendName = "";
+  const friendNames = new Map();
 
   const knownFriends = new Set();
 
@@ -87,6 +89,8 @@ import { supabase as supabaseDev } from "./supabase.js";
     messageVersion++;
 
     currentFriendId = null;
+    currentFriendName = "";
+    document.getElementById("dm-list-view")?.removeAttribute("hidden");
 
     const room = document.getElementById("dm-room");
     const messages =
@@ -148,6 +152,7 @@ import { supabase as supabaseDev } from "./supabase.js";
       if (version !== friendVersion) return;
 
       knownFriends.clear();
+      friendNames.clear();
       friends.forEach(id => knownFriends.add(id));
 
       container.replaceChildren();
@@ -173,7 +178,10 @@ import { supabase as supabaseDev } from "./supabase.js";
         item.className = "message-item";
 
         const name = document.createElement("strong");
-        name.textContent = await getRealUserName(friendId);
+        const displayName = await getRealUserName(friendId);
+        if (version !== friendVersion) return;
+        friendNames.set(friendId, displayName);
+        name.textContent = displayName;
 
         const button = document.createElement("button");
         button.type = "button";
@@ -206,6 +214,13 @@ import { supabase as supabaseDev } from "./supabase.js";
       message.sender_id === currentUserId
         ? "chat-message mine"
         : "chat-message";
+
+    if (message.sender_id !== currentUserId) {
+      const sender = document.createElement("strong");
+      sender.className = "dm-sender-name";
+      sender.textContent = currentFriendName || "상대방";
+      wrapper.appendChild(sender);
+    }
 
     const bubble = document.createElement("div");
     bubble.className = "chat-bubble";
@@ -390,6 +405,8 @@ messages.forEach(message => {
 
     currentUserId = user.id;
     currentFriendId = friendId;
+    currentFriendName = friendNames.get(friendId) || "상대방";
+    document.getElementById("dm-list-view")?.setAttribute("hidden", "");
 
     const room = document.getElementById("dm-room");
     const title =
@@ -397,8 +414,13 @@ messages.forEach(message => {
 
     if (room) room.hidden = false;
 
-    if (title) {
-      title.textContent = await getRealUserName(friendId);
+    if (title) title.textContent = currentFriendName;
+    if (!friendNames.has(friendId)) {
+      const name = await getRealUserName(friendId);
+      if (currentFriendId !== friendId) return;
+      currentFriendName = name;
+      friendNames.set(friendId, name);
+      if (title) title.textContent = name;
     }
 
     subscribeRealtime(friendId);
@@ -483,6 +505,7 @@ messages.forEach(message => {
     if (!form) return;
 
     form.addEventListener("submit", sendMessage);
+    document.getElementById("dm-back")?.addEventListener("click", closeRoom);
 
     document.querySelectorAll('[data-page="message"]')
       .forEach(button => {
