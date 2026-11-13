@@ -14,7 +14,7 @@ load_dotenv(Path(__file__).resolve().parent / '.env')
 app = FastAPI(title="InhaGo API")
 app.add_middleware(CORSMiddleware,
     allow_origins=[origin.strip().rstrip("/") for origin in os.getenv("FRONTEND_ORIGINS", "").split(",") if origin.strip()],
-    allow_origin_regex=r"https?://(localhost|127\\.0\\.0\\.1)(:\\d+)?",
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type"])
 security = HTTPBearer()
