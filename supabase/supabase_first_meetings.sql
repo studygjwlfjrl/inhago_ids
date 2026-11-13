@@ -50,6 +50,35 @@ drop policy if exists "inhago_participants_leave" on public.meeting_participants
 create policy "inhago_participants_leave" on public.meeting_participants for delete to authenticated
   using (user_id = (select auth.uid()));
 
+-- Enforce status transitions in the database even for direct PostgREST updates.
+-- A client must not bypass the completion-time check by updating status itself.
+create or replace function public.inhago_guard_meeting_changes()
+returns trigger language plpgsql security invoker set search_path = ''
+as $
+begin
+  if new.creator_id is distinct from old.creator_id then
+    raise exception '모임장은 변경할 수 없습니다.';
+  end if;
+  if old.status <> 'open' then
+    raise exception '이미 종료된 모임은 수정할 수 없습니다.';
+  end if;
+  if new.status not in ('open', 'cancelled', 'completed') then
+    raise exception '허용되지 않은 모임 상태입니다.';
+  end if;
+  if new.status = 'completed' and old.meeting_time > now() then
+    raise exception '모임 예정 시간이 지나야 완료할 수 있습니다.';
+  end if;
+  if new.status = 'open' and new.meeting_time <= now() then
+    raise exception '미래의 모임 시간만 설정할 수 있습니다.';
+  end if;
+  return new;
+end;
+$;
+drop trigger if exists inhago_guard_meeting_changes on public.meetings;
+create trigger inhago_guard_meeting_changes
+before update on public.meetings
+for each row execute function public.inhago_guard_meeting_changes();
+
 -- Atomic completion: checks ownership and time inside Postgres, not the browser.
 -- SECURITY INVOKER keeps RLS in force. The update_guard also restricts the transition.
 create or replace function public.complete_meeting_safe(p_meeting_id uuid)
