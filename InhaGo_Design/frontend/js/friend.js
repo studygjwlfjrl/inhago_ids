@@ -57,10 +57,10 @@ import { supabase as supabaseDev } from "./supabase.js";
   const STORAGE_KEY = "inhago_friends_demo_v1";
 
   const sampleUsers = [
-    { id: "u1", name: "김인하", studentId: "20260001" },
-    { id: "u2", name: "박지민", studentId: "20260002" },
-    { id: "u3", name: "이수연", studentId: "20260003" },
-    { id: "u4", name: "최민준", studentId: "20260004" }
+    { id: "u1", name: "김인하", department: "학과 미설정" },
+    { id: "u2", name: "박지민", department: "학과 미설정" },
+    { id: "u3", name: "이수연", department: "학과 미설정" },
+    { id: "u4", name: "최민준", department: "학과 미설정" }
   ];
 
   function loadData() {
@@ -131,10 +131,10 @@ import { supabase as supabaseDev } from "./supabase.js";
     const name = document.createElement("strong");
     name.textContent = user.name;
 
-    const studentId = document.createElement("small");
-    studentId.textContent = `학번: ${user.studentId}`;
+    const department = document.createElement("small");
+    department.textContent = `학과: ${user.department || "학과 미설정"}`;
 
-    info.append(name, studentId);
+    info.append(name, department);
 
     const actions = document.createElement("div");
     actions.className = "friend-actions";
@@ -273,6 +273,16 @@ import { supabase as supabaseDev } from "./supabase.js";
     return data?.real_name
       ? data.real_name.split("/")[0].trim()
       : "이름 미등록";
+  }
+
+  async function getUserDepartment(userId) {
+    const { data, error } = await supabaseDev.from("profiles")
+      .select("department").eq("id", userId).maybeSingle();
+    if (error) {
+      if (!/department|column|schema cache/i.test(error.message)) console.warn("학과 조회 실패:", error.message);
+      return "학과 미설정";
+    }
+    return data?.department?.trim() || "학과 미설정";
   }
 
   // 개발용 계정 표시명
@@ -561,7 +571,9 @@ import { supabase as supabaseDev } from "./supabase.js";
 
       actions.append(acceptButton, rejectButton);
 
-      info.appendChild(name);
+      const department = document.createElement("small");
+      department.textContent = "학과: " + await getUserDepartment(request.requester_id);
+      info.append(name, department);
       row.append(info, actions);
       container.appendChild(row);
 
@@ -592,7 +604,7 @@ import { supabase as supabaseDev } from "./supabase.js";
         return {
           id: friendId,
           name: await getRealUserName(friendId),
-          studentId: ""
+          department: await getUserDepartment(friendId)
         };
       })
     );
@@ -755,7 +767,12 @@ import { supabase as supabaseDev } from "./supabase.js";
         });
       }
 
-      row.append(name, button);
+      const department = document.createElement("small");
+      department.textContent = "학과: " + await getUserDepartment(foundUser.id);
+      const info = document.createElement("div");
+      info.className = "friend-info";
+      info.append(name, department);
+      row.append(info, button);
       container.appendChild(row);
     }
   }
