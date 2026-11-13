@@ -21,21 +21,33 @@ async function loadProfile() {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return;
   currentUser = user;
-  const googleName = String(user.user_metadata?.full_name || user.user_metadata?.name || '').trim();
   const { data: profile, error: profileError } = await supabase.from('profiles').select('real_name,manner_score').eq('id', user.id).maybeSingle();
-  if (profileError) console.error('프로필 조회 실패:', profileError);
-  if (googleName && profile && profile.real_name !== googleName) {
-    const { error: updateError } = await supabase.from('profiles').update({real_name:googleName}).eq('id',user.id);
-    if (updateError) console.error('Google 계정 이름 동기화 실패:',updateError);
-  }
-  const displayName = googleName || profile?.real_name || 'Google 계정 이름 없음';
-  if ($('profile-user-name')) $('profile-user-name').textContent = displayName;
-  if ($('header-user-name')) $('header-user-name').textContent = displayName;
+  if (profileError) { console.error('프로필 조회 실패:', profileError); return; }
+  const name = profile?.real_name?.trim() || '이름 미설정';
+  if ($('profile-user-name')) $('profile-user-name').textContent = name;
+  if ($('header-user-name')) $('header-user-name').textContent = name;
+  if ($('real-name-input')) $('real-name-input').value = profile?.real_name || '';
   if (Number.isInteger(profile?.manner_score)) {
     window.setMannerScore?.(profile.manner_score);
     updateMascot(profile.manner_score);
   }
 }
+$('real-name-form')?.addEventListener('submit', async event => {
+  event.preventDefault();
+  const name = $('real-name-input').value.trim();
+  if (name.length < 2 || name.length > 20) { msg('real-name-message','이름은 2~20자로 입력해 주세요.'); return; }
+  if (!currentUser) { msg('real-name-message','로그인이 필요합니다.'); return; }
+  const button = event.currentTarget.querySelector('button');
+  button.disabled = true;
+  try {
+    const { error } = await supabase.from('profiles').update({ real_name: name }).eq('id', currentUser.id);
+    if (error) throw error;
+    if ($('profile-user-name')) $('profile-user-name').textContent = name;
+    if ($('header-user-name')) $('header-user-name').textContent = name;
+    msg('real-name-message','이름이 저장되었습니다.');
+  } catch (error) { msg('real-name-message','저장 실패: '+error.message); }
+  finally { button.disabled = false; }
+});
 async function loadReviewMeetings() {
   if (!currentUser) return;
   const { data: rows, error } = await supabase.from('meeting_participants').select('meeting_id').eq('user_id',currentUser.id).eq('status','joined');
