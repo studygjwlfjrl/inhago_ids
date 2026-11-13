@@ -19,16 +19,25 @@ const msg = (id, text) => { if ($(id)) $(id).textContent = text; };
 let currentUser = null;
 let reviewMeetingsVersion = 0;
 let reviewPeopleVersion = 0;
+let departmentColumnAvailable = true;
+const showDepartmentSetup = visible => { if ($('department-setup-note')) $('department-setup-note').hidden = !visible; };
 async function loadProfile() {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return;
   currentUser = user;
-  const { data: profile, error: profileError } = await supabase.from('profiles').select('real_name,manner_score').eq('id', user.id).maybeSingle();
+  let { data: profile, error: profileError } = await supabase.from('profiles').select('real_name,manner_score,department').eq('id', user.id).maybeSingle();
+  if (profileError && /department|column|schema cache/i.test(profileError.message)) {
+    departmentColumnAvailable = false;
+    showDepartmentSetup(true);
+    ({ data: profile, error: profileError } = await supabase.from('profiles').select('real_name,manner_score').eq('id', user.id).maybeSingle());
+  } else { departmentColumnAvailable = true; showDepartmentSetup(false); }
   if (profileError) { console.error('프로필 조회 실패:', profileError); return; }
   const name = profile?.real_name?.trim() || '이름 미설정';
   if ($('profile-user-name')) $('profile-user-name').textContent = name;
   if ($('header-user-name')) $('header-user-name').textContent = name;
   if ($('real-name-input')) $('real-name-input').value = profile?.real_name || '';
+  if ($('department-input')) $('department-input').value = profile?.department || '';
+  if ($('profile-department')) $('profile-department').textContent = profile?.department?.trim() || '학과 미설정';
   if (Number.isInteger(profile?.manner_score)) {
     window.setMannerScore?.(profile.manner_score);
     updateMascot(profile.manner_score);
@@ -37,16 +46,19 @@ async function loadProfile() {
 $('real-name-form')?.addEventListener('submit', async event => {
   event.preventDefault();
   const name = $('real-name-input').value.trim();
+  const department = $('department-input')?.value.trim() || '';
   if (name.length < 2 || name.length > 20) { msg('real-name-message','이름은 2~20자로 입력해 주세요.'); return; }
   if (!currentUser) { msg('real-name-message','로그인이 필요합니다.'); return; }
   const button = event.currentTarget.querySelector('button');
   button.disabled = true;
   try {
-    const { error } = await supabase.from('profiles').update({ real_name: name }).eq('id', currentUser.id);
+    const updates = departmentColumnAvailable ? { real_name: name, department: department || null } : { real_name: name };
+    const { error } = await supabase.from('profiles').update(updates).eq('id', currentUser.id);
     if (error) throw error;
     if ($('profile-user-name')) $('profile-user-name').textContent = name;
     if ($('header-user-name')) $('header-user-name').textContent = name;
-    msg('real-name-message','이름이 저장되었습니다.');
+    if (departmentColumnAvailable && $('profile-department')) $('profile-department').textContent = department || '학과 미설정';
+    msg('real-name-message', departmentColumnAvailable ? '이름과 학과가 저장되었습니다.' : '이름이 저장되었습니다. 학과 저장은 DB 설정이 필요합니다.');
   } catch (error) { msg('real-name-message','저장 실패: '+error.message); }
   finally { button.disabled = false; }
 });
