@@ -1651,3 +1651,15 @@ dialog::backdrop {
 /* Backend connection notice: keep the last loaded meetings visible. */
 .api-connection-banner:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;margin:10px 0;border:1px solid #f3c5a5;border-radius:12px;background:#fff8f1;color:#8a451a;font-size:14px}
 .api-connection-banner button{border:1px solid #dca376;border-radius:8px;background:#fff;padding:7px 12px;color:inherit;cursor:pointer;white-space:nowrap}
+
+/* Kakao T-style meeting pickup position selector */
+.location-picker-dialog{border:0;border-radius:20px;padding:0;width:min(94vw,620px);max-height:92vh;box-shadow:0 15px 60px #0004}
+.location-picker-dialog::backdrop{background:#142b48a8}
+.location-picker-panel{padding:18px;display:flex;flex-direction:column;gap:12px}
+.location-picker-header{display:flex;align-items:center;justify-content:space-between}
+.location-picker-header h2{margin:0}
+.location-picker-header button{border:0;background:transparent;font-size:24px;cursor:pointer}
+.location-picker-map-wrap{position:relative;height:min(55vh,440px);min-height:280px;border-radius:14px;overflow:hidden;background:#eaf0f4}
+#location-picker-map{width:100%;height:100%}
+.location-picker-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);font-size:38px;line-height:1;pointer-events:none;filter:drop-shadow(0 3px 2px #0005)}
+#selected-meeting-location{overflow-wrap:anywhere}
