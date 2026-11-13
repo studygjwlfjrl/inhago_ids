@@ -7,6 +7,7 @@ from database import get_supabase, get_user_supabase
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from pathlib import Path
+from postgrest.exceptions import APIError
 load_dotenv(Path(__file__).resolve().parent / '.env')
 
 app = FastAPI(title="InhaGo API")
@@ -109,6 +110,7 @@ def create_meeting(
         supabase = get_user_supabase(credentials.credentials)
 
         data = meeting.model_dump(mode="json")
+        data["category"] = {"food": "meal"}.get(data["category"], data["category"])
         data["creator_id"] = str(user.id)
         data["status"] = "open"
 
@@ -120,6 +122,11 @@ def create_meeting(
 
         return {"meeting": response.data[0]}
 
+    except APIError as exc:
+        logging.exception("모임 생성 DB 오류")
+        if exc.code == "23514":
+            raise HTTPException(status_code=422, detail="모임 카테고리가 DB 제약조건과 일치하지 않습니다.")
+        raise HTTPException(status_code=500, detail="모임 저장 중 DB 오류가 발생했습니다.")
     except Exception:
         logging.exception("모임 생성 중 오류 발생")
         raise HTTPException(
