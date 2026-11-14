@@ -11,7 +11,7 @@ window.addEventListener('inhaGoLoginSuccess',loadMeetings);
 window.addEventListener('online',loadMeetings);
 window.addEventListener('inhaGoMeetingsChanged',loadMeetings);
 supabase.auth.getSession().then(({data})=>{if(data.session)loadMeetings();}).catch(console.error);
-document.querySelectorAll('.category-chip').forEach(b=>b.addEventListener('click',()=>{activeCategory=b.dataset.category;document.querySelectorAll('.category-chip').forEach(c=>c.classList.toggle('active',c===b));renderCards();}));$('notification-button')?.addEventListener('click',()=>toast('알림 기능을 준비하고 있습니다.'));$('locate-button')?.addEventListener('click',()=>{$('locationBtn')?.click();});window.addEventListener('load',refreshIcons);renderCards();renderProfile();// Supabase에서 불러온 실제 매너 점수를 화면에 표시
+document.querySelectorAll('.category-chip').forEach(b=>b.addEventListener('click',()=>{activeCategory=b.dataset.category;document.querySelectorAll('.category-chip').forEach(c=>c.classList.toggle('active',c===b));renderCards();}));$('locate-button')?.addEventListener('click',()=>{$('locationBtn')?.click();});window.addEventListener('load',refreshIcons);renderCards();renderProfile();// Supabase에서 불러온 실제 매너 점수를 화면에 표시
 window.setMannerScore = function (score) {
   if (!Number.isInteger(score) || score < 0 || score > 100) {
     return;
