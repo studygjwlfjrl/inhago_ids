@@ -17,6 +17,15 @@
   <script type="module" src="js/main.js"></script>
 
   <style>
+    .inha-badge{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;border-radius:12px;padding:0 5px;background:#e84657;color:white;font-size:11px;font-weight:800;line-height:1}
+    .inha-badge[hidden],.inha-notifications[hidden],.notification-dot[hidden]{display:none!important}
+    .inha-notifications{position:absolute;right:16px;top:78px;z-index:1200;width:min(340px,calc(100vw - 32px));max-height:420px;overflow:auto;background:white;border:1px solid #dce8f4;border-radius:18px;box-shadow:0 16px 40px #1634542b;padding:12px}
+    .inha-notifications-head{display:flex;align-items:center;justify-content:space-between;padding:8px}
+    .inha-notifications-head button{background:transparent;border:0;color:#2166b8;cursor:pointer}
+    .inha-notifications-list{display:grid;gap:6px}
+    .notification-entry{display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-align:left;padding:12px;border:0;border-radius:12px;background:#f2f7ff;cursor:pointer;color:#18365d}
+    .notification-entry small{color:#617c9c}
+
     #chat-page .chat-container[hidden],
     #group-chat-view[hidden],
     #group-chat-list-view[hidden],
@@ -150,7 +159,8 @@
     <div class="header-actions">
       <button class="icon-button" id="notification-button" aria-label="알림">
         <i data-lucide="bell"></i>
-        <span class="notification-dot"></span>
+        <span class="notification-dot" hidden></span>
+        <span id="notification-count" class="inha-badge" hidden>0</span>
       </button>
 
       <button class="avatar-button" data-page="profile" aria-label="프로필">
@@ -159,6 +169,10 @@
     </div>
   </header>
 
+    <section id="notification-panel" class="inha-notifications" hidden aria-label="알림 목록">
+      <div class="inha-notifications-head"><strong>알림</strong><button id="notification-mark-read" type="button">모두 읽음</button></div>
+      <div id="notification-list" class="inha-notifications-list" aria-live="polite">알림을 확인하는 중...</div>
+    </section>
   <!-- 홈과 탐색에서만 표시 -->
   <section class="hero" id="hero">
     <label class="search" for="search">
@@ -1017,6 +1031,7 @@
 <script type="module" src="js/friend.js"></script>
 <script type="module" src="js/message.js"></script>
 <script type="module" src="js/chat.js"></script>
+    <script type="module" src="js/notifications.js"></script>
 <script type="module" src="js/login-features.js"></script>
 <script type="module" src="js/meeting-management.js"></script>
 <script type="module" src="./js/group-chat.js"></script>
