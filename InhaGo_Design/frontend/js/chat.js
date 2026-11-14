@@ -410,6 +410,7 @@ appendNamedMessage(container, message).then(() => {
 
     // 채팅방에 처음 입장했을 때 맨 아래로 이동
     container.scrollTop = container.scrollHeight;
+    window.dispatchEvent(new CustomEvent('inhaGoRoomRead', {detail:{type:'meeting',id:String(roomId)}}));
   }
 
 
