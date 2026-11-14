@@ -1,0 +1,10 @@
+# Google Maps 로컬 API 설정
+/map/config.js
+.DS_Store
+
+# Local Python and Supabase settings
+.env
+.env.*
+.venv/
+__pycache__/
+*.pyc

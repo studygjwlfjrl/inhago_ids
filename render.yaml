@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: inhago-web
+    runtime: static
+    buildCommand: bash deploy/build-frontend.sh
+    staticPublishPath: ./dist
+    envVars:
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
