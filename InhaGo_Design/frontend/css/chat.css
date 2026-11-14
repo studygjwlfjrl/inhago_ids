@@ -487,3 +487,131 @@
   font-size: 11px;
   margin-top: 6px;
 }
+
+/* =====================================
+   단체 채팅방 관리 메뉴
+===================================== */
+
+#group-chat-menu-btn {
+  margin-left: auto;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #263b5a;
+  font-size: 27px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#group-chat-menu-btn:hover {
+  background: #edf3fc;
+}
+
+.group-chat-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.group-chat-menu-panel {
+  width: min(100%, 370px);
+  height: 100%;
+  box-sizing: border-box;
+  padding: 24px 20px;
+  background: #fff;
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.08);
+  overflow-y: auto;
+}
+
+.group-chat-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.group-chat-menu-header h3 {
+  margin: 0;
+  color: #17233c;
+  font-size: 21px;
+  font-weight: 750;
+}
+
+.group-chat-menu-header button {
+  border: none;
+  background: transparent;
+  color: #66758d;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.group-chat-menu-panel h4 {
+  margin: 0 0 15px;
+  color: #17233c;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.group-chat-member-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 24px;
+}
+
+.group-chat-member-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 4px;
+  color: #24344f;
+  font-size: 14px;
+}
+
+.group-chat-member-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  background: #eaf1ff;
+  font-size: 20px;
+}
+
+.group-chat-menu-action {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 15px 12px;
+  margin-top: 10px;
+  border: 1px solid #e5ebf5;
+  border-radius: 12px;
+  background: #f7f9fd;
+  color: #2864ce;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.group-chat-menu-action:hover {
+  background: #edf4ff;
+}
+
+.group-chat-leave-btn {
+  margin-top: 14px;
+  background: #fff7f7;
+  border-color: #ffe2e2;
+  color: #d94b4b;
+}
+
+.group-chat-leave-btn:hover {
+  background: #ffeded;
+}
