@@ -146,12 +146,76 @@ async function openFriendProfile(userId) {
     score >= 28 ? "D+" :
     score >= 11 ? "D0" : "F";
 
-  alert(
-    `이름: ${profile.real_name || "이름 미등록"}\n` +
-    `학과: ${profile.department || "학과 미등록"}\n` +
-    `매너 점수: ${score}점\n` +
-    `매너 학점: ${grade}`
-  );
+  
+const imageName = {
+  "A+": "Aplus", "A0": "A0",
+  "B+": "Bplus", "B0": "B0",
+  "C+": "Cplus", "C0": "C0",
+  "D+": "Dplus", "D0": "D0",
+  "F": "F"
+}[grade];
+
+document.getElementById("friend-profile-overlay")?.remove();
+
+const overlay = document.createElement("div");
+overlay.id = "friend-profile-overlay";
+
+overlay.innerHTML = `
+  <div class="friend-profile-card" role="dialog"
+       aria-modal="true" aria-label="친구 프로필">
+    <div class="friend-profile-hero">
+      <div class="friend-profile-top">
+        <span>INHAGO · FRIEND PROFILE</span>
+        <button class="friend-profile-close" type="button"
+                aria-label="닫기">×</button>
+      </div>
+      <img class="friend-profile-mascot"
+           src="assets/induck_${imageName}.svg"
+           alt="매너 학점 ${grade} 인덕이">
+      <p>매너 학점에 따라 인덕이 표정이 달라져요</p>
+    </div>
+    <div class="friend-profile-content">
+      <h2 class="friend-profile-name"></h2>
+      <p class="friend-profile-department"></p>
+      <div class="friend-profile-stats">
+        <div>
+          <span>매너 점수</span>
+          <strong class="friend-profile-score"></strong>
+        </div>
+        <div>
+          <span>매너 학점</span>
+          <strong class="friend-profile-grade"></strong>
+        </div>
+      </div>
+      <button class="friend-profile-message" type="button">
+        💬 메시지 보내기
+      </button>
+    </div>
+  </div>
+`;
+
+overlay.querySelector(".friend-profile-name").textContent =
+  profile.real_name || "이름 미등록";
+overlay.querySelector(".friend-profile-department").textContent =
+  `인하대학교 · ${profile.department || "학과 미등록"}`;
+overlay.querySelector(".friend-profile-score").textContent =
+  `${score}점`;
+overlay.querySelector(".friend-profile-grade").textContent = grade;
+
+overlay.querySelector(".friend-profile-close").onclick =
+  () => overlay.remove();
+
+overlay.addEventListener("click", (event) => {
+  if (event.target === overlay) overlay.remove();
+});
+
+overlay.querySelector(".friend-profile-message").onclick = () => {
+  overlay.remove();
+  handleAction("open-direct-chat", userId);
+};
+
+document.body.appendChild(overlay);
+
 }
 
   function createUserRow(user, buttons) {
