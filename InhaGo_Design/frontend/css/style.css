@@ -1663,3 +1663,125 @@ dialog::backdrop {
 #location-picker-map{width:100%;height:100%}
 .location-picker-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);font-size:38px;line-height:1;pointer-events:none;filter:drop-shadow(0 3px 2px #0005)}
 #selected-meeting-location{overflow-wrap:anywhere}
+
+/* 카카오톡 스타일 친구 프로필 */
+#friend-profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(22, 37, 64, 0.48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.friend-profile-card {
+  width: 100%;
+  max-width: 340px;
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 65px rgba(25, 45, 80, 0.25);
+  font-family: inherit;
+}
+
+.friend-profile-hero {
+  background: #dceaff;
+  padding: 20px 20px 22px;
+  text-align: center;
+}
+
+.friend-profile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #5674a0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.friend-profile-close {
+  border: none;
+  background: transparent;
+  color: #506a90;
+  font-size: 27px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.friend-profile-mascot {
+  display: block;
+  width: 190px;
+  height: 190px;
+  object-fit: contain;
+  margin: 8px auto;
+}
+
+.friend-profile-hero p {
+  margin: 0;
+  color: #345b92;
+  font-size: 12px;
+}
+
+.friend-profile-content {
+  padding: 24px;
+  text-align: center;
+}
+
+.friend-profile-name {
+  margin: 0 0 8px;
+  color: #192a46;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.friend-profile-department {
+  margin: 0 0 22px;
+  color: #72829b;
+  font-size: 13px;
+}
+
+.friend-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.friend-profile-stats > div {
+  background: #f2f6fc;
+  border-radius: 14px;
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.friend-profile-stats span {
+  color: #74849b;
+  font-size: 12px;
+}
+
+.friend-profile-stats strong {
+  color: #3263be;
+  font-size: 25px;
+}
+
+.friend-profile-message {
+  width: 100%;
+  padding: 14px;
+  background: #3b68d8;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.friend-profile-message:hover {
+  background: #2e55b8;
+}
