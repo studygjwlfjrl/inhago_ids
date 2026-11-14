@@ -298,7 +298,44 @@ const groupInput = document.getElementById(
 
 let activeGroupRoomId = null;
 let currentGroupUserId = null;
+// 단체 채팅 실시간 구독 관리
+let groupChatChannel = null;
 
+function stopGroupChatRealtime() {
+  if (groupChatChannel) {
+    const oldChannel = groupChatChannel;
+    groupChatChannel = null;
+    supabaseDev.removeChannel(oldChannel);
+  }
+}
+
+function startGroupChatRealtime(roomId) {
+  stopGroupChatRealtime();
+
+  const channel = supabaseDev
+    .channel(`group-chat-${roomId}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "group_chat_messages",
+        filter: `room_id=eq.${roomId}`
+      },
+      () => {
+        if (activeGroupRoomId === roomId) {
+          loadGroupMessages(roomId);
+        }
+      }
+    )
+    .subscribe(status => {
+      if (status === "SUBSCRIBED") {
+        console.log("실시간 채팅 연결 완료:", roomId);
+      }
+    });
+
+  groupChatChannel = channel;
+}
 /* 현재 로그인 사용자 확인 */
 
 async function getGroupUserId() {
@@ -512,6 +549,7 @@ async function openGroupChatRoom(room) {
   groupListView.hidden = true;
   groupRoomView.hidden = false;
   groupRoomTitle.textContent = room.name;
+   startGroupChatRealtime(room.id);
 
   await loadGroupMessages(room.id);
 }
@@ -711,6 +749,7 @@ if (groupForm && groupInput) {
 
 groupBackBtn?.addEventListener("click", () => {
   activeGroupRoomId = null;
+  stopGroupChatRealtime();
 
   groupRoomView.hidden = true;
   groupListView.hidden = false;
@@ -1124,6 +1163,7 @@ async function openGroupChatMenu() {
       if (error) throw error;
 
       activeGroupRoomId = null;
+       stopGroupChatRealtime();
 
       closeMenu();
 
