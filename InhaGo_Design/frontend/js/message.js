@@ -503,6 +503,17 @@ messages.forEach(message => {
   function init() {
     const form = document.getElementById("dm-form");
     if (!form) return;
+    
+window.addEventListener("inhaGoOpenDirectChat", async event => {
+  const friendId = event.detail?.friendId;
+  if (!friendId) return;
+
+  document.querySelector('[data-page="message"]')?.click();
+
+  await renderFriends();
+  await openRoom(friendId);
+});
+
 
     form.addEventListener("submit", sendMessage);
     document.getElementById("dm-back")?.addEventListener("click", closeRoom);
