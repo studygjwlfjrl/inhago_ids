@@ -12,7 +12,7 @@ async function renderPeopleSearch(query, version) {
     if (version !== peopleSearchVersion) return;
     if (!user) { container.textContent = '사람 검색은 로그인이 필요합니다.'; return; }
     const {data, error} = await supabase.from('profiles')
-      .select('id,real_name,department')
+      .select('id,real_name')
       .ilike('real_name', '%' + query.replace(/[%,]/g, '') + '%')
       .neq('id', user.id).limit(20);
     if (version !== peopleSearchVersion) return;
@@ -37,7 +37,7 @@ async function renderPeopleSearch(query, version) {
       name.textContent = person.real_name?.split('/')[0]?.trim() || '이름 미등록';
       const department = document.createElement('p');
       department.className = 'muted';
-      department.textContent = person.department || '학과 미설정';
+      department.textContent = '인하Go 사용자';
       info.append(name, department);
       const button = document.createElement('button');
       button.type = 'button';
