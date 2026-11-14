@@ -21,6 +21,17 @@
     defer
   ></script>
   <script type="module" src="js/main.js"></script>
+
+<style>
+  /* hidden 속성이 적용된 채팅 화면은 반드시 숨김 */
+  #chat-page .chat-container[hidden],
+  #group-chat-view[hidden],
+  #group-chat-list-view[hidden],
+  #group-chat-room-view[hidden] {
+    display: none !important;
+  }
+</style>
+
 </head>
 
 <body>
