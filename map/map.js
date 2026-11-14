@@ -33,6 +33,34 @@ const mapIcons = {
 
 let map;
 let markers = [];
+let mapResizeObserver = null;
+let mapResizeFrame = null;
+
+// 반응형 레이아웃에서 지도 크기가 바뀌면 Google Maps에 변경 사항 알림
+function observeMapSize(element) {
+  if (!element || !window.ResizeObserver) return;
+  let previousWidth = element.clientWidth;
+  let previousHeight = element.clientHeight;
+
+  mapResizeObserver?.disconnect();
+  mapResizeObserver = new ResizeObserver(() => {
+    const width = element.clientWidth;
+    const height = element.clientHeight;
+    if (!map || !width || !height ||
+        (width === previousWidth && height === previousHeight)) return;
+    previousWidth = width;
+    previousHeight = height;
+
+    if (mapResizeFrame !== null) cancelAnimationFrame(mapResizeFrame);
+    mapResizeFrame = requestAnimationFrame(() => {
+      mapResizeFrame = null;
+      const center = map.getCenter();
+      google.maps.event.trigger(map, "resize");
+      if (center) map.setCenter(center);
+    });
+  });
+  mapResizeObserver.observe(element);
+}
 const status = document.getElementById("status");
 
 // Google 지도 생성
@@ -41,13 +69,23 @@ async function initMap() {
     const { Map } =
       await google.maps.importLibrary("maps");
 
-    map = new Map(document.getElementById("map"), {
+    const mapElement = document.getElementById("map");
+    map = new Map(mapElement, {
       center: campus,
       zoom: 16,
       mapId: "DEMO_MAP_ID",
       mapTypeControl: false,
       streetViewControl: false
     });
+
+    observeMapSize(mapElement);
+    // 첫 페인트가 끝난 뒤에도 지도 크기를 한 번 동기화
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (!map) return;
+      const center = map.getCenter();
+      google.maps.event.trigger(map, "resize");
+      if (center) map.setCenter(center);
+    }));
 
     setupButtons();
     // 모임 API 지연/실패가 위치 버튼 및 GPS 시작을 막지 않도록 비동기 실행
