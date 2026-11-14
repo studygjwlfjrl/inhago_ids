@@ -190,7 +190,7 @@ function startLocationTracking() {
 function showMarkers(category) {
   activeMapCategory = category;
   markers.forEach(marker => {
-    marker.map = null;
+    marker.setMap(null);
   });
 
   markers = [];
