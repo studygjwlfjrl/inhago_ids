@@ -121,7 +121,7 @@ async function refresh() {
   } finally { refreshing = false; }
 }
 
-button?.addEventListener('click', () => { if (!panel) return; panel.hidden = !panel.hidden; if (!panel.hidden) void refresh(); });
+button?.addEventListener('click', () => { if (!panel?.hidden) void refresh(); });
 document.getElementById('notification-mark-read')?.addEventListener('click', () => {
   for (const item of lastItems) dismissed[item.id] = true;
   if (userId) setStore(dismissKey(), dismissed);
