@@ -320,15 +320,60 @@
           type="button">
     친구 단체 채팅
   </button>
-</div>
-        <!-- 친구 단체 채팅 화면 -->
+
 <div id="group-chat-view" hidden>
-  <h2>친구 단체 채팅</h2>
-  <button id="create-group-chat-btn" type="button">
-    + 단체 채팅방 만들기
-  </button>
-  <div id="group-chat-room-list"></div>
+
+  <!-- 단체 채팅방 목록 화면 -->
+  <div id="group-chat-list-view">
+    <h2>친구 단체 채팅</h2>
+
+    <button id="create-group-chat-btn" type="button">
+      + 단체 채팅방 만들기
+    </button>
+
+    <div id="group-chat-room-list"></div>
+  </div>
+
+  <!-- 단체 채팅방 대화 화면 -->
+  <div id="group-chat-room-view" hidden>
+
+    <div class="chat-room-header">
+      <button
+        id="group-chat-back"
+        type="button"
+        class="chat-back-btn"
+      >
+        ← 목록
+      </button>
+
+      <h2 id="group-chat-room-title">단체 채팅방</h2>
+    </div>
+
+    <div
+      id="group-chat-messages"
+      class="chat-messages"
+      role="log"
+      aria-label="단체 채팅 메시지"
+      aria-live="polite"
+    ></div>
+
+    <form id="group-chat-form" class="chat-form">
+      <input
+        id="group-chat-input"
+        type="text"
+        placeholder="메시지를 입력하세요."
+        maxlength="2000"
+        aria-label="단체 채팅 메시지 입력"
+        required
+      >
+
+      <button type="submit">전송</button>
+    </form>
+
+  </div>
+
 </div>
+
 
           <div class="chat-container">
 
