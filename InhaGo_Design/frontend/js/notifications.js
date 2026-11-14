@@ -103,6 +103,15 @@ async function refresh() {
         items.push({id:'reminder:'+meeting.id+':'+meeting.meeting_time,type:'reminder',title:'모임 시작이 가까워요',details:meeting.title+' · 1시간 이내 시작',page:'profile'});
       }
     }
+    const activeMeetingIds = [...new Set([...created,...joined].map(m=>m.id))];
+    if (activeMeetingIds.length) {
+      const groupMessages = await query('chat_messages','id,meeting_id,sender_id,created_at',q=>q.in('meeting_id',activeMeetingIds).neq('sender_id',user.id).order('created_at',{ascending:false}).limit(100));
+      for (const msg of groupMessages) {
+        const room = roomKey('meeting',msg.meeting_id);
+        if (timeOf(msg.created_at) <= timeOf(roomReads[room])) continue;
+        items.push({id:'group:'+msg.id,type:'message',title:'모임 채팅 메시지',details:'참여 중인 모임에 새 메시지가 있습니다.',page:'chat',room});
+      }
+    }
     // 취소된 모임은 채팅 목록에서 제외되며 리마인드에도 포함되지 않습니다.
     lastItems = items;
     render();
