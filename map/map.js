@@ -14,7 +14,7 @@ async function refreshMeetings() {
     meetings = (response.meetings || [])
       .filter(m => Number.isFinite(Number(m.latitude)) && Number.isFinite(Number(m.longitude)) && m.latitude != null && m.longitude != null)
       .map(m => ({
-        id: m.id, title: m.title, category: m.category,
+        id: m.id, title: m.title, category: m.category === "food" ? "meal" : m.category,
         lat: Number(m.latitude), lng: Number(m.longitude),
         place: m.location_name, time: new Date(m.meeting_time).toLocaleString('ko-KR')
       }));
@@ -214,8 +214,7 @@ function getMyLocation() {
 
 // 버튼 이벤트
 function setupButtons() {
-  const locationButton = document.getElementById("locationBtn");
-  if (locationButton) locationButton.addEventListener("click", getMyLocation);
+
 
   document.getElementById("closeBtn")
     ?.addEventListener("click", () => {
@@ -260,6 +259,16 @@ function loadGoogleMaps() {
 }
 
 window.addEventListener("inhaGoMeetingsChanged", refreshMeetings);
+
+// 상단 카테고리 선택도 지도 마커 필터와 연동
+const topCategories = document.querySelectorAll(".category-chip[data-category]");
+topCategories.forEach(button => button.addEventListener("click", () => {
+  const category = button.dataset.category === "food" ? "meal" : button.dataset.category;
+  topCategories.forEach(chip => chip.classList.toggle("active", chip === button));
+  document.querySelectorAll("#filters [data-category]").forEach(filter =>
+    filter.classList.toggle("active", filter.dataset.category === category));
+  if (map) showMarkers(category);
+}));
 window.addEventListener("inhaGoLoginSuccess", () => {
     refreshMeetings();
     if (typeof map !== "undefined" && map) {
