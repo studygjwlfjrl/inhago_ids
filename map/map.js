@@ -267,6 +267,7 @@ function setupButtons() {
 
         button.classList.add("active");
         showMarkers(button.dataset.category);
+        document.querySelectorAll(".category-chip[data-category]").forEach(chip => chip.classList.toggle("active", (chip.dataset.category === "food" ? "meal" : chip.dataset.category) === button.dataset.category));
       });
     });
 }
@@ -305,6 +306,7 @@ topCategories.forEach(button => button.addEventListener("click", () => {
   topCategories.forEach(chip => chip.classList.toggle("active", chip === button));
   document.querySelectorAll("#filters [data-category]").forEach(filter =>
     filter.classList.toggle("active", filter.dataset.category === category));
+  activeMapCategory = category;
   if (map) showMarkers(category);
 }));
 window.addEventListener("inhaGoLoginSuccess", () => {
