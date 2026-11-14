@@ -25,3 +25,12 @@ if (meetingTab && groupTab && meetingView && groupView) {
     switchChatTab("group");
   });
 }
+// 친구 단체 채팅방 만들기 버튼
+const createGroupChatBtn =
+  document.getElementById("create-group-chat-btn");
+
+if (createGroupChatBtn) {
+  createGroupChatBtn.addEventListener("click", () => {
+    alert("단체 채팅방 만들기 버튼 연결 성공!");
+  });
+}
