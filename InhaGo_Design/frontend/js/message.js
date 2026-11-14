@@ -136,6 +136,33 @@ import { supabase as supabaseDev } from "./supabase.js";
     return [...friends];
   }
 
+  
+async function loadDirectChatPreviews(userId) {
+  const { data, error } = await supabaseDev
+    .from("direct_messages")
+    .select("sender_id, receiver_id, content, created_at")
+    .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+    .order("created_at", { ascending: false })
+    .limit(500);
+
+  if (error) throw error;
+
+  const previews = new Map();
+
+  for (const message of data ?? []) {
+    const friendId =
+      message.sender_id === userId
+        ? message.receiver_id
+        : message.sender_id;
+
+    if (!previews.has(friendId)) {
+      previews.set(friendId, message);
+    }
+  }
+
+  return previews;
+}
+
   async function renderFriends() {
     const container =
       document.getElementById("dm-friend-list");
@@ -148,6 +175,15 @@ import { supabase as supabaseDev } from "./supabase.js";
 
     try {
       const friends = await loadFriends();
+      
+const previews = await loadDirectChatPreviews(currentUserId);
+
+friends.sort((a, b) => {
+  const timeA = previews.get(a)?.created_at || "";
+  const timeB = previews.get(b)?.created_at || "";
+  return timeB.localeCompare(timeA);
+});
+
 
       if (version !== friendVersion) return;
 
@@ -182,18 +218,38 @@ import { supabase as supabaseDev } from "./supabase.js";
         if (version !== friendVersion) return;
         friendNames.set(friendId, displayName);
         name.textContent = displayName;
+        
+const lastMessage = previews.get(friendId);
 
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "message-btn";
-        button.textContent = "채팅방 입장";
+const preview = document.createElement("p");
+preview.className = "dm-last-preview";
+preview.textContent = lastMessage
+  ? lastMessage.content
+  : "아직 나눈 대화가 없습니다.";
 
-        button.addEventListener("click", () => {
-          openRoom(friendId);
-        });
+const lastTime = document.createElement("small");
+lastTime.className = "dm-last-time";
+lastTime.textContent = lastMessage
+  ? new Date(lastMessage.created_at).toLocaleDateString("ko-KR", {
+      month: "numeric",
+      day: "numeric"
+    })
+  : "";
 
-        item.append(name, button);
-        container.appendChild(item);
+
+const info = document.createElement("div");
+info.className = "dm-chat-info";
+info.append(name, preview);
+
+item.classList.add("dm-chat-row");
+item.append(info, lastTime);
+
+item.addEventListener("click", () => {
+  openRoom(friendId);
+});
+
+container.appendChild(item);
+
       }
     } catch (error) {
       console.error("친구 목록 조회 실패:", error);
