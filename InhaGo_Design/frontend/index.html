@@ -17,9 +17,10 @@
   <script type="module" src="js/main.js?v=notifications-fix-20261115"></script>
 
   <style>
-    .inha-badge{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;border-radius:12px;padding:0 5px;background:#e84657;color:white;font-size:11px;font-weight:800;line-height:1}
+    .inha-badge{pointer-events:none;display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;border-radius:12px;padding:0 5px;background:#e84657;color:white;font-size:11px;font-weight:800;line-height:1}
     .inha-badge[hidden],.inha-notifications[hidden],.notification-dot[hidden]{display:none!important}
-    .inha-notifications{position:absolute;right:16px;top:78px;z-index:1200;width:min(340px,calc(100vw - 32px));max-height:420px;overflow:auto;background:white;border:1px solid #dce8f4;border-radius:18px;box-shadow:0 16px 40px #1634542b;padding:12px}
+    .inha-notifications{position:fixed;right:16px;top:78px;z-index:1200;width:min(340px,calc(100vw - 32px));max-height:420px;overflow:auto;background:white;border:1px solid #dce8f4;border-radius:18px;box-shadow:0 16px 40px #1634542b;padding:12px}
+    #notification-button{position:relative;z-index:10000;cursor:pointer;min-width:36px;min-height:36px}
     .inha-notifications-head{display:flex;align-items:center;justify-content:space-between;padding:8px}
     .inha-notifications-head button{background:transparent;border:0;color:#2166b8;cursor:pointer}
     .inha-notifications-list{display:grid;gap:6px}
@@ -1059,10 +1060,19 @@
   const button = document.getElementById('notification-button');
   const panel = document.getElementById('notification-panel');
   if (!button || !panel) return;
-  button.addEventListener('click', () => { panel.hidden = !panel.hidden; });
+  button.type = 'button';
+  button.setAttribute('aria-expanded', 'false');
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element) || !target.closest('#notification-button')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    panel.hidden = !panel.hidden;
+    button.setAttribute('aria-expanded', String(!panel.hidden));
+  }, true);
 })();
 </script>
-<script type="module" src="js/notifications.js?v=notifications-fix-20261115"></script>
+<script type="module" src="js/notifications.js?v=notifications-integration-20261115"></script>
 <script type="module" src="js/login-features.js"></script>
 <script type="module" src="js/meeting-management.js"></script>
 <script type="module" src="./js/group-chat.js"></script>
