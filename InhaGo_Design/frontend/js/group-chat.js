@@ -199,3 +199,231 @@ if (createGroupChatBtn) {
   });
 }
 
+/* =========================================
+   4. 친구 단체 채팅방 목록 및 메시지
+========================================= */
+
+const groupRoomList = document.getElementById("group-chat-room-list");
+const groupListView = document.getElementById("group-chat-list-view");
+const groupRoomView = document.getElementById("group-chat-room-view");
+const groupBackBtn = document.getElementById("group-chat-back");
+const groupRoomTitle = document.getElementById("group-chat-room-title");
+const groupMessages = document.getElementById("group-chat-messages");
+const groupForm = document.getElementById("group-chat-form");
+const groupInput = document.getElementById("group-chat-input");
+
+let activeGroupRoomId = null;
+let currentGroupUserId = null;
+
+// 현재 로그인 사용자 확인
+async function getGroupUserId() {
+  const { data, error } = await supabaseDev.auth.getUser();
+
+  if (error) throw error;
+
+  currentGroupUserId = data?.user?.id || null;
+  return currentGroupUserId;
+}
+
+// 내가 참여한 단체 채팅방 목록 불러오기
+async function loadGroupChatRooms() {
+  if (!groupRoomList) return;
+
+  groupRoomList.textContent = "채팅방을 불러오는 중...";
+
+  try {
+    const userId = await getGroupUserId();
+
+    if (!userId) {
+      groupRoomList.textContent = "로그인 후 이용할 수 있습니다.";
+      return;
+    }
+
+    const { data: memberships, error: memberError } =
+      await supabaseDev
+        .from("group_chat_members")
+        .select("room_id")
+        .eq("user_id", userId);
+
+    if (memberError) throw memberError;
+
+    const roomIds = [
+      ...new Set((memberships || []).map(m => m.room_id))
+    ];
+
+    if (roomIds.length === 0) {
+      groupRoomList.textContent = "참여 중인 단체 채팅방이 없습니다.";
+      return;
+    }
+
+    const { data: rooms, error: roomError } = await supabaseDev
+      .from("group_chat_rooms")
+      .select("id, name, created_at")
+      .in("id", roomIds)
+      .order("created_at", { ascending: false });
+
+    if (roomError) throw roomError;
+
+    groupRoomList.replaceChildren();
+
+    for (const room of rooms || []) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = room.name;
+      button.style.cssText = `
+        display:block;
+        width:100%;
+        padding:15px;
+        margin:8px 0;
+        text-align:left;
+        background:#f3f6fc;
+        color:#222;
+        border:1px solid #ddd;
+        border-radius:10px;
+        cursor:pointer;
+      `;
+
+      button.addEventListener("click", () => {
+        openGroupChatRoom(room);
+      });
+
+      groupRoomList.appendChild(button);
+    }
+
+  } catch (error) {
+    console.error("단체 채팅방 목록 오류:", error);
+    groupRoomList.textContent =
+      "채팅방 목록을 불러오지 못했습니다.";
+  }
+}
+
+// 단체 채팅방 열기
+async function openGroupChatRoom(room) {
+  activeGroupRoomId = room.id;
+
+  groupListView.hidden = true;
+  groupRoomView.hidden = false;
+  groupRoomTitle.textContent = room.name;
+
+  await loadGroupMessages(room.id);
+}
+
+// 메시지 목록 불러오기
+async function loadGroupMessages(roomId) {
+  if (!groupMessages || !roomId) return;
+
+  const { data: messages, error } = await supabaseDev
+    .from("group_chat_messages")
+    .select("id, sender_id, content, created_at")
+    .eq("room_id", roomId)
+    .order("created_at", { ascending: true })
+    .limit(200);
+
+  if (error) {
+    console.error("메시지 조회 오류:", error);
+    groupMessages.textContent = "메시지를 불러오지 못했습니다.";
+    return;
+  }
+
+  // 다른 채팅방으로 이동한 경우 이전 요청 결과 무시
+  if (activeGroupRoomId !== roomId) return;
+
+  groupMessages.replaceChildren();
+
+  if (!messages?.length) {
+    groupMessages.textContent = "아직 메시지가 없습니다.";
+    return;
+  }
+
+  for (const message of messages) {
+    const item = document.createElement("div");
+    const isMine = message.sender_id === currentGroupUserId;
+
+    item.style.cssText = `
+      padding:10px;
+      margin:8px 0;
+      border-radius:10px;
+      background:${isMine ? "#dceaff" : "#f1f1f1"};
+      color:#222;
+      text-align:${isMine ? "right" : "left"};
+      overflow-wrap:anywhere;
+    `;
+
+    const sender = document.createElement("strong");
+    sender.textContent = isMine ? "나" : "참여자";
+
+    const content = document.createElement("div");
+    content.textContent = message.content;
+
+    item.append(sender, content);
+    groupMessages.appendChild(item);
+  }
+
+  groupMessages.scrollTop = groupMessages.scrollHeight;
+}
+
+// 메시지 전송
+if (groupForm && groupInput) {
+  groupForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const roomId = activeGroupRoomId;
+    const content = groupInput.value.trim();
+
+    if (!roomId || !content) return;
+
+    const submitBtn = groupForm.querySelector(
+      'button[type="submit"]'
+    );
+
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      const userId = await getGroupUserId();
+
+      if (!userId) {
+        alert("로그인이 필요합니다.");
+        return;
+      }
+
+      const { error } = await supabaseDev
+        .from("group_chat_messages")
+        .insert({
+          room_id: roomId,
+          sender_id: userId,
+          content
+        });
+
+      if (error) throw error;
+
+      groupInput.value = "";
+
+      await loadGroupMessages(roomId);
+
+    } catch (error) {
+      console.error("메시지 전송 오류:", error);
+      alert("메시지 전송 실패: " + error.message);
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
+}
+
+// 목록으로 돌아가기
+groupBackBtn?.addEventListener("click", () => {
+  activeGroupRoomId = null;
+  groupRoomView.hidden = true;
+  groupListView.hidden = false;
+
+  loadGroupChatRooms();
+});
+
+// 단체 채팅 탭을 열면 채팅방 목록 새로고침
+groupTab?.addEventListener("click", () => {
+  if (activeGroupRoomId) {
+    loadGroupMessages(activeGroupRoomId);
+  } else {
+    loadGroupChatRooms();
+  }
+});
+
