@@ -120,6 +120,7 @@ import { supabase as supabaseDev } from "./supabase.js";
       await supabaseDev
         .from("meetings")
         .select("id, title, location_name, creator_id")
+        .neq("status", "cancelled")
         .eq("creator_id", user.id);
 
     if (createdError) {
@@ -132,7 +133,8 @@ import { supabase as supabaseDev } from "./supabase.js";
       const { data, error } = await supabaseDev
         .from("meetings")
         .select("id, title, location_name, creator_id")
-        .in("id", meetingIds);
+        .in("id", meetingIds)
+        .neq("status", "cancelled");
 
       if (error) {
         throw error;
@@ -169,6 +171,7 @@ import { supabase as supabaseDev } from "./supabase.js";
       if (version !== refreshVersion) return;
 
       joinedMeetings = meetings;
+      if (currentRoomId && !meetings.some(m => String(m.id) === String(currentRoomId))) closeRoom();
       container.replaceChildren();
 
       if (meetings.length === 0) {
@@ -342,6 +345,7 @@ appendNamedMessage(container, message).then(() => {
     subscribeRealtime(roomId);
 
     await renderMessages();
+    window.dispatchEvent(new CustomEvent('inhaGoRoomRead', { detail: { type: 'meeting', id: String(roomId) } }));
   }
 
 
