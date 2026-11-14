@@ -399,7 +399,94 @@ async function openGroupChatRoom(room) {
 }
 
 // 메시지 목록 불러오기
+
 async function loadGroupMessages(roomId) {
+  if (!groupMessages || !roomId) return;
+
+  const { data: messages, error } = await supabaseDev
+    .from("group_chat_messages")
+    .select("id, sender_id, content, created_at")
+    .eq("room_id", roomId)
+    .order("created_at", { ascending: true })
+    .limit(200);
+
+  if (error) {
+    console.error("메시지 조회 오류:", error);
+    if (activeGroupRoomId === roomId) {
+      groupMessages.textContent =
+        "메시지를 불러오지 못했습니다.";
+    }
+    return;
+  }
+
+  if (activeGroupRoomId !== roomId) return;
+
+  const senderIds = [...new Set(
+    (messages || []).map(message => message.sender_id)
+  )];
+
+  let profiles = [];
+
+  if (senderIds.length > 0) {
+    const { data, error: profileError } = await supabaseDev
+      .from("profiles")
+      .select("id, nickname, real_name")
+      .in("id", senderIds);
+
+    if (profileError) {
+      console.error("프로필 조회 오류:", profileError);
+    } else {
+      profiles = data || [];
+    }
+  }
+
+  if (activeGroupRoomId !== roomId) return;
+
+  const profileMap = new Map(
+    profiles.map(profile => [profile.id, profile])
+  );
+
+  groupMessages.replaceChildren();
+
+  if (!messages?.length) {
+    groupMessages.textContent = "아직 메시지가 없습니다.";
+    return;
+  }
+
+  for (const message of messages) {
+    const item = document.createElement("div");
+    const isMine = message.sender_id === currentGroupUserId;
+
+    item.style.cssText = `
+      padding:10px;
+      margin:8px 0;
+      border-radius:10px;
+      background:${isMine ? "#dceaff" : "#f1f1f1"};
+      color:#222;
+      text-align:${isMine ? "right" : "left"};
+      overflow-wrap:anywhere;
+    `;
+
+    const sender = document.createElement("strong");
+    const profile = profileMap.get(message.sender_id);
+
+    const senderName =
+      profile?.nickname ||
+      profile?.real_name ||
+      "이름 미설정";
+
+    sender.textContent = isMine ? "나" : senderName;
+
+    const content = document.createElement("div");
+    content.textContent = message.content;
+
+    item.append(sender, content);
+    groupMessages.appendChild(item);
+  }
+
+  groupMessages.scrollTop = groupMessages.scrollHeight;
+}
+
   if (!groupMessages || !roomId) return;
 
   const { data: messages, error } = await supabaseDev
