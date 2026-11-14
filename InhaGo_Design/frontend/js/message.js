@@ -508,7 +508,11 @@ window.addEventListener("inhaGoOpenDirectChat", async event => {
   const friendId = event.detail?.friendId;
   if (!friendId) return;
 
-  document.querySelector('[data-page="message"]')?.click();
+
+document.querySelectorAll(".page").forEach(page => {
+  page.classList.remove("active");
+});
+document.getElementById("message-page")?.classList.add("active");
 
   await renderFriends();
   await openRoom(friendId);
