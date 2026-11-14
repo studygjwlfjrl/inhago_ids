@@ -1,80 +1,45 @@
 
-import { supabase as supabaseDev } from "./supabase.js";
+import { supabase } from "./supabase.js";
 
-/* =========================================
-   InhaGo 친구 단체 채팅
-   - 통합 채팅 탭 호환
-   - 채팅방 생성
-   - 실시간 메시지
-   - 최신 메시지순 목록
-   - 친구 초대
-   - 참여자 확인
-   - 채팅방 나가기
-========================================= */
+// =====================================
+// 인하고 단체 채팅 - 속도 개선 버전
+// =====================================
 
-const meetingTab = document.getElementById("meeting-chat-tab");
-const groupTab = document.getElementById("group-chat-tab");
-const directTab = document.getElementById("direct-chat-tab");
+const $ = id => document.getElementById(id);
 
-const meetingView = document.querySelector(
-  "#chat-page .chat-container"
-);
-const groupView = document.getElementById("group-chat-view");
-const directView = document.getElementById("direct-chat-view");
+const groupTab = $("group-chat-tab");
+const createBtn = $("create-group-chat-btn");
+const roomList = $("group-chat-room-list");
+const listView = $("group-chat-list-view");
+const roomView = $("group-chat-room-view");
+const backBtn = $("group-chat-back");
+const roomTitle = $("group-chat-room-title");
+const messagesEl = $("group-chat-messages");
+const form = $("group-chat-form");
+const input = $("group-chat-input");
+const menuBtn = $("group-chat-menu-btn");
 
-const createGroupChatBtn = document.getElementById(
-  "create-group-chat-btn"
-);
+let userId = null;
+let activeRoomId = null;
+let roomChannel = null;
+let listChannel = null;
+let menuOverlay = null;
+let sending = false;
+let roomVersion = 0;
+let messageVersion = 0;
+let refreshTimer = null;
 
-const groupRoomList = document.getElementById(
-  "group-chat-room-list"
-);
-const groupListView = document.getElementById(
-  "group-chat-list-view"
-);
-const groupRoomView = document.getElementById(
-  "group-chat-room-view"
-);
-const groupBackBtn = document.getElementById(
-  "group-chat-back"
-);
-const groupRoomTitle = document.getElementById(
-  "group-chat-room-title"
-);
-const groupMessages = document.getElementById(
-  "group-chat-messages"
-);
-const groupForm = document.getElementById(
-  "group-chat-form"
-);
-const groupInput = document.getElementById(
-  "group-chat-input"
-);
-const groupMenuBtn = document.getElementById(
-  "group-chat-menu-btn"
-);
+const displayedIds = new Set();
+const senderNames = new Map();
+const latestMessages = new Map();
+const roomsCache = new Map();
+const memberships = new Set();
 
-let activeGroupRoomId = null;
-let currentGroupUserId = null;
-let groupChatChannel = null;
-let groupListChannel = null;
-let groupMenuOverlay = null;
-
-let roomLoadVersion = 0;
-let messageLoadVersion = 0;
-let sendingMessage = false;
-
-/* =========================================
-   1. 공통 함수
-========================================= */
-
-async function getGroupUserId() {
-  const { data, error } = await supabaseDev.auth.getUser();
-
-  if (error) throw error;
-
-  currentGroupUserId = data?.user?.id || null;
-  return currentGroupUserId;
+function element(tag, className = "", text) {
+  const el = document.createElement(tag);
+  if (className) el.className = className;
+  if (text !== undefined) el.textContent = text;
+  return el;
 }
 
 function displayName(profile) {
@@ -85,15 +50,13 @@ function displayName(profile) {
   );
 }
 
-function formatChatTime(value) {
+function formatTime(value) {
   if (!value) return "";
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
 
-  const today = new Date();
-
-  if (date.toDateString() === today.toDateString()) {
+  if (date.toDateString() === new Date().toDateString()) {
     return date.toLocaleTimeString("ko-KR", {
       hour: "numeric",
       minute: "2-digit"
@@ -106,294 +69,411 @@ function formatChatTime(value) {
   });
 }
 
-function makeElement(tag, className, content) {
-  const element = document.createElement(tag);
+async function getUserId() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) throw error;
 
-  if (className) element.className = className;
-  if (content !== undefined) element.textContent = content;
-
-  return element;
+  userId = data?.user?.id || null;
+  return userId;
 }
 
-function closeOverlay(overlay) {
-  if (!overlay) return;
-  overlay.remove();
+async function getProfiles(ids) {
+  const unique = [...new Set(ids.filter(Boolean))];
+  if (!unique.length) return new Map();
 
-  if (groupMenuOverlay === overlay) {
-    groupMenuOverlay = null;
-    groupMenuBtn?.setAttribute("aria-expanded", "false");
-  }
-}
-
-/* =========================================
-   2. 통합 채팅 탭 호환
-
-   index.html에서 이미 세 가지 탭을 관리하므로
-   여기서는 화면 전환을 중복 처리하지 않는다.
-========================================= */
-
-groupTab?.addEventListener("click", () => {
-  if (activeGroupRoomId) {
-    loadGroupMessages(activeGroupRoomId);
-  } else {
-    loadGroupChatRooms();
-  }
-});
-
-/* =========================================
-   3. 수락된 친구 목록 조회
-========================================= */
-
-async function loadAcceptedFriends(userId) {
-  const { data: friendships, error } = await supabaseDev
-    .from("friendships")
-    .select("requester_id, receiver_id")
-    .eq("status", "accepted")
-    .or(
-      `requester_id.eq.${userId},receiver_id.eq.${userId}`
-    );
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, nickname, real_name")
+    .in("id", unique);
 
   if (error) throw error;
 
-  const friendIds = [
-    ...new Set(
-      (friendships || [])
-        .map(friend =>
-          friend.requester_id === userId
-            ? friend.receiver_id
-            : friend.requester_id
-        )
-        .filter(Boolean)
+  const result = new Map();
+
+  for (const profile of data || []) {
+    result.set(profile.id, displayName(profile));
+    senderNames.set(profile.id, displayName(profile));
+  }
+
+  return result;
+}
+
+// =====================================
+// 친구 목록
+// =====================================
+
+async function loadFriends() {
+  const id = await getUserId();
+  if (!id) return [];
+
+  const { data, error } = await supabase
+    .from("friendships")
+    .select("requester_id, receiver_id")
+    .eq("status", "accepted")
+    .or(`requester_id.eq.${id},receiver_id.eq.${id}`);
+
+  if (error) throw error;
+
+  const ids = [...new Set(
+    (data || []).map(row =>
+      row.requester_id === id
+        ? row.receiver_id
+        : row.requester_id
     )
-  ];
+  )];
 
-  if (friendIds.length === 0) return [];
+  const names = await getProfiles(ids);
 
-  const { data: profiles, error: profileError } =
-    await supabaseDev
-      .from("profiles")
-      .select("id, nickname, real_name")
-      .in("id", friendIds);
-
-  if (profileError) throw profileError;
-
-  const profileMap = new Map(
-    (profiles || []).map(profile => [
-      profile.id,
-      profile
-    ])
-  );
-
-  return friendIds.map(id => ({
-    id,
-    name: displayName(profileMap.get(id))
+  return ids.map(friendId => ({
+    id: friendId,
+    name: names.get(friendId) || "이름 미설정"
   }));
 }
 
-/* =========================================
-   4. 친구 선택 팝업
-========================================= */
+// =====================================
+// 메시지 즉시 표시
+// =====================================
 
-function showFriendSelection({
-  title,
-  friends,
-  confirmText,
-  onConfirm
-}) {
-  const overlay = makeElement(
-    "div",
-    "group-chat-menu-overlay"
-  );
+function appendMessage(message) {
+  if (!message?.id) return;
+  if (String(message.room_id) !== String(activeRoomId)) return;
 
-  const panel = makeElement(
-    "div",
-    "group-chat-menu-panel"
-  );
+  const id = String(message.id);
+  if (displayedIds.has(id)) return;
 
-  const heading = makeElement("h3", "", title);
-  const friendList = makeElement(
-    "div",
-    "group-chat-member-list"
-  );
+  displayedIds.add(id);
 
-  const checkboxes = [];
+  messagesEl.querySelectorAll(".group-chat-empty")
+    .forEach(el => el.remove());
 
-  friends.forEach(friend => {
-    const label = makeElement(
-      "label",
-      "group-chat-member-item"
-    );
+  const mine = message.sender_id === userId;
 
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = friend.id;
+  const item = element("div");
+  item.dataset.messageId = id;
 
-    const name = makeElement(
-      "span",
-      "",
-      friend.name
-    );
-
-    label.append(checkbox, name);
-    friendList.appendChild(label);
-    checkboxes.push(checkbox);
-  });
-
-  const actions = makeElement("div");
-  actions.style.cssText = `
-    display:flex;
-    gap:10px;
-    justify-content:flex-end;
-    margin-top:18px;
+  item.style.cssText = `
+    padding:10px;
+    margin:8px 0;
+    border-radius:10px;
+    background:${mine ? "#dceaff" : "#f1f1f1"};
+    color:#222;
+    text-align:${mine ? "right" : "left"};
+    overflow-wrap:anywhere;
   `;
 
-  const cancelBtn = makeElement(
-    "button",
-    "group-chat-menu-action",
-    "취소"
+  const sender = element(
+    "strong",
+    "",
+    mine
+      ? "나"
+      : senderNames.get(message.sender_id) || "이름 확인 중..."
   );
-  cancelBtn.type = "button";
 
-  const confirmBtn = makeElement(
-    "button",
-    "group-chat-menu-action",
-    confirmText
-  );
-  confirmBtn.type = "button";
+  const content = element("div", "", message.content);
+  const time = element("small", "", formatTime(message.created_at));
 
-  actions.append(cancelBtn, confirmBtn);
-  panel.append(heading, friendList, actions);
-  overlay.appendChild(panel);
-  document.body.appendChild(overlay);
+  time.style.cssText = `
+    display:block;
+    margin-top:5px;
+    font-size:10px;
+    opacity:.6;
+  `;
 
-  const close = () => overlay.remove();
+  item.append(sender, content, time);
+  messagesEl.appendChild(item);
 
-  cancelBtn.addEventListener("click", close);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 
-  overlay.addEventListener("click", event => {
-    if (event.target === overlay) close();
-  });
+  // 이름 조회 때문에 메시지 표시를 기다리지 않는다.
+  if (!mine && !senderNames.has(message.sender_id)) {
+    getProfiles([message.sender_id])
+      .then(names => {
+        if (item.isConnected) {
+          sender.textContent =
+            names.get(message.sender_id) || "이름 미설정";
+        }
+      })
+      .catch(console.error);
+  }
+}
 
-  confirmBtn.addEventListener("click", async () => {
-    const selectedIds = checkboxes
-      .filter(checkbox => checkbox.checked)
-      .map(checkbox => checkbox.value);
+// =====================================
+// 채팅방 미리보기 즉시 갱신
+// =====================================
 
-    if (selectedIds.length === 0) {
-      alert("친구를 최소 1명 선택해주세요.");
+function updatePreview(message) {
+  const roomId = String(message.room_id);
+
+  if (!memberships.has(roomId)) return;
+
+  const previous = latestMessages.get(roomId);
+
+  if (
+    previous &&
+    new Date(previous.created_at) > new Date(message.created_at)
+  ) {
+    return;
+  }
+
+  latestMessages.set(roomId, message);
+
+  const row = [...roomList.querySelectorAll("[data-room-id]")]
+    .find(el => el.dataset.roomId === roomId);
+
+  if (!row) return;
+
+  const preview = row.querySelector(".group-chat-list-preview");
+  const time = row.querySelector(".group-chat-list-time");
+
+  if (preview) {
+    preview.textContent =
+      (message.sender_id === userId ? "나: " : "") +
+      message.content;
+  }
+
+  if (time) time.textContent = formatTime(message.created_at);
+
+  roomList.prepend(row);
+}
+
+function scheduleRefresh() {
+  clearTimeout(refreshTimer);
+
+  refreshTimer = setTimeout(() => {
+    loadRooms(true);
+  }, 350);
+}
+
+// =====================================
+// 채팅방 목록
+// =====================================
+
+async function loadRooms(silent = false) {
+  if (!roomList) return;
+
+  const version = ++roomVersion;
+
+  if (!silent && !roomList.children.length) {
+    roomList.textContent = "채팅방을 불러오는 중...";
+  }
+
+  try {
+    const id = await getUserId();
+
+    if (version !== roomVersion) return;
+
+    if (!id) {
+      roomList.textContent = "로그인이 필요합니다.";
       return;
     }
 
-    confirmBtn.disabled = true;
+    const { data: memberRows, error: memberError } =
+      await supabase
+        .from("group_chat_members")
+        .select("room_id")
+        .eq("user_id", id);
 
-    try {
-      const shouldClose = await onConfirm(selectedIds);
+    if (memberError) throw memberError;
 
-      if (shouldClose !== false) {
-        close();
-      }
-    } catch (error) {
-      console.error("친구 선택 처리 오류:", error);
-      alert("처리 실패: " + error.message);
-    } finally {
-      confirmBtn.disabled = false;
+    const ids = [...new Set(
+      (memberRows || []).map(row => row.room_id)
+    )];
+
+    memberships.clear();
+    ids.forEach(id => memberships.add(String(id)));
+
+    if (!ids.length) {
+      roomList.textContent = "참여 중인 단체 채팅방이 없습니다.";
+      return;
     }
-  });
 
-  return overlay;
-}
+    const [roomsResult, membersResult, messagesResult] =
+      await Promise.all([
+        supabase
+          .from("group_chat_rooms")
+          .select("id, name, created_at")
+          .in("id", ids),
 
-/* =========================================
-   5. 단체 채팅방 만들기
-========================================= */
+        supabase
+          .from("group_chat_members")
+          .select("room_id, user_id")
+          .in("room_id", ids),
 
-createGroupChatBtn?.addEventListener(
-  "click",
-  async () => {
-    createGroupChatBtn.disabled = true;
+        supabase
+          .from("group_chat_messages")
+          .select("id, room_id, sender_id, content, created_at")
+          .in("room_id", ids)
+          .order("created_at", { ascending: false })
+          .limit(500)
+      ]);
 
-    try {
-      const userId = await getGroupUserId();
+    if (roomsResult.error) throw roomsResult.error;
+    if (membersResult.error) throw membersResult.error;
+    if (messagesResult.error) throw messagesResult.error;
 
-      if (!userId) {
-        alert("로그인이 필요합니다.");
-        return;
+    if (version !== roomVersion) return;
+
+    const counts = new Map();
+
+    for (const member of membersResult.data || []) {
+      const key = String(member.room_id);
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+
+    for (const message of messagesResult.data || []) {
+      const key = String(message.room_id);
+      const previous = latestMessages.get(key);
+
+      if (
+        !previous ||
+        new Date(message.created_at) > new Date(previous.created_at)
+      ) {
+        latestMessages.set(key, message);
       }
+    }
 
-      const friends = await loadAcceptedFriends(userId);
+    const rooms = roomsResult.data || [];
 
-      if (friends.length === 0) {
-        alert("초대할 수 있는 친구가 없습니다.");
-        return;
-      }
+    roomsCache.clear();
+    rooms.forEach(room => roomsCache.set(String(room.id), room));
 
-      const roomName = prompt(
-        "단체 채팅방 이름을 입력하세요."
+    rooms.sort((a, b) => {
+      const timeA =
+        latestMessages.get(String(a.id))?.created_at ||
+        a.created_at;
+
+      const timeB =
+        latestMessages.get(String(b.id))?.created_at ||
+        b.created_at;
+
+      return new Date(timeB) - new Date(timeA);
+    });
+
+    const fragment = document.createDocumentFragment();
+
+    for (const room of rooms) {
+      const last = latestMessages.get(String(room.id));
+
+      const button = element("button", "group-chat-list-item");
+      button.type = "button";
+      button.dataset.roomId = String(room.id);
+
+      const avatar = element(
+        "div",
+        "group-chat-list-avatar",
+        "👥"
       );
 
-      if (roomName === null) return;
+      const info = element("div", "group-chat-list-info");
+      const title = element("div", "group-chat-list-title");
 
-      const name = roomName.trim();
+      title.append(
+        element("span", "", room.name),
+        element(
+          "span",
+          "group-chat-member-count",
+          `${counts.get(String(room.id)) || 0}명`
+        )
+      );
 
-      if (!name || name.length > 100) {
-        alert("채팅방 이름은 1~100자로 입력해주세요.");
-        return;
-      }
+      const preview = element(
+        "div",
+        "group-chat-list-preview",
+        last
+          ? `${last.sender_id === id ? "나: " : ""}${last.content}`
+          : "새로운 대화를 시작해 보세요."
+      );
 
-      showFriendSelection({
-        title: "초대할 친구 선택",
-        friends,
-        confirmText: "채팅방 만들기",
+      const time = element(
+        "span",
+        "group-chat-list-time",
+        formatTime(last?.created_at || room.created_at)
+      );
 
-        onConfirm: async selectedIds => {
-          const { data: roomId, error } =
-            await supabaseDev.rpc(
-              "create_group_chat",
-              {
-                p_name: name,
-                p_friend_ids: selectedIds
-              }
-            );
+      info.append(title, preview);
+      button.append(avatar, info, time);
 
-          if (error) throw error;
+      button.addEventListener("click", () => openRoom(room));
 
-          console.log("생성된 채팅방 ID:", roomId);
+      fragment.appendChild(button);
+    }
 
-          await loadGroupChatRooms();
-          alert("단체 채팅방이 생성되었습니다.");
+    roomList.replaceChildren(fragment);
 
-          return true;
-        }
-      });
+  } catch (error) {
+    console.error("단체 채팅 목록 오류:", error);
 
-    } catch (error) {
-      console.error("단체 채팅방 생성 오류:", error);
-      alert("채팅방 생성 실패: " + error.message);
-    } finally {
-      createGroupChatBtn.disabled = false;
+    if (version === roomVersion && !roomList.children.length) {
+      roomList.textContent = "채팅방 목록을 불러오지 못했습니다.";
     }
   }
-);
-
-/* =========================================
-   6. 실시간 채팅 관리
-========================================= */
-
-function stopGroupChatRealtime() {
-  if (!groupChatChannel) return;
-
-  const channel = groupChatChannel;
-  groupChatChannel = null;
-
-  supabaseDev.removeChannel(channel);
 }
 
-function startGroupChatRealtime(roomId) {
-  stopGroupChatRealtime();
+// =====================================
+// 메시지 기록 조회
+// =====================================
 
-  if (!roomId) return;
+async function loadMessages(roomId) {
+  const version = ++messageVersion;
 
-  groupChatChannel = supabaseDev
+  try {
+    const { data, error } = await supabase
+      .from("group_chat_messages")
+      .select("id, room_id, sender_id, content, created_at")
+      .eq("room_id", roomId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (error) throw error;
+
+    if (
+      version !== messageVersion ||
+      String(activeRoomId) !== String(roomId)
+    ) return;
+
+    const ordered = [...(data || [])].reverse();
+
+    const missingNames = [...new Set(
+      ordered.map(message => message.sender_id)
+        .filter(id => id !== userId && !senderNames.has(id))
+    )];
+
+    // 이름 조회는 메시지 표시와 병렬로 처리한다.
+    if (missingNames.length) {
+      getProfiles(missingNames).catch(console.error);
+    }
+
+    if (!ordered.length && !displayedIds.size) {
+      messagesEl.replaceChildren(
+        element("div", "group-chat-empty", "아직 메시지가 없습니다.")
+      );
+      return;
+    }
+
+    for (const message of ordered) {
+      appendMessage(message);
+    }
+
+  } catch (error) {
+    console.error("단체 채팅 메시지 조회 오류:", error);
+  }
+}
+
+// =====================================
+// Realtime
+// =====================================
+
+function stopRoomRealtime() {
+  if (roomChannel) {
+    supabase.removeChannel(roomChannel);
+    roomChannel = null;
+  }
+}
+
+function startRoomRealtime(roomId) {
+  stopRoomRealtime();
+
+  roomChannel = supabase
     .channel(`inha-group-room-${roomId}`)
     .on(
       "postgres_changes",
@@ -403,47 +483,25 @@ function startGroupChatRealtime(roomId) {
         table: "group_chat_messages",
         filter: `room_id=eq.${roomId}`
       },
-      () => {
-        if (activeGroupRoomId === roomId) {
-          loadGroupMessages(roomId);
-        }
+      payload => {
+        const message = payload.new;
 
-        loadGroupChatRooms({
-          silent: true
-        });
+        updatePreview(message);
+
+        if (String(activeRoomId) === String(roomId)) {
+          appendMessage(message);
+        }
       }
     )
     .subscribe(status => {
-      if (status === "SUBSCRIBED") {
-        console.log(
-          "단체 채팅 실시간 연결 완료:",
-          roomId
-        );
-      }
-
-      if (
-        status === "CHANNEL_ERROR" ||
-        status === "TIMED_OUT"
-      ) {
-        console.warn(
-          "단체 채팅 실시간 연결 상태:",
-          status
-        );
-      }
+      console.log("단체 채팅 Realtime:", status);
     });
 }
 
-/* =========================================
-   7. 채팅방 목록 실시간 갱신
+function startListRealtime() {
+  if (listChannel) return;
 
-   새 방에 초대되거나 참여 정보가 바뀌면
-   목록을 다시 불러온다.
-========================================= */
-
-function startGroupListRealtime() {
-  if (groupListChannel) return;
-
-  groupListChannel = supabaseDev
+  listChannel = supabase
     .channel("inha-group-list-updates")
     .on(
       "postgres_changes",
@@ -452,9 +510,7 @@ function startGroupListRealtime() {
         schema: "public",
         table: "group_chat_members"
       },
-      () => {
-        loadGroupChatRooms({ silent: true });
-      }
+      scheduleRefresh
     )
     .on(
       "postgres_changes",
@@ -463,748 +519,416 @@ function startGroupListRealtime() {
         schema: "public",
         table: "group_chat_messages"
       },
-      () => {
-        loadGroupChatRooms({ silent: true });
-      }
+      payload => updatePreview(payload.new)
     )
     .subscribe();
 }
 
-/* =========================================
-   8. 단체 채팅방 목록
-========================================= */
+// =====================================
+// 채팅방 열기 / 닫기
+// =====================================
 
-async function loadGroupChatRooms(options = {}) {
-  if (!groupRoomList) return;
-
-  const version = ++roomLoadVersion;
-
-  if (!options.silent) {
-    groupRoomList.textContent =
-      "채팅방을 불러오는 중...";
-  }
-
-  try {
-    const userId = await getGroupUserId();
-
-    if (version !== roomLoadVersion) return;
-
-    if (!userId) {
-      groupRoomList.textContent =
-        "로그인 후 이용할 수 있습니다.";
-      return;
-    }
-
-    const { data: memberships, error: memberError } =
-      await supabaseDev
-        .from("group_chat_members")
-        .select("room_id")
-        .eq("user_id", userId);
-
-    if (memberError) throw memberError;
-
-    if (version !== roomLoadVersion) return;
-
-    const roomIds = [
-      ...new Set(
-        (memberships || [])
-          .map(member => member.room_id)
-          .filter(Boolean)
-      )
-    ];
-
-    if (roomIds.length === 0) {
-      groupRoomList.textContent =
-        "참여 중인 단체 채팅방이 없습니다.";
-      return;
-    }
-
-    const [
-      roomsResult,
-      membersResult,
-      messagesResult
-    ] = await Promise.all([
-      supabaseDev
-        .from("group_chat_rooms")
-        .select("id, name, created_at")
-        .in("id", roomIds),
-
-      supabaseDev
-        .from("group_chat_members")
-        .select("room_id, user_id")
-        .in("room_id", roomIds),
-
-      supabaseDev
-        .from("group_chat_messages")
-        .select(
-          "room_id, sender_id, content, created_at"
-        )
-        .in("room_id", roomIds)
-        .order("created_at", {
-          ascending: false
-        })
-        .limit(1000)
-    ]);
-
-    if (roomsResult.error) throw roomsResult.error;
-    if (membersResult.error) throw membersResult.error;
-    if (messagesResult.error) throw messagesResult.error;
-
-    if (version !== roomLoadVersion) return;
-
-    const memberCounts = new Map();
-
-    for (const member of membersResult.data || []) {
-      memberCounts.set(
-        member.room_id,
-        (memberCounts.get(member.room_id) || 0) + 1
-      );
-    }
-
-    const latestMessages = new Map();
-
-    for (const message of messagesResult.data || []) {
-      if (!latestMessages.has(message.room_id)) {
-        latestMessages.set(
-          message.room_id,
-          message
-        );
-      }
-    }
-
-    const rooms = [...(roomsResult.data || [])];
-
-    rooms.sort((a, b) => {
-      const timeA =
-        latestMessages.get(a.id)?.created_at ||
-        a.created_at ||
-        "";
-
-      const timeB =
-        latestMessages.get(b.id)?.created_at ||
-        b.created_at ||
-        "";
-
-      return new Date(timeB) - new Date(timeA);
-    });
-
-    const fragment = document.createDocumentFragment();
-
-    for (const room of rooms) {
-      const lastMessage = latestMessages.get(room.id);
-      const memberCount = memberCounts.get(room.id) || 0;
-
-      const button = makeElement(
-        "button",
-        "group-chat-list-item"
-      );
-      button.type = "button";
-
-      const avatar = makeElement(
-        "div",
-        "group-chat-list-avatar",
-        "👥"
-      );
-
-      const info = makeElement(
-        "div",
-        "group-chat-list-info"
-      );
-
-      const title = makeElement(
-        "div",
-        "group-chat-list-title"
-      );
-
-      const name = makeElement(
-        "span",
-        "",
-        room.name
-      );
-
-      const count = makeElement(
-        "span",
-        "group-chat-member-count",
-        `${memberCount}명`
-      );
-
-      title.append(name, count);
-
-      const preview = makeElement(
-        "div",
-        "group-chat-list-preview"
-      );
-
-      preview.textContent = lastMessage
-        ? `${
-            lastMessage.sender_id === userId
-              ? "나: "
-              : ""
-          }${lastMessage.content}`
-        : "새로운 대화를 시작해 보세요.";
-
-      info.append(title, preview);
-
-      const time = makeElement(
-        "span",
-        "group-chat-list-time",
-        formatChatTime(
-          lastMessage?.created_at ||
-          room.created_at
-        )
-      );
-
-      button.append(avatar, info, time);
-
-      button.addEventListener("click", () => {
-        openGroupChatRoom(room);
-      });
-
-      fragment.appendChild(button);
-    }
-
-    groupRoomList.replaceChildren(fragment);
-
-  } catch (error) {
-    console.error(
-      "단체 채팅방 목록 오류:",
-      error
-    );
-
-    if (version === roomLoadVersion) {
-      groupRoomList.textContent =
-        "채팅방 목록을 불러오지 못했습니다.";
-    }
-  }
-}
-
-/* =========================================
-   9. 채팅방 열기
-========================================= */
-
-async function openGroupChatRoom(room) {
+async function openRoom(room) {
   if (!room?.id) return;
 
-  activeGroupRoomId = room.id;
-  messageLoadVersion++;
+  activeRoomId = room.id;
+  messageVersion++;
+  displayedIds.clear();
 
-  groupListView.hidden = true;
-  groupRoomView.hidden = false;
-  groupRoomTitle.textContent = room.name;
+  listView.hidden = true;
+  roomView.hidden = false;
+  roomTitle.textContent = room.name;
 
-  groupMessages.textContent =
-    "메시지를 불러오는 중...";
+  messagesEl.replaceChildren();
 
-  await getGroupUserId();
+  await getUserId();
 
-  if (activeGroupRoomId !== room.id) return;
+  if (String(activeRoomId) !== String(room.id)) return;
 
-  startGroupChatRealtime(room.id);
-  await loadGroupMessages(room.id);
+  startRoomRealtime(room.id);
+  await loadMessages(room.id);
 }
 
-/* =========================================
-   10. 메시지 목록 조회
-========================================= */
+function closeRoom() {
+  activeRoomId = null;
+  messageVersion++;
+  displayedIds.clear();
 
-async function loadGroupMessages(roomId) {
-  if (!groupMessages || !roomId) return;
+  stopRoomRealtime();
 
-  const version = ++messageLoadVersion;
+  roomView.hidden = true;
+  listView.hidden = false;
+  messagesEl.replaceChildren();
+
+  loadRooms(true);
+}
+
+backBtn?.addEventListener("click", closeRoom);
+
+groupTab?.addEventListener("click", () => {
+  if (activeRoomId) return;
+  loadRooms(true);
+});
+
+// =====================================
+// 메시지 전송
+// =====================================
+
+form?.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (sending || !activeRoomId) return;
+
+  const content = input.value.trim();
+  if (!content) return;
+
+  const roomId = activeRoomId;
+  const button = form.querySelector('button[type="submit"]');
+
+  sending = true;
+  if (button) button.disabled = true;
 
   try {
-    const { data: messages, error } =
-      await supabaseDev
-        .from("group_chat_messages")
-        .select(
-          "id, sender_id, content, created_at"
-        )
-        .eq("room_id", roomId)
-        .order("created_at", {
-          ascending: false
-        })
-        .limit(200);
+    const id = await getUserId();
+
+    if (!id) throw new Error("로그인이 필요합니다.");
+
+    const { data, error } = await supabase
+      .from("group_chat_messages")
+      .insert({
+        room_id: roomId,
+        sender_id: id,
+        content
+      })
+      .select("id, room_id, sender_id, content, created_at")
+      .single();
 
     if (error) throw error;
 
-    if (
-      version !== messageLoadVersion ||
-      activeGroupRoomId !== roomId
-    ) {
-      return;
+    if (data) {
+      updatePreview(data);
+      appendMessage(data);
     }
 
-    const orderedMessages = [...(messages || [])]
-      .reverse();
-
-    const senderIds = [
-      ...new Set(
-        orderedMessages
-          .map(message => message.sender_id)
-          .filter(Boolean)
-      )
-    ];
-
-    let profiles = [];
-
-    if (senderIds.length > 0) {
-      const { data, error: profileError } =
-        await supabaseDev
-          .from("profiles")
-          .select("id, nickname, real_name")
-          .in("id", senderIds);
-
-      if (profileError) {
-        console.error(
-          "작성자 프로필 조회 오류:",
-          profileError
-        );
-      } else {
-        profiles = data || [];
-      }
+    if (String(activeRoomId) === String(roomId)) {
+      input.value = "";
     }
-
-    if (
-      version !== messageLoadVersion ||
-      activeGroupRoomId !== roomId
-    ) {
-      return;
-    }
-
-    const profileMap = new Map(
-      profiles.map(profile => [
-        profile.id,
-        profile
-      ])
-    );
-
-    const fragment = document.createDocumentFragment();
-
-    if (orderedMessages.length === 0) {
-      groupMessages.textContent =
-        "아직 메시지가 없습니다.";
-      return;
-    }
-
-    for (const message of orderedMessages) {
-      const isMine =
-        message.sender_id === currentGroupUserId;
-
-      const item = makeElement("div");
-
-      item.style.cssText = `
-        padding:10px;
-        margin:8px 0;
-        border-radius:10px;
-        background:${isMine ? "#dceaff" : "#f1f1f1"};
-        color:#222;
-        text-align:${isMine ? "right" : "left"};
-        overflow-wrap:anywhere;
-      `;
-
-      const profile = profileMap.get(
-        message.sender_id
-      );
-
-      const sender = makeElement(
-        "strong",
-        "",
-        isMine ? "나" : displayName(profile)
-      );
-
-      const content = makeElement(
-        "div",
-        "",
-        message.content
-      );
-
-      const time = makeElement(
-        "small",
-        "",
-        formatChatTime(message.created_at)
-      );
-
-      time.style.cssText = `
-        display:block;
-        margin-top:5px;
-        font-size:10px;
-        opacity:.6;
-      `;
-
-      item.append(sender, content, time);
-      fragment.appendChild(item);
-    }
-
-    groupMessages.replaceChildren(fragment);
-    groupMessages.scrollTop =
-      groupMessages.scrollHeight;
 
   } catch (error) {
-    console.error("메시지 조회 오류:", error);
-
-    if (
-      version === messageLoadVersion &&
-      activeGroupRoomId === roomId
-    ) {
-      groupMessages.textContent =
-        "메시지를 불러오지 못했습니다.";
-    }
+    console.error("단체 채팅 전송 실패:", error);
+    alert("메시지 전송 실패: " + error.message);
+  } finally {
+    sending = false;
+    if (button) button.disabled = false;
   }
-}
+});
 
-/* =========================================
-   11. 메시지 전송
-========================================= */
+// =====================================
+// 친구 선택 팝업
+// =====================================
 
-groupForm?.addEventListener(
-  "submit",
-  async event => {
-    event.preventDefault();
+function selectFriends({
+  title,
+  friends,
+  confirmText,
+  onConfirm
+}) {
+  const overlay = element("div", "group-chat-menu-overlay");
+  const panel = element("div", "group-chat-menu-panel");
 
-    if (sendingMessage) return;
+  const heading = element("h3", "", title);
+  const list = element("div", "group-chat-member-list");
+  const checkboxes = [];
 
-    const roomId = activeGroupRoomId;
-    const content = groupInput?.value.trim();
+  for (const friend of friends) {
+    const label = element("label", "group-chat-member-item");
+    const checkbox = document.createElement("input");
 
-    if (!roomId || !content) return;
+    checkbox.type = "checkbox";
+    checkbox.value = friend.id;
 
-    sendingMessage = true;
+    label.append(checkbox, element("span", "", friend.name));
+    list.appendChild(label);
+    checkboxes.push(checkbox);
+  }
 
-    const submitBtn = groupForm.querySelector(
-      'button[type="submit"]'
-    );
+  const actions = element("div");
+  actions.style.cssText =
+    "display:flex;gap:10px;justify-content:flex-end;margin-top:18px";
 
-    if (submitBtn) submitBtn.disabled = true;
+  const cancel = element(
+    "button",
+    "group-chat-menu-action",
+    "취소"
+  );
+
+  const confirm = element(
+    "button",
+    "group-chat-menu-action",
+    confirmText
+  );
+
+  cancel.type = "button";
+  confirm.type = "button";
+
+  actions.append(cancel, confirm);
+  panel.append(heading, list, actions);
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+
+  cancel.onclick = close;
+  overlay.onclick = event => {
+    if (event.target === overlay) close();
+  };
+
+  confirm.onclick = async () => {
+    const ids = checkboxes
+      .filter(checkbox => checkbox.checked)
+      .map(checkbox => checkbox.value);
+
+    if (!ids.length) {
+      alert("친구를 최소 1명 선택해주세요.");
+      return;
+    }
+
+    confirm.disabled = true;
 
     try {
-      const userId = await getGroupUserId();
-
-      if (!userId) {
-        alert("로그인이 필요합니다.");
-        return;
-      }
-
-      const { error } = await supabaseDev
-        .from("group_chat_messages")
-        .insert({
-          room_id: roomId,
-          sender_id: userId,
-          content
-        });
-
-      if (error) throw error;
-
-      if (activeGroupRoomId === roomId) {
-        groupInput.value = "";
-        await loadGroupMessages(roomId);
-      }
-
-      await loadGroupChatRooms({
-        silent: true
-      });
-
+      const result = await onConfirm(ids);
+      if (result !== false) close();
     } catch (error) {
-      console.error("메시지 전송 오류:", error);
-      alert(
-        "메시지 전송 실패: " + error.message
-      );
+      alert("처리 실패: " + error.message);
     } finally {
-      sendingMessage = false;
-
-      if (submitBtn) {
-        submitBtn.disabled = false;
-      }
+      confirm.disabled = false;
     }
-  }
-);
-
-/* =========================================
-   12. 채팅방 목록으로 돌아가기
-========================================= */
-
-function closeGroupChatRoom() {
-  activeGroupRoomId = null;
-  messageLoadVersion++;
-
-  stopGroupChatRealtime();
-
-  if (groupRoomView) {
-    groupRoomView.hidden = true;
-  }
-
-  if (groupListView) {
-    groupListView.hidden = false;
-  }
-
-  if (groupMessages) {
-    groupMessages.replaceChildren();
-  }
-
-  loadGroupChatRooms();
+  };
 }
 
-groupBackBtn?.addEventListener(
-  "click",
-  closeGroupChatRoom
-);
+// =====================================
+// 단체 채팅방 생성
+// =====================================
 
-/* =========================================
-   13. 채팅방 참여자 목록
-========================================= */
+createBtn?.addEventListener("click", async () => {
+  createBtn.disabled = true;
 
-async function loadGroupMembers(roomId, container, title) {
-  const { data: members, error } =
-    await supabaseDev
-      .from("group_chat_members")
-      .select("user_id")
-      .eq("room_id", roomId);
+  try {
+    const friends = await loadFriends();
+
+    if (!friends.length) {
+      alert("초대할 수 있는 친구가 없습니다.");
+      return;
+    }
+
+    const roomName = prompt("단체 채팅방 이름을 입력하세요.");
+    if (roomName === null) return;
+
+    const name = roomName.trim();
+
+    if (!name || name.length > 100) {
+      alert("채팅방 이름은 1~100자로 입력해주세요.");
+      return;
+    }
+
+    selectFriends({
+      title: "초대할 친구 선택",
+      friends,
+      confirmText: "채팅방 만들기",
+
+      onConfirm: async ids => {
+        const { error } = await supabase.rpc(
+          "create_group_chat",
+          {
+            p_name: name,
+            p_friend_ids: ids
+          }
+        );
+
+        if (error) throw error;
+
+        await loadRooms(true);
+        alert("단체 채팅방이 생성되었습니다.");
+        return true;
+      }
+    });
+
+  } catch (error) {
+    alert("채팅방 생성 실패: " + error.message);
+  } finally {
+    createBtn.disabled = false;
+  }
+});
+
+// =====================================
+// 참여자 확인
+// =====================================
+
+async function loadMembers(roomId, container, title) {
+  const { data, error } = await supabase
+    .from("group_chat_members")
+    .select("user_id")
+    .eq("room_id", roomId);
 
   if (error) throw error;
 
-  const memberIds = (members || [])
-    .map(member => member.user_id);
-
-  let profiles = [];
-
-  if (memberIds.length > 0) {
-    const result = await supabaseDev
-      .from("profiles")
-      .select("id, nickname, real_name")
-      .in("id", memberIds);
-
-    if (result.error) throw result.error;
-
-    profiles = result.data || [];
-  }
+  const ids = (data || []).map(row => row.user_id);
+  const names = await getProfiles(ids);
 
   if (!container.isConnected) return;
 
-  const profileMap = new Map(
-    profiles.map(profile => [
-      profile.id,
-      profile
-    ])
-  );
-
-  title.textContent =
-    `대화 상대 ${memberIds.length}명`;
+  title.textContent = `대화 상대 ${ids.length}명`;
 
   const fragment = document.createDocumentFragment();
 
-  for (const id of memberIds) {
-    const row = makeElement(
-      "div",
-      "group-chat-member-item"
+  for (const id of ids) {
+    const row = element("div", "group-chat-member-item");
+
+    row.append(
+      element("div", "group-chat-member-avatar", "👤"),
+      element(
+        "span",
+        "",
+        (names.get(id) || "이름 미설정") +
+        (id === userId ? " (나)" : "")
+      )
     );
 
-    const avatar = makeElement(
-      "div",
-      "group-chat-member-avatar",
-      "👤"
-    );
-
-    const profile = profileMap.get(id);
-
-    const name = makeElement(
-      "span",
-      "",
-      id === currentGroupUserId
-        ? `${displayName(profile)} (나)`
-        : displayName(profile)
-    );
-
-    row.append(avatar, name);
     fragment.appendChild(row);
   }
 
   container.replaceChildren(fragment);
 }
 
-/* =========================================
-   14. 친구 초대하기
-========================================= */
+// =====================================
+// 친구 초대
+// =====================================
 
-async function inviteFriendsToGroup(roomId, closeMenu) {
-  const userId = await getGroupUserId();
+async function inviteFriends(roomId, closeMenu) {
+  const friends = await loadFriends();
 
-  if (!userId) {
-    alert("로그인이 필요합니다.");
-    return;
-  }
-
-  const friends = await loadAcceptedFriends(userId);
-
-  const { data: members, error } =
-    await supabaseDev
-      .from("group_chat_members")
-      .select("user_id")
-      .eq("room_id", roomId);
+  const { data, error } = await supabase
+    .from("group_chat_members")
+    .select("user_id")
+    .eq("room_id", roomId);
 
   if (error) throw error;
 
   const memberIds = new Set(
-    (members || []).map(member => member.user_id)
+    (data || []).map(row => row.user_id)
   );
 
-  const availableFriends = friends.filter(
+  const available = friends.filter(
     friend => !memberIds.has(friend.id)
   );
 
-  if (availableFriends.length === 0) {
+  if (!available.length) {
     alert("초대할 수 있는 친구가 없습니다.");
     return;
   }
 
-  showFriendSelection({
+  selectFriends({
     title: "친구 초대하기",
-    friends: availableFriends,
+    friends: available,
     confirmText: "선택한 친구 초대",
 
-    onConfirm: async selectedIds => {
-      let invitedCount = 0;
+    onConfirm: async ids => {
+      let count = 0;
 
       try {
-        for (const friendId of selectedIds) {
-          const { error: inviteError } =
-            await supabaseDev.rpc(
-              "invite_group_chat_friend",
-              {
-                p_room_id: roomId,
-                p_friend_id: friendId
-              }
-            );
+        for (const friendId of ids) {
+          const { error } = await supabase.rpc(
+            "invite_group_chat_friend",
+            {
+              p_room_id: roomId,
+              p_friend_id: friendId
+            }
+          );
 
-          if (inviteError) throw inviteError;
-
-          invitedCount++;
+          if (error) throw error;
+          count++;
         }
 
         closeMenu();
+        scheduleRefresh();
 
-        await loadGroupChatRooms({
-          silent: true
-        });
-
-        alert(
-          `${invitedCount}명의 친구를 초대했습니다.`
-        );
-
+        alert(`${count}명의 친구를 초대했습니다.`);
         return true;
 
       } catch (error) {
-        console.error("친구 초대 오류:", error);
-
-        alert(
-          `${invitedCount}명 초대 완료. ` +
-          `나머지 초대 중 오류: ${error.message}`
-        );
-
-        await loadGroupChatRooms({
-          silent: true
-        });
-
+        alert(`${count}명 초대 완료. 오류: ${error.message}`);
+        scheduleRefresh();
         return false;
       }
     }
   });
 }
 
-/* =========================================
-   15. 채팅방 나가기
-========================================= */
+// =====================================
+// 채팅방 나가기
+// =====================================
 
-async function leaveGroupChat(roomId, closeMenu) {
-  const confirmed = confirm(
-    "정말 채팅방을 나가시겠습니까?\n" +
-    "나가면 내 채팅 목록에서 이 방이 사라집니다."
-  );
+async function leaveRoom(roomId, closeMenu) {
+  if (!window.confirm("정말 채팅방을 나가시겠습니까?")) return;
 
-  if (!confirmed) return;
-
-  const { error } = await supabaseDev.rpc(
+  const { error } = await supabase.rpc(
     "leave_group_chat",
-    {
-      p_room_id: roomId
-    }
+    { p_room_id: roomId }
   );
 
   if (error) throw error;
 
-  stopGroupChatRealtime();
   closeMenu();
-  closeGroupChatRoom();
+  closeRoom();
+  scheduleRefresh();
 
   alert("채팅방에서 나갔습니다.");
 }
 
-/* =========================================
-   16. 채팅방 관리 메뉴
-========================================= */
+// =====================================
+// 채팅방 메뉴
+// =====================================
 
-async function openGroupChatMenu() {
-  if (!activeGroupRoomId) return;
+async function openMenu() {
+  if (!activeRoomId) return;
 
-  if (groupMenuOverlay) {
-    closeOverlay(groupMenuOverlay);
+  if (menuOverlay) {
+    menuOverlay.remove();
+    menuOverlay = null;
   }
 
-  const roomId = activeGroupRoomId;
+  const roomId = activeRoomId;
 
-  const overlay = makeElement(
-    "div",
-    "group-chat-menu-overlay"
-  );
+  const overlay = element("div", "group-chat-menu-overlay");
+  const panel = element("div", "group-chat-menu-panel");
+  const header = element("div", "group-chat-menu-header");
 
-  const panel = makeElement(
-    "div",
-    "group-chat-menu-panel"
-  );
-
-  const header = makeElement(
-    "div",
-    "group-chat-menu-header"
-  );
-
-  const title = makeElement(
-    "h3",
-    "",
-    "채팅방 서랍"
-  );
-
-  const closeBtn = makeElement(
-    "button",
-    "",
-    "✕"
-  );
+  const title = element("h3", "", "채팅방 서랍");
+  const closeBtn = element("button", "", "✕");
   closeBtn.type = "button";
-  closeBtn.setAttribute("aria-label", "닫기");
 
   header.append(title, closeBtn);
 
-  const memberTitle = makeElement(
-    "h4",
-    "",
-    "대화 상대"
-  );
-
-  const memberList = makeElement(
+  const memberTitle = element("h4", "", "대화 상대");
+  const memberList = element(
     "div",
     "group-chat-member-list",
     "참여자를 불러오는 중..."
   );
 
-  const inviteBtn = makeElement(
+  const inviteBtn = element(
     "button",
     "group-chat-menu-action",
     "＋ 친구 초대하기"
   );
-  inviteBtn.type = "button";
 
-  const leaveBtn = makeElement(
+  const leaveBtn = element(
     "button",
     "group-chat-menu-action group-chat-leave-btn",
     "채팅방 나가기"
   );
+
+  inviteBtn.type = "button";
   leaveBtn.type = "button";
 
   panel.append(
@@ -1218,151 +942,97 @@ async function openGroupChatMenu() {
   overlay.appendChild(panel);
   document.body.appendChild(overlay);
 
-  groupMenuOverlay = overlay;
-
-  groupMenuBtn?.setAttribute(
-    "aria-expanded",
-    "true"
-  );
+  menuOverlay = overlay;
+  menuBtn?.setAttribute("aria-expanded", "true");
 
   const closeMenu = () => {
-    closeOverlay(overlay);
+    overlay.remove();
+
+    if (menuOverlay === overlay) {
+      menuOverlay = null;
+      menuBtn?.setAttribute("aria-expanded", "false");
+    }
   };
 
-  closeBtn.addEventListener(
-    "click",
-    closeMenu
-  );
+  closeBtn.onclick = closeMenu;
 
-  overlay.addEventListener("click", event => {
-    if (event.target === overlay) {
-      closeMenu();
+  overlay.onclick = event => {
+    if (event.target === overlay) closeMenu();
+  };
+
+  inviteBtn.onclick = async () => {
+    inviteBtn.disabled = true;
+
+    try {
+      await inviteFriends(roomId, closeMenu);
+    } catch (error) {
+      alert("친구 초대 실패: " + error.message);
+    } finally {
+      inviteBtn.disabled = false;
     }
-  });
+  };
+
+  leaveBtn.onclick = async () => {
+    leaveBtn.disabled = true;
+
+    try {
+      await leaveRoom(roomId, closeMenu);
+    } catch (error) {
+      alert("채팅방 나가기 실패: " + error.message);
+    } finally {
+      leaveBtn.disabled = false;
+    }
+  };
 
   try {
-    await getGroupUserId();
-
-    await loadGroupMembers(
-      roomId,
-      memberList,
-      memberTitle
-    );
-
+    await getUserId();
+    await loadMembers(roomId, memberList, memberTitle);
   } catch (error) {
-    console.error("참여자 조회 오류:", error);
-
-    if (overlay.isConnected) {
-      memberList.textContent =
-        "참여자 목록을 불러오지 못했습니다.";
-    }
-  }
-
-  inviteBtn.addEventListener(
-    "click",
-    async () => {
-      inviteBtn.disabled = true;
-
-      try {
-        await inviteFriendsToGroup(
-          roomId,
-          closeMenu
-        );
-      } catch (error) {
-        console.error("친구 초대 오류:", error);
-        alert(
-          "친구 초대 실패: " + error.message
-        );
-      } finally {
-        inviteBtn.disabled = false;
-      }
-    }
-  );
-
-  leaveBtn.addEventListener(
-    "click",
-    async () => {
-      leaveBtn.disabled = true;
-
-      try {
-        await leaveGroupChat(
-          roomId,
-          closeMenu
-        );
-      } catch (error) {
-        console.error("채팅방 나가기 오류:", error);
-        alert(
-          "채팅방 나가기 실패: " + error.message
-        );
-      } finally {
-        leaveBtn.disabled = false;
-      }
-    }
-  );
-}
-
-/* =========================================
-   17. 관리 메뉴 버튼
-========================================= */
-
-groupMenuBtn?.addEventListener(
-  "click",
-  () => {
-    if (groupMenuOverlay) {
-      closeOverlay(groupMenuOverlay);
-    } else {
-      openGroupChatMenu();
-    }
-  }
-);
-
-/* =========================================
-   18. 초기화
-========================================= */
-
-async function initializeGroupChat() {
-  try {
-    const userId = await getGroupUserId();
-
-    if (!userId) return;
-
-    await loadGroupChatRooms();
-    startGroupListRealtime();
-
-  } catch (error) {
-    console.error(
-      "단체 채팅 초기화 오류:",
-      error
-    );
+    memberList.textContent = "참여자를 불러오지 못했습니다.";
+    console.error(error);
   }
 }
 
-window.addEventListener(
-  "inhaGoLoginSuccess",
-  initializeGroupChat
-);
+menuBtn?.addEventListener("click", () => {
+  if (menuOverlay) {
+    menuOverlay.remove();
+    menuOverlay = null;
+    menuBtn.setAttribute("aria-expanded", "false");
+  } else {
+    openMenu();
+  }
+});
+
+// =====================================
+// 초기화
+// =====================================
+
+async function initialize() {
+  try {
+    const id = await getUserId();
+    if (!id) return;
+
+    await loadRooms();
+    startListRealtime();
+
+  } catch (error) {
+    console.error("단체 채팅 초기화 오류:", error);
+  }
+}
+
+window.addEventListener("inhaGoLoginSuccess", initialize);
 
 if (document.readyState === "loading") {
-  document.addEventListener(
-    "DOMContentLoaded",
-    initializeGroupChat
-  );
+  document.addEventListener("DOMContentLoaded", initialize);
 } else {
-  initializeGroupChat();
+  initialize();
 }
 
-/* =========================================
-   19. 페이지 종료 시 구독 정리
-========================================= */
+window.addEventListener("pagehide", () => {
+  stopRoomRealtime();
 
-window.addEventListener(
-  "pagehide",
-  () => {
-    stopGroupChatRealtime();
-
-    if (groupListChannel) {
-      supabaseDev.removeChannel(groupListChannel);
-      groupListChannel = null;
-    }
+  if (listChannel) {
+    supabase.removeChannel(listChannel);
+    listChannel = null;
   }
-);
+});
