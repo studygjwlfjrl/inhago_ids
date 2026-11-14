@@ -322,6 +322,7 @@ messages.forEach(message => {
 
 
     container.scrollTop = container.scrollHeight;
+    window.dispatchEvent(new CustomEvent('inhaGoRoomRead', {detail:{type:'dm',id:String(friendId)}}));
   }
 
   function subscribeRealtime(friendId) {
