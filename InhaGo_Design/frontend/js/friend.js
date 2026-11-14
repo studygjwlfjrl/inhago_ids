@@ -121,6 +121,39 @@ import { supabase as supabaseDev } from "./supabase.js";
     return button;
   }
 
+async function openFriendProfile(userId) {
+  const { data: profile, error } = await supabaseDev
+    .from("profiles")
+    .select("real_name, department, manner_score")
+    .eq("id", userId)
+    .single();
+
+  if (error || !profile) {
+    alert("친구 프로필을 불러오지 못했습니다.");
+    console.error(error);
+    return;
+  }
+
+  const score = Number(profile.manner_score ?? 100);
+
+  const grade =
+    score >= 95 ? "A+" :
+    score >= 84 ? "A0" :
+    score >= 73 ? "B+" :
+    score >= 62 ? "B0" :
+    score >= 50 ? "C+" :
+    score >= 39 ? "C0" :
+    score >= 28 ? "D+" :
+    score >= 11 ? "D0" : "F";
+
+  alert(
+    `이름: ${profile.real_name || "이름 미등록"}\n` +
+    `학과: ${profile.department || "학과 미등록"}\n` +
+    `매너 점수: ${score}점\n` +
+    `매너 학점: ${grade}`
+  );
+}
+
   function createUserRow(user, buttons) {
     const row = document.createElement("div");
     row.className = "friend-item";
@@ -128,10 +161,19 @@ import { supabase as supabaseDev } from "./supabase.js";
     const info = document.createElement("div");
     info.className = "friend-info";
 
-    const name = document.createElement("strong");
-    name.textContent = user.name;
+    
+const name = document.createElement("strong");
+name.textContent = user.name;
 
-    const department = document.createElement("small");
+name.style.cursor = "pointer";
+name.title = "친구 프로필 보기";
+
+name.addEventListener("click", () => {
+  openFriendProfile(user.id);
+});
+
+const department = document.createElement("small");
+
     department.textContent = `학과: ${user.department || "학과 미설정"}`;
 
     info.append(name, department);
