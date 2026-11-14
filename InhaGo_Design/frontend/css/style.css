@@ -1785,3 +1785,125 @@ dialog::backdrop {
 .friend-profile-message:hover {
   background: #2e55b8;
 }
+
+/* InhaGo 비룡탑 로그인 화면 */
+#auth-panel.inhago-login {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  z-index: 2147483647 !important;
+  overflow: hidden !important;
+  isolation: isolate;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  background-color: #263b5a;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.12) 0%,
+      transparent 35%,
+      transparent 70%,
+      rgba(0, 0, 0, 0.4) 100%
+    ),
+    url("../assets/login-background.png");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+#auth-panel .login-content {
+  width: 100%;
+  max-width: 560px;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11vh 24px 5vh;
+}
+
+#auth-panel .login-brand {
+  color: white;
+  text-align: center;
+}
+
+#auth-panel .login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+}
+
+#auth-panel .login-logo .login-pin-icon {
+  width: 42px;
+  height: 42px;
+  color: white;
+  flex-shrink: 0;
+}
+
+#auth-panel .login-brand p {
+  margin-top: 16px;
+  color: white;
+  font-size: 17px;
+}
+
+#auth-panel .login-bottom {
+  width: 100%;
+  text-align: center;
+}
+
+#auth-panel .google-login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 18px;
+  margin: 0 auto;
+  background: white;
+  border: none;
+  border-radius: 12px;
+  color: #111;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+#auth-panel .google-login-button svg {
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+}
+
+#auth-panel .login-notice {
+  margin-top: 16px;
+  color: white;
+  font-size: 13px;
+  line-height: 1.5;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+}
+
+#auth-panel #auth-message {
+  margin-top: 12px;
+  color: white;
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  #auth-panel .login-content {
+    padding: 10vh 24px 5vh;
+  }
+
+  #auth-panel .login-brand p {
+    font-size: 16px;
+  }
+}
