@@ -517,3 +517,173 @@ groupTab?.addEventListener("click", () => {
   }
 });
 
+/* =========================================
+   5. 단체 채팅방 관리 메뉴
+========================================= */
+
+const groupMenuBtn =
+  document.getElementById("group-chat-menu-btn");
+
+let groupMenuOverlay = null;
+
+async function openGroupChatMenu() {
+  if (!activeGroupRoomId) return;
+
+  const roomId = activeGroupRoomId;
+
+  const overlay = document.createElement("div");
+  overlay.className = "group-chat-menu-overlay";
+
+  const panel = document.createElement("div");
+  panel.className = "group-chat-menu-panel";
+
+  const header = document.createElement("div");
+  header.className = "group-chat-menu-header";
+
+  const title = document.createElement("h3");
+  title.textContent = "채팅방 서랍";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.textContent = "✕";
+  closeBtn.setAttribute("aria-label", "닫기");
+
+  header.append(title, closeBtn);
+
+  const memberTitle = document.createElement("h4");
+  memberTitle.textContent = "대화 상대";
+
+  const memberList = document.createElement("div");
+  memberList.className = "group-chat-member-list";
+  memberList.textContent = "참여자를 불러오는 중...";
+
+  const inviteBtn = document.createElement("button");
+  inviteBtn.type = "button";
+  inviteBtn.className = "group-chat-menu-action";
+  inviteBtn.textContent = "＋ 친구 초대하기";
+
+  const leaveBtn = document.createElement("button");
+  leaveBtn.type = "button";
+  leaveBtn.className =
+    "group-chat-menu-action group-chat-leave-btn";
+  leaveBtn.textContent = "채팅방 나가기";
+
+  panel.append(
+    header,
+    memberTitle,
+    memberList,
+    inviteBtn,
+    leaveBtn
+  );
+
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+
+  groupMenuOverlay = overlay;
+  groupMenuBtn?.setAttribute("aria-expanded", "true");
+
+  function closeMenu() {
+    overlay.remove();
+
+    if (groupMenuOverlay === overlay) {
+      groupMenuOverlay = null;
+      groupMenuBtn?.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  closeBtn.addEventListener("click", closeMenu);
+
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) closeMenu();
+  });
+
+  try {
+    const { data: members, error: memberError } =
+      await supabaseDev
+        .from("group_chat_members")
+        .select("user_id")
+        .eq("room_id", roomId);
+
+    if (memberError) throw memberError;
+
+    const memberIds = (members || []).map(m => m.user_id);
+
+    let profiles = [];
+
+    if (memberIds.length > 0) {
+      const { data, error } = await supabaseDev
+        .from("profiles")
+        .select("id, nickname, real_name")
+        .in("id", memberIds);
+
+      if (error) throw error;
+      profiles = data || [];
+    }
+
+    if (!overlay.isConnected) return;
+
+    const profileMap = new Map(
+      profiles.map(p => [p.id, p])
+    );
+
+    memberList.replaceChildren();
+
+    memberTitle.textContent =
+      `대화 상대 ${memberIds.length}명`;
+
+    for (const id of memberIds) {
+      const row = document.createElement("div");
+      row.className = "group-chat-member-item";
+
+      const avatar = document.createElement("div");
+      avatar.className = "group-chat-member-avatar";
+      avatar.textContent = "👤";
+
+      const name = document.createElement("span");
+
+      const profile = profileMap.get(id);
+
+      const displayName =
+        profile?.nickname ||
+        profile?.real_name ||
+        "이름 미설정";
+
+      name.textContent =
+        id === currentGroupUserId
+          ? `${displayName} (나)`
+          : displayName;
+
+      row.append(avatar, name);
+      memberList.appendChild(row);
+    }
+
+  } catch (error) {
+    console.error("참여자 조회 오류:", error);
+
+    if (overlay.isConnected) {
+      memberList.textContent =
+        "참여자 목록을 불러오지 못했습니다.";
+    }
+  }
+
+  // 다음 단계에서 실제 친구 초대 기능 연결
+  inviteBtn.addEventListener("click", () => {
+    alert("다음 단계에서 친구 초대 기능을 연결할게요.");
+  });
+
+  // 다음 단계에서 채팅방 나가기 기능 연결
+  leaveBtn.addEventListener("click", () => {
+    alert("다음 단계에서 채팅방 나가기 기능을 연결할게요.");
+  });
+}
+
+groupMenuBtn?.addEventListener("click", () => {
+  if (groupMenuOverlay) {
+    groupMenuOverlay.remove();
+    groupMenuOverlay = null;
+    groupMenuBtn.setAttribute("aria-expanded", "false");
+  } else {
+    openGroupChatMenu();
+  }
+});
+
