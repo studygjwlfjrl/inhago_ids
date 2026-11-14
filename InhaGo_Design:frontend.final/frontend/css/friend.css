@@ -1,0 +1,101 @@
+
+/* InhaGo 친구 관리 화면 */
+
+.friend-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.friend-section {
+  background: #f8fbff;
+  border: 1px solid #e4eef8;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.friend-section h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  color: #152f56;
+}
+
+.friend-search {
+  display: flex;
+  gap: 10px;
+}
+
+.friend-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #d6e4f4;
+  border-radius: 12px;
+}
+
+.friend-btn {
+  background: #2084f6;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.friend-btn:hover {
+  background: #1166d0;
+}
+
+.friend-btn.secondary {
+  background: #e7f0fa;
+  color: #245b9c;
+}
+
+.friend-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #e4eef8;
+}
+
+.friend-item:last-child {
+  border-bottom: none;
+}
+
+.friend-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.friend-info strong {
+  color: #152f56;
+}
+
+.friend-info small {
+  color: #7890aa;
+}
+
+.friend-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 700px) {
+  .friend-section {
+    padding: 15px;
+  }
+
+  .friend-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .friend-actions {
+    width: 100%;
+  }
+}

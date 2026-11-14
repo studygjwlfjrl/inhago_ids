@@ -1,0 +1,102 @@
+
+/* InhaGo 1:1 쪽지 화면 */
+
+.message-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.message-section {
+  background: #f8fbff;
+  border: 1px solid #e4eef8;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.message-section h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  color: #152f56;
+}
+
+.message-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message-form select,
+.message-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d6e4f4;
+  border-radius: 12px;
+  background: white;
+}
+
+.message-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.message-btn {
+  background: #2084f6;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.message-btn:hover {
+  background: #1166d0;
+}
+
+.message-item {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: white;
+  border: 1px solid #e4eef8;
+  border-radius: 14px;
+}
+
+.message-item strong {
+  color: #152f56;
+}
+
+.message-item p {
+  margin: 10px 0;
+  color: #365576;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.message-time {
+  font-size: 12px;
+  color: #7890aa;
+}
+
+.message-empty {
+  color: #7890aa;
+  text-align: center;
+  padding: 20px;
+}
+
+@media (max-width: 700px) {
+  .message-section {
+    padding: 15px;
+  }
+
+  .message-form textarea {
+    min-height: 100px;
+  }
+}
+
+#dm-list-view[hidden],#dm-room[hidden]{display:none!important}
+.dm-room-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.dm-room-header h2{margin:0}
+.dm-back-btn{border:1px solid #d6e4f4;background:white;color:#152f56;padding:9px 12px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer}
+.dm-sender-name{display:block;font-size:12px;color:#365576;margin-bottom:5px}
+#dm-room .chat-messages{height:min(58vh,580px);min-height:300px}

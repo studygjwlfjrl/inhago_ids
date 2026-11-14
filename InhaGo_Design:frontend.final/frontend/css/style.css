@@ -1,0 +1,898 @@
+
+/* ========================================
+   1. 기본 설정
+======================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #eaf5ff;
+  color: #152f56;
+  font-family: Pretendard, "Noto Sans KR", Arial, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #6bbaff;
+  outline-offset: 2px;
+}
+
+/* ========================================
+   2. 전체 레이아웃 및 헤더
+======================================== */
+
+.app {
+  max-width: 1700px;
+  margin: auto;
+  padding: 18px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 0 12px 16px;
+}
+
+.brand {
+  text-decoration: none;
+  font-size: 37px;
+  font-weight: 900;
+  color: #1457ad;
+  letter-spacing: -2px;
+  text-shadow: 1px 2px white;
+}
+
+.brand span {
+  font-size: 22px;
+}
+
+.search {
+  margin: auto;
+  background: #fff;
+  box-shadow: 0 6px 24px #b8d7ee70;
+  border-radius: 40px;
+  padding: 13px 20px;
+  display: flex;
+  gap: 12px;
+  max-width: 600px;
+  flex: 1;
+  font-size: 22px;
+  color: #8199b7;
+}
+
+.search input {
+  border: 0;
+  outline: 0;
+  width: 100%;
+  min-width: 0;
+  color: #244268;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: 0;
+  font-weight: 700;
+  color: #254d83;
+}
+
+.account img {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #b8dcff;
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 330px;
+  gap: 16px;
+  min-height: 690px;
+}
+
+/* ========================================
+   3. 사이드바 및 메뉴 아이콘
+======================================== */
+
+.sidebar,
+aside {
+  background: #fff;
+  border-radius: 24px;
+  padding: 16px;
+  box-shadow: 0 8px 24px #a9c6e43b;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.sidebar > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  border-radius: 15px;
+  padding: 14px;
+  text-align: left;
+  color: #5b7599;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.sidebar > button.active,
+.sidebar > button:hover {
+  background: #e6f3ff;
+  color: #1678ef;
+}
+
+.sidebar > button span {
+  margin-left: 0;
+}
+
+.sidebar > button .lucide {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  stroke-width: 2;
+}
+
+.greeting {
+  margin-top: auto;
+  text-align: center;
+  padding: 16px 0;
+  background: linear-gradient(#fff, #e5f4ff);
+  border-radius: 20px;
+}
+
+.greeting img {
+  width: 130px;
+  height: 160px;
+  object-fit: contain;
+}
+
+.greeting strong,
+.greeting small {
+  display: block;
+}
+
+.greeting small {
+  color: #7290ae;
+  margin-top: 8px;
+}
+
+/* ========================================
+   4. 메인 화면 및 지도
+======================================== */
+
+main {
+  min-width: 0;
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.page:not(#home) {
+  background: #fff;
+  min-height: 680px;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 8px 24px #a9c6e43b;
+}
+
+.page h1 {
+  margin: 0 0 12px;
+  font-size: 27px;
+}
+
+.map {
+  height: 640px;
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #b5e0b2 url('../assets/campus-map.png') center/cover;
+  box-shadow: 0 8px 24px #a9c6e43b;
+}
+
+.weather,
+.legend {
+  position: absolute;
+  background: #fffffff0;
+  border-radius: 20px;
+  padding: 10px 16px;
+  font-weight: 700;
+  box-shadow: 0 4px 16px #1a5b8830;
+}
+
+.weather {
+  top: 16px;
+  right: 16px;
+}
+
+.legend {
+  bottom: 16px;
+  left: 16px;
+  font-size: 14px;
+}
+
+.map-note {
+  font-size: 12px;
+  color: #6c87a5;
+  margin: 8px 4px;
+}
+
+/* ========================================
+   5. 지도 모임 핀 - Lucide 원형 아이콘
+======================================== */
+
+.pin {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transform: translate(-50%, -50%);
+  rotate: none;
+
+  border: 4px solid #ffffff;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+
+  color: #ffffff;
+  box-shadow: 0 8px 14px #224f8155;
+  z-index: 2;
+}
+
+.pin .lucide {
+  width: 28px;
+  height: 28px;
+  stroke-width: 2.3;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.pin.food {
+  background: #ff9948;
+}
+
+.pin.exercise {
+  background: #2886ef;
+}
+
+.pin.study {
+  background: #9264f5;
+}
+
+.pin.taxi {
+  background: #ffc32d;
+}
+
+/* 지도 플레이어 */
+
+.player {
+  position: absolute;
+  left: 49%;
+  top: 54%;
+  transform: translate(-50%, -50%);
+  width: 118px;
+  text-align: center;
+  background: #9cdeff88;
+  border: 3px solid #ffffffba;
+  border-radius: 50%;
+  padding: 6px;
+  box-shadow: 0 0 0 12px #5ab6f84d;
+}
+
+.player img {
+  height: 105px;
+  width: 95px;
+}
+
+.player span {
+  display: block;
+  background: #fff;
+  border-radius: 15px;
+  padding: 4px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* ========================================
+   6. 주변 모임 목록
+======================================== */
+
+.aside-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e6eef8;
+}
+
+.aside-title h2 {
+  font-size: 20px;
+}
+
+.aside-title small,
+.muted {
+  color: #7890aa;
+}
+
+.meeting {
+  display: flex;
+  gap: 12px;
+  padding: 17px 0;
+  border-bottom: 1px solid #edf2f9;
+  cursor: pointer;
+}
+
+.meeting:hover {
+  background: #f6fbff;
+}
+
+.meeting-icon {
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  color: white;
+  font-size: 23px;
+}
+
+.meeting-icon.food {
+  background: #ff9948;
+}
+
+.meeting-icon.exercise {
+  background: #2886ef;
+}
+
+.meeting-icon.study {
+  background: #9264f5;
+}
+
+.meeting-icon.taxi {
+  background: #ffc32d;
+}
+
+.meeting-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.meeting-info strong {
+  font-size: 14px;
+}
+
+.meeting-info p {
+  margin: 6px 0;
+  color: #7890aa;
+  font-size: 12px;
+}
+
+.meeting-info small {
+  color: #55779e;
+}
+
+/* ========================================
+   7. 버튼 및 입력폼
+======================================== */
+
+.primary {
+  border: 0;
+  background: #2084f6;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 14px;
+  font-weight: 800;
+}
+
+.primary:hover {
+  background: #1166d0;
+}
+
+.wide {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.mini-score {
+  background: #eef7ff;
+  padding: 15px;
+  border-radius: 16px;
+  margin-top: 18px;
+}
+
+.mini-score span,
+.mini-score b {
+  display: block;
+}
+
+.mini-score b {
+  font-size: 24px;
+  color: #1678ef;
+  margin: 6px 0;
+}
+
+.mini-score button,
+.secondary {
+  border: 0;
+  background: #e7f0fa;
+  padding: 9px 12px;
+  border-radius: 12px;
+  color: #245b9c;
+  font-weight: 700;
+}
+
+.panel {
+  background: #f8fbff;
+  border: 1px solid #e4eef8;
+  border-radius: 20px;
+  padding: 22px;
+  margin: 18px 0;
+}
+
+.form {
+  max-width: 550px;
+}
+
+label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+label input,
+label select,
+label textarea {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+  border: 1px solid #d6e4f4;
+  border-radius: 12px;
+  padding: 12px;
+  background: white;
+}
+
+/* ========================================
+   8. 마이페이지
+======================================== */
+
+.profile-top {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.profile-top img {
+  width: 105px;
+  height: 105px;
+  border-radius: 24px;
+  background: #cfeaff;
+}
+
+.profile-top h2 {
+  margin: 0;
+}
+
+.score-card {
+  background: linear-gradient(130deg, #e9f7ff, #f7fbff);
+}
+
+.score-heading {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 800;
+}
+
+.score-tag {
+  display: inline-block;
+  color: #1870d7;
+  background: #e2f1ff;
+  border-radius: 14px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.score-number strong {
+  font-size: 62px;
+  color: #1978ee;
+}
+
+.score-number span {
+  font-size: 23px;
+  color: #8ea6be;
+}
+
+.progress {
+  height: 12px;
+  background: #dbe7f3;
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+.progress > div {
+  height: 100%;
+  background: linear-gradient(90deg, #48c2ff, #2179ff);
+  width: 92%;
+  transition: width .2s;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.stats div {
+  background: #fff;
+  border-radius: 16px;
+  text-align: center;
+  padding: 17px;
+}
+
+.stats b,
+.stats span {
+  display: block;
+}
+
+.stats b {
+  font-size: 26px;
+  color: #247aef;
+}
+
+.stats span {
+  color: #7890aa;
+  font-size: 13px;
+}
+
+/* ========================================
+   9. 알림 및 모달
+======================================== */
+
+.notice {
+  background: #fff6e8;
+  color: #91632b;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.results .meeting {
+  padding: 20px;
+  border-radius: 15px;
+}
+
+.modal-inner {
+  padding: 24px;
+  min-width: min(360px, 85vw);
+}
+
+dialog {
+  border: 0;
+  border-radius: 24px;
+  box-shadow: 0 20px 70px #1d4c7a55;
+}
+
+dialog::backdrop {
+  background: #163d63a0;
+}
+
+.close {
+  float: right;
+  border: 0;
+  background: #e8f2fc;
+  border-radius: 50%;
+  font-size: 25px;
+  width: 34px;
+  height: 34px;
+}
+
+.modal-icon {
+  font-size: 40px;
+}
+
+.modal-inner p {
+  color: #607e9e;
+}
+
+#toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #143e6a;
+  color: white;
+  border-radius: 20px;
+  padding: 12px 22px;
+  display: none;
+  z-index: 20;
+}
+
+/* ========================================
+   10. 태블릿 반응형
+======================================== */
+
+@media (max-width: 1150px) {
+  .shell {
+    grid-template-columns: 170px minmax(0, 1fr);
+  }
+
+  aside {
+    grid-column: 2;
+  }
+
+  .sidebar {
+    grid-row: 1 / 3;
+  }
+
+  .map {
+    height: 550px;
+  }
+}
+
+/* ========================================
+   11. 모바일 반응형
+======================================== */
+
+@media (max-width: 700px) {
+  .app {
+    padding: 8px;
+  }
+
+  header {
+    gap: 8px;
+  }
+
+  .brand {
+    font-size: 26px;
+  }
+
+  .search {
+    padding: 8px;
+  }
+
+  .account span {
+    display: none;
+  }
+
+  .shell {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 모바일 하단 메뉴 */
+
+  .sidebar {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    overflow-x: auto;
+    padding: 8px 4px;
+    gap: 0;
+    order: 2;
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    scrollbar-width: none;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sidebar > button {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 2px;
+    border-radius: 12px;
+  }
+
+  .sidebar > button .lucide {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  .sidebar > button span,
+  .greeting {
+    display: none;
+  }
+
+  /* 모바일 지도 */
+
+  .map {
+    height: 480px;
+  }
+
+  .legend {
+    font-size: 11px;
+  }
+
+  /* 모바일 페이지 */
+
+  .page:not(#home) {
+    min-height: 480px;
+    padding: 18px;
+  }
+
+  aside {
+    order: 1;
+  }
+
+  /* 모바일 프로필 */
+
+  .profile-top {
+    gap: 10px;
+  }
+
+  .profile-top img {
+    width: 76px;
+    height: 76px;
+  }
+}
+
+/* ========================================
+   12. 모임 종류 선택 Lucide 아이콘
+======================================== */
+
+.meeting-type-native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.meeting-type-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 9px;
+}
+
+.meeting-type-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 13px 4px;
+  border: 2px solid #d6e4f4;
+  border-radius: 14px;
+  background: #fff;
+  color: #4f6989;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background .15s, border-color .15s;
+}
+
+.meeting-type-option .lucide {
+  width: 25px;
+  height: 25px;
+  stroke-width: 2.2;
+}
+
+.meeting-type-option[data-type="food"] .lucide {
+  color: #ff9948;
+}
+
+.meeting-type-option[data-type="exercise"] .lucide {
+  color: #2886ef;
+}
+
+.meeting-type-option[data-type="study"] .lucide {
+  color: #9264f5;
+}
+
+.meeting-type-option[data-type="taxi"] .lucide {
+  color: #d9a000;
+}
+
+.meeting-type-option.selected {
+  border-color: #2084f6;
+  background: #eaf5ff;
+  color: #1457ad;
+}
+
+.meeting-type-option:hover {
+  background: #f2f9ff;
+}
+
+/* 지도 범례 아이콘 */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.legend .lucide {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.2;
+}
+
+.legend > span:nth-child(1) .lucide {
+  color: #ff9948;
+}
+
+.legend > span:nth-child(2) .lucide {
+  color: #2886ef;
+}
+
+.legend > span:nth-child(3) .lucide {
+  color: #9264f5;
+}
+
+.legend > span:nth-child(4) .lucide {
+  color: #d9a000;
+}
+
+
+/* 주변 모임 및 상세 모달 Lucide 아이콘 */
+
+.meeting-icon .lucide {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2.2;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.modal-icon.meeting-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+
+.modal-icon.meeting-icon .lucide {
+  width: 30px;
+  height: 30px;
+}

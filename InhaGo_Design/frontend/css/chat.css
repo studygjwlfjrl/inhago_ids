@@ -1,0 +1,176 @@
+
+/* InhaGo 모임별 채팅 화면 */
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chat-section {
+  background: #f8fbff;
+  border: 1px solid #e4eef8;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.chat-section h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  color: #152f56;
+}
+
+/* 채팅방 목록 */
+
+.chat-room-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
+  background: white;
+  border: 1px solid #e4eef8;
+  border-radius: 14px;
+}
+
+.chat-room-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chat-room-info small {
+  color: #7890aa;
+}
+
+/* 버튼 */
+
+.chat-btn {
+  background: #2084f6;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chat-btn:hover {
+  background: #1166d0;
+}
+
+/* 채팅 메시지 영역 */
+
+.chat-messages {
+  height: 350px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #e4eef8;
+  border-radius: 14px;
+  padding: 15px;
+}
+
+.chat-message {
+  margin-bottom: 14px;
+  max-width: 80%;
+}
+
+.chat-message.mine {
+  margin-left: auto;
+  text-align: right;
+}
+
+.chat-message .chat-bubble {
+  display: inline-block;
+  background: #e7f0fa;
+  padding: 12px 15px;
+  border-radius: 14px;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.chat-message.mine .chat-bubble {
+  background: #2084f6;
+  color: white;
+}
+
+.chat-message small {
+  display: block;
+  color: #7890aa;
+  margin-top: 5px;
+  font-size: 11px;
+}
+
+/* 메시지 입력 영역 */
+
+.chat-form {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.chat-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #d6e4f4;
+  border-radius: 12px;
+}
+
+.chat-empty {
+  color: #7890aa;
+  text-align: center;
+  padding: 20px;
+}
+
+/* 모바일 화면 */
+
+@media (max-width: 700px) {
+  .chat-section {
+    padding: 15px;
+  }
+
+  .chat-room-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chat-room-item .chat-btn {
+    width: 100%;
+  }
+
+  .chat-messages {
+    height: 300px;
+  }
+
+  .chat-message {
+    max-width: 90%;
+  }
+}
+
+
+/* 선택하기 전에는 채팅방을 숨김 */
+#chat-room[hidden] {
+  display: none;
+}
+
+#chat-list-view[hidden],#chat-room[hidden]{display:none!important}
+.chat-room-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.chat-room-header h2{margin:0}
+.chat-back-btn{background:#fff;border:1px solid #d6e4f4;border-radius:10px;padding:9px 12px;color:#152f56;cursor:pointer;font:inherit;font-weight:700}
+#chat-room .chat-messages{height:min(58vh,580px);min-height:300px}
+
+/* Conversation list and full-page chat layout */
+#chat-page .chat-container{gap:0}
+#chat-page .chat-section{border:0;background:transparent;padding:0}
+#chat-page .chat-room-item{cursor:pointer;flex-direction:row;align-items:center;padding:18px 14px;border:0;border-bottom:1px solid #e4eef8;border-radius:0;margin:0;background:#fff}
+#chat-page .chat-room-item:hover,#chat-page .chat-room-item:focus-visible{background:#edf5ff}
+#chat-page .chat-room-info strong{font-size:16px}
+#chat-page .chat-room-arrow{font-size:28px;color:#7890aa}
+#chat-page .chat-room-header{position:sticky;top:0;z-index:2;background:#fff;padding:14px 0;border-bottom:1px solid #e4eef8}
+#chat-page #chat-room .chat-messages{height:min(58vh,620px);min-height:320px;border:0;background:#fff}
+#chat-page .chat-sender-name{display:block;font-size:12px;color:#365576;margin-bottom:5px}
+#chat-page .chat-form{position:sticky;bottom:0;background:#fff;padding:12px 0;margin:0}
+@media(max-width:700px){#chat-page .chat-room-item{flex-direction:row}#chat-page .chat-room-item .chat-btn{width:auto}}

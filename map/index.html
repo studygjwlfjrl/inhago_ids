@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>IDS 캠퍼스 지도</title>
+  <link rel="stylesheet" href="./map.css">
+</head>
+<body>
+
+  <header>
+    <h2>IDS 캠퍼스 지도</h2>
+    <button id="locationBtn">내 위치</button>
+  </header>
+
+  <nav id="filters">
+    <button data-category="all">전체</button>
+    <button data-category="meal">밥약</button>
+    <button data-category="taxi">택시팟</button>
+    <button data-category="study">스터디</button>
+    <button data-category="exercise">운동</button>
+  </nav>
+
+  <!-- 지도가 표시되는 영역 -->
+  <div id="map"></div>
+
+  <!-- 상태 및 오류 메시지 -->
+  <p id="status" role="status"></p>
+
+  <!-- 모임 정보 바텀시트 -->
+  <section id="bottomSheet" hidden>
+    <button id="closeBtn">닫기</button>
+    <h3 id="meetingTitle"></h3>
+    <p id="meetingInfo"></p>
+  </section>
+
+  <script src="./config.js"></script>
+  <script src="./map.js"></script>
+
+</body>
+</html>

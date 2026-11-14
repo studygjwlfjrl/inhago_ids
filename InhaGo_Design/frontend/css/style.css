@@ -1,1 +1,1665 @@
-*{box-sizing:border-box}body{margin:0;background:#eaf5ff;color:#152f56;font-family:Pretendard,"Noto Sans KR",Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #6bbaff;outline-offset:2px}.app{max-width:1700px;margin:auto;padding:18px}header{display:flex;align-items:center;gap:30px;padding:0 12px 16px}.brand{text-decoration:none;font-size:37px;font-weight:900;color:#1457ad;letter-spacing:-2px;text-shadow:1px 2px white}.brand span{font-size:22px}.search{margin:auto;background:#fff;box-shadow:0 6px 24px #b8d7ee70;border-radius:40px;padding:13px 20px;display:flex;gap:12px;max-width:600px;flex:1;font-size:22px;color:#8199b7}.search input{border:0;outline:0;width:100%;min-width:0;color:#244268}.account{display:flex;align-items:center;gap:10px;background:transparent;border:0;font-weight:700;color:#254d83}.account img{width:46px;height:46px;border-radius:50%;background:#b8dcff}.shell{display:grid;grid-template-columns:220px minmax(0,1fr) 330px;gap:16px;min-height:690px}.sidebar,aside{background:#fff;border-radius:24px;padding:16px;box-shadow:0 8px 24px #a9c6e43b}.sidebar{display:flex;flex-direction:column;gap:7px}.sidebar>button{border:0;background:transparent;border-radius:15px;padding:14px;text-align:left;color:#5b7599;font-weight:700;font-size:17px}.sidebar>button.active,.sidebar>button:hover{background:#e6f3ff;color:#1678ef}.sidebar>button span{margin-left:9px}.greeting{margin-top:auto;text-align:center;padding:16px 0;background:linear-gradient(#fff,#e5f4ff);border-radius:20px}.greeting img{width:130px;height:160px;object-fit:contain}.greeting strong,.greeting small{display:block}.greeting small{color:#7290ae;margin-top:8px}main{min-width:0}.page{display:none}.page.active{display:block}.page:not(#home){background:#fff;min-height:680px;border-radius:24px;padding:28px;box-shadow:0 8px 24px #a9c6e43b}.page h1{margin:0 0 12px;font-size:27px}.map{height:640px;position:relative;border-radius:24px;overflow:hidden;background:#b5e0b2 url('../assets/campus-map.png') center/cover;box-shadow:0 8px 24px #a9c6e43b}.weather,.legend{position:absolute;background:#fffffff0;border-radius:20px;padding:10px 16px;font-weight:700;box-shadow:0 4px 16px #1a5b8830}.weather{top:16px;right:16px}.legend{bottom:16px;left:16px;font-size:14px}.map-note{font-size:12px;color:#6c87a5;margin:8px 4px}.pin{position:absolute;transform:translate(-50%,-50%);border:4px solid white;width:62px;height:62px;border-radius:50% 50% 50% 5%;rotate:-45deg;box-shadow:0 8px 14px #224f8155;font-size:25px;z-index:2}.pin::first-letter{rotate:45deg}.food{background:#ff9948}.exercise{background:#2886ef}.study{background:#9264f5}.taxi{background:#ffc32d}.player{position:absolute;left:49%;top:54%;transform:translate(-50%,-50%);width:118px;text-align:center;background:#9cdeff88;border:3px solid #ffffffba;border-radius:50%;padding:6px;box-shadow:0 0 0 12px #5ab6f84d}.player img{height:105px;width:95px}.player span{display:block;background:#fff;border-radius:15px;padding:4px;font-size:12px;font-weight:800}.aside-title{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e6eef8}.aside-title h2{font-size:20px}.aside-title small,.muted{color:#7890aa}.meeting{display:flex;gap:12px;padding:17px 0;border-bottom:1px solid #edf2f9;cursor:pointer}.meeting:hover{background:#f6fbff}.meeting-icon{border-radius:15px;display:grid;place-items:center;width:44px;height:44px;flex-shrink:0;color:white;font-size:23px}.meeting-icon.food{background:#ff9948}.meeting-icon.exercise{background:#2886ef}.meeting-icon.study{background:#9264f5}.meeting-icon.taxi{background:#ffc32d}.meeting-info{flex:1;min-width:0}.meeting-info strong{font-size:14px}.meeting-info p{margin:6px 0;color:#7890aa;font-size:12px}.meeting-info small{color:#55779e}.primary{border:0;background:#2084f6;color:#fff;padding:12px 20px;border-radius:14px;font-weight:800}.primary:hover{background:#1166d0}.wide{width:100%;margin-top:16px}.mini-score{background:#eef7ff;padding:15px;border-radius:16px;margin-top:18px}.mini-score span,.mini-score b{display:block}.mini-score b{font-size:24px;color:#1678ef;margin:6px 0}.mini-score button,.secondary{border:0;background:#e7f0fa;padding:9px 12px;border-radius:12px;color:#245b9c;font-weight:700}.panel{background:#f8fbff;border:1px solid #e4eef8;border-radius:20px;padding:22px;margin:18px 0}.form{max-width:550px}label{display:block;font-weight:700;margin-bottom:14px}label input,label select,label textarea{display:block;width:100%;margin-top:7px;border:1px solid #d6e4f4;border-radius:12px;padding:12px;background:white}.profile-top{display:flex;align-items:center;gap:20px}.profile-top img{width:105px;height:105px;border-radius:24px;background:#cfeaff}.profile-top h2{margin:0}.score-card{background:linear-gradient(130deg,#e9f7ff,#f7fbff)}.score-heading{display:flex;justify-content:space-between;font-weight:800}.score-tag{display:inline-block;color:#1870d7;background:#e2f1ff;border-radius:14px;padding:5px 10px;font-size:12px}.score-number strong{font-size:62px;color:#1978ee}.score-number span{font-size:23px;color:#8ea6be}.progress{height:12px;background:#dbe7f3;border-radius:30px;overflow:hidden}.progress>div{height:100%;background:linear-gradient(90deg,#48c2ff,#2179ff);width:92%;transition:width .2s}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stats div{background:#fff;border-radius:16px;text-align:center;padding:17px}.stats b,.stats span{display:block}.stats b{font-size:26px;color:#247aef}.stats span{color:#7890aa;font-size:13px}.notice{background:#fff6e8;color:#91632b;padding:12px;border-radius:12px;font-size:13px}.results .meeting{padding:20px;border-radius:15px}.modal-inner{padding:24px;min-width:min(360px,85vw)}dialog{border:0;border-radius:24px;box-shadow:0 20px 70px #1d4c7a55}dialog::backdrop{background:#163d63a0}.close{float:right;border:0;background:#e8f2fc;border-radius:50%;font-size:25px;width:34px;height:34px}.modal-icon{font-size:40px}.modal-inner p{color:#607e9e}#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#143e6a;color:white;border-radius:20px;padding:12px 22px;display:none;z-index:20}@media(max-width:1150px){.shell{grid-template-columns:170px minmax(0,1fr)}aside{grid-column:2}.sidebar{grid-row:1/3}.map{height:550px}}@media(max-width:700px){.app{padding:8px}header{gap:8px}.brand{font-size:26px}.search{padding:8px}.account span{display:none}.shell{display:flex;flex-direction:column}.sidebar{flex-direction:row;overflow:auto;padding:8px;gap:0;order:2;position:sticky;bottom:0;z-index:4}.sidebar>button{font-size:20px;min-width:54px;text-align:center;padding:10px}.sidebar>button span,.greeting{display:none}.map{height:480px}.page:not(#home){min-height:480px;padding:18px}aside{order:1}.legend{font-size:11px}.profile-top{gap:10px}.profile-top img{width:76px;height:76px}}
+
+/* =========================================
+   InhaGo - iOS Style v2
+   ========================================= */
+
+:root {
+  --blue: #1677f2;
+  --blue-dark: #075bd4;
+  --navy: #101b33;
+  --muted: #64748b;
+  --background: #f7f9ff;
+  --white: #ffffff;
+  --border: #e9edf5;
+  --shadow: 0 8px 25px rgba(30, 60, 110, 0.08);
+  --font: "Pretendard", -apple-system,
+    BlinkMacSystemFont, "Apple SD Gothic Neo",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--navy);
+  background: #e9edf5;
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.app {
+  position: relative;
+  max-width: 480px;
+  min-height: 100vh;
+  margin: auto;
+  padding-bottom: 110px;
+  background: var(--background);
+  box-shadow: 0 0 45px rgba(20, 35, 65, 0.12);
+}
+
+/* ---------- Header ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 25px 24px 16px;
+  background: #f9fbff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--navy);
+  font-size: 30px;
+  font-weight: 850;
+  letter-spacing: -1.5px;
+  text-decoration: none;
+}
+
+.brand svg {
+  width: 28px;
+  height: 28px;
+  color: var(--blue);
+  stroke-width: 3;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.icon-button,
+.avatar-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.icon-button svg {
+  width: 26px;
+  height: 26px;
+}
+
+.notification-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+.avatar-button img {
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  background: #e5dfff;
+  object-fit: cover;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  padding: 22px 24px 20px;
+  background:
+    radial-gradient(
+      circle at 110% 85%,
+      rgba(124, 176, 255, 0.38),
+      transparent 62%
+    ),
+    linear-gradient(145deg, #f9fbff, #eef4ff);
+}
+
+.hero[hidden] {
+  display: none !important;
+}
+
+.hero.search-mode {
+  padding-top: 12px;
+}
+
+.hero.search-mode .hero-intro {
+  display: none;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(26px, 7vw, 34px);
+  line-height: 1.4;
+  font-weight: 850;
+  letter-spacing: -1.3px;
+}
+
+.hero h1 span {
+  color: #0867e7;
+}
+
+.hero-intro > p {
+  margin: 13px 0 23px;
+  color: #63728e;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* ---------- Search ---------- */
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 40px;
+  background: white;
+  box-shadow: var(--shadow);
+}
+
+.search svg {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+  color: var(--navy);
+}
+
+.search input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--navy);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.search input::placeholder {
+  color: #8190a9;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 1;
+}
+
+/* ---------- Categories ---------- */
+
+.categories {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  margin: 20px -24px 0;
+  padding: 0 24px 5px;
+  scrollbar-width: none;
+}
+
+.categories::-webkit-scrollbar {
+  display: none;
+}
+
+.category-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+  min-height: 43px;
+  padding: 0 13px;
+  border: 1px solid #edf1f7;
+  border-radius: 30px;
+  background: white;
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 750;
+  box-shadow: 0 3px 10px rgba(30, 60, 100, 0.05);
+}
+
+.category-chip svg {
+  width: 17px;
+  height: 17px;
+}
+
+.category-chip[data-category="food"] svg {
+  color: #ff8b2c;
+}
+
+.category-chip[data-category="exercise"] svg {
+  color: #2586f6;
+}
+
+.category-chip[data-category="study"] svg {
+  color: #9556f4;
+}
+
+.category-chip[data-category="taxi"] svg {
+  color: #f2b600;
+}
+
+.category-chip.active {
+  border-color: var(--blue);
+  background: linear-gradient(135deg, #55a2ff, #0867ec);
+  color: white;
+}
+
+.category-chip.active svg {
+  color: white;
+}
+
+/* ---------- Pages ---------- */
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+/* ---------- Map ---------- */
+
+.map {
+  position: relative;
+  height: 270px;
+  margin: 0 18px 18px;
+  overflow: hidden;
+  border-radius: 25px;
+  background:
+    #d8ebd0
+    url("../assets/campus-map.png")
+    center / cover no-repeat;
+  box-shadow: var(--shadow);
+}
+
+.map-location {
+  position: absolute;
+  top: 14px;
+  left: 12px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  max-width: calc(100% - 24px);
+  padding: 10px 12px;
+  border-radius: 30px;
+  background: white;
+  box-shadow: var(--shadow);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.map-location svg {
+  width: 16px;
+  height: 16px;
+  color: var(--blue);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #27c58c;
+}
+
+.pin {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border: 4px solid white;
+  border-radius: 50% 50% 50% 8px;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  box-shadow: 0 5px 12px rgba(20, 50, 90, 0.2);
+  color: white;
+}
+
+.pin svg {
+  width: 21px;
+  height: 21px;
+  transform: rotate(45deg);
+}
+
+.food,
+.meeting-icon.food {
+  background: #ff8b34;
+}
+
+.exercise,
+.meeting-icon.exercise {
+  background: #2789f8;
+}
+
+.study,
+.meeting-icon.study {
+  background: #9957ed;
+}
+
+.taxi,
+.meeting-icon.taxi {
+  background: #ffbe16;
+}
+
+.my-location {
+  position: absolute;
+  top: 65%;
+  left: 50%;
+  width: 19px;
+  height: 19px;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: #1677f2;
+  box-shadow:
+    0 0 0 11px rgba(22, 119, 242, 0.13),
+    0 0 0 24px rgba(22, 119, 242, 0.07);
+  transform: translate(-50%, -50%);
+}
+
+.locate-button {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: white;
+  color: var(--blue);
+  box-shadow: var(--shadow);
+}
+
+.locate-button svg {
+  width: 23px;
+  height: 23px;
+}
+
+/* ---------- Nearby Meetings ---------- */
+
+.nearby {
+  min-height: 260px;
+  padding: 13px 18px 24px;
+  border-radius: 30px 30px 0 0;
+  background: #fff;
+}
+
+.sheet-handle {
+  width: 39px;
+  height: 5px;
+  margin: 0 auto 20px;
+  border-radius: 10px;
+  background: #d7deea;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 13px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 850;
+  letter-spacing: -0.5px;
+}
+
+.section-heading h2 span {
+  margin-left: 3px;
+  color: #68758b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.more-button {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  color: #5b667b;
+  font-size: 12px;
+}
+
+.more-button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.meeting-list {
+  display: grid;
+  gap: 11px;
+}
+
+.meeting {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 15px 13px;
+  border: 1px solid #f1f3f8;
+  border-radius: 21px;
+  background: white;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.meeting-icon {
+  display: grid;
+  place-items: center;
+  width: 53px;
+  height: 53px;
+  flex-shrink: 0;
+  border-radius: 17px;
+  color: white;
+}
+
+.meeting-icon svg {
+  width: 25px;
+  height: 25px;
+}
+
+.meeting-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.meeting-info strong {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.meeting-info p,
+.meeting-info small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 4px 0;
+  color: #69758a;
+  font-size: 11px;
+}
+
+.meeting-info svg {
+  width: 14px;
+  height: 14px;
+}
+
+.meeting-arrow {
+  width: 19px;
+  height: 19px;
+  color: #5c687b;
+}
+
+/* ---------- Bottom Navigation ---------- */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  width: min(100%, 480px);
+  padding: 9px 8px max(10px, env(safe-area-inset-bottom));
+  border-top: 1px solid #edf0f5;
+  border-radius: 23px 23px 0 0;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 -5px 24px rgba(30, 60, 100, 0.07);
+  transform: translateX(-50%);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 5px 1px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: #536076;
+}
+
+.nav-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 35px;
+  border-radius: 14px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.nav-item > span:last-child {
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.nav-item.active {
+  color: var(--blue);
+}
+
+.nav-item.active .nav-icon {
+  background: #e8f1ff;
+  color: var(--blue);
+}
+
+.nav-item.active .nav-icon svg {
+  stroke-width: 2.7;
+}
+
+/* ---------- Subpages ---------- */
+
+.subpage {
+  min-height: 65vh;
+  padding: 26px 20px 40px;
+  background: white;
+}
+
+.page-heading {
+  margin-bottom: 24px;
+}
+
+.page-heading > p {
+  margin: 0 0 8px;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.3px;
+}
+
+.page-heading h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.page-heading > span,
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.panel {
+  margin: 15px 0;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: #f9fbff;
+}
+
+.panel h2 {
+  font-size: 17px;
+}
+
+/* ---------- Redesigned Forms ---------- */
+
+.styled-form {
+  display: grid;
+  gap: 15px;
+}
+
+.form-card,
+.review-card {
+  padding: 21px 19px;
+  border: 1px solid #edf1f7;
+  border-radius: 23px;
+  background: #fff;
+  box-shadow: 0 5px 22px rgba(30, 60, 110, 0.05);
+}
+
+.form-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.form-section-icon {
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: #e8f1ff;
+  color: var(--blue);
+}
+
+.form-section-icon svg {
+  width: 21px;
+  height: 21px;
+}
+
+.form-section-heading h2 {
+  margin: 0 0 5px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.form-section-heading p {
+  margin: 0;
+  color: #8793a5;
+  font-size: 11px;
+}
+
+.field {
+  display: block;
+  margin-bottom: 19px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field-title {
+  display: block;
+  margin-bottom: 9px;
+  color: #25334d;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.field-title em {
+  color: var(--blue);
+  font-style: normal;
+}
+
+.field input,
+.field select,
+.field textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 14px 15px;
+  border: 1px solid #e5eaf2;
+  border-radius: 14px;
+  outline: none;
+  background: #f8faff;
+  color: var(--navy);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: #9ba6b7;
+  opacity: 1;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: #7cb5ff;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(22, 119, 242, 0.08);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 115px;
+}
+
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 15px;
+  background: var(--blue);
+  padding: 15px 18px;
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.primary svg {
+  width: 18px;
+  height: 18px;
+}
+
+.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wide {
+  width: 100%;
+}
+
+.submit-button {
+  min-height: 51px;
+  margin-top: 2px;
+  box-shadow: 0 6px 15px rgba(22, 119, 242, 0.17);
+}
+
+.secondary {
+  margin-top: 12px;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: #e8f1ff;
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.notice {
+  padding: 13px;
+  border-radius: 12px;
+  background: #fff7e9;
+  color: #92642b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.form-help {
+  margin: 0 0 15px;
+  color: #8b96a8;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* ---------- Friends ---------- */
+
+.friend-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.friend-item:last-child {
+  border-bottom: 0;
+}
+
+.friend-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: var(--blue);
+  font-weight: 800;
+}
+
+.friend-item strong {
+  font-size: 14px;
+}
+
+.friend-item p {
+  margin: 5px 0 0;
+}
+
+.demo-tag {
+  margin-left: auto;
+  padding: 5px 9px;
+  border-radius: 10px;
+  background: #e8f1ff;
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+/* ---------- Profile ---------- */
+
+.profile-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-top img {
+  width: 75px;
+  height: 75px;
+  border-radius: 20px;
+  background: #dbeafe;
+}
+
+.profile-top h2 {
+  margin: 0;
+}
+
+.score-card {
+  background: linear-gradient(135deg, #eaf3ff, #fff);
+}
+
+.score-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.score-number {
+  margin: 13px 0;
+}
+
+.score-number strong {
+  color: var(--blue);
+  font-size: 54px;
+}
+
+.score-number span {
+  color: #8995a9;
+  font-size: 21px;
+}
+
+.progress {
+  height: 11px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #dbe5f3;
+}
+
+.progress > div {
+  width: 92%;
+  height: 100%;
+  background: linear-gradient(90deg, #60a5fa, #1677f2);
+}
+
+#score-label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin-bottom: 19px;
+}
+
+.stats > div {
+  padding: 17px 7px;
+  border-radius: 16px;
+  background: #eff6ff;
+  text-align: center;
+}
+
+.stats b,
+.stats span {
+  display: block;
+}
+
+.stats b {
+  color: var(--blue);
+  font-size: 23px;
+}
+
+.stats span {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.review-card {
+  margin-bottom: 16px;
+}
+
+.review-card .form-section-heading {
+  margin-bottom: 24px;
+}
+
+.reset-button {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 12px;
+  text-decoration: underline;
+}
+
+/* ---------- Modal & Toast ---------- */
+
+dialog {
+  width: min(400px, calc(100vw - 30px));
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(15, 35, 70, 0.3);
+}
+
+dialog::backdrop {
+  background: rgba(10, 25, 50, 0.5);
+}
+
+.modal-inner {
+  padding: 24px;
+}
+
+.modal-inner h2 {
+  font-size: 20px;
+}
+
+.modal-inner p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.modal-icon {
+  margin: 15px 0;
+  font-size: 35px;
+}
+
+.close {
+  float: right;
+  display: grid;
+  place-items: center;
+  width: 33px;
+  height: 33px;
+  border: 0;
+  border-radius: 50%;
+  background: #edf3fb;
+}
+
+.close svg {
+  width: 18px;
+  height: 18px;
+}
+
+#toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  z-index: 40;
+  display: none;
+  width: max-content;
+  max-width: 90vw;
+  padding: 13px 17px;
+  border-radius: 15px;
+  background: #17243b;
+  color: white;
+  font-size: 12px;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 370px) {
+  .topbar {
+    padding-inline: 18px;
+  }
+
+  .hero {
+    padding-inline: 18px;
+  }
+
+  .categories {
+    margin-inline: -18px;
+    padding-inline: 18px;
+  }
+
+  .hero h1 {
+    font-size: 26px;
+  }
+
+  .map {
+    height: 245px;
+    margin-inline: 12px;
+  }
+
+  .bottom-nav {
+    padding-inline: 3px;
+  }
+
+  .nav-item > span:last-child {
+    font-size: 9px;
+  }
+
+  .nav-icon {
+    width: 38px;
+  }
+}
+
+@media (min-width: 700px) {
+  .app {
+    margin-top: 25px;
+    margin-bottom: 25px;
+    min-height: calc(100vh - 50px);
+    border-radius: 30px;
+    overflow: hidden;
+  }
+}
+
+
+/* =========================================
+   InhaGo - Design Fix v3
+   하단 메뉴 / 탐색 / 친구 / 만들기
+   ========================================= */
+
+/* 1. 하단 메뉴: iPhone 시안처럼 자연스러운 선택 효과 */
+
+.bottom-nav {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: center;
+  gap: 0;
+  min-height: 82px;
+  padding: 10px 8px max(12px, env(safe-area-inset-bottom));
+  border-radius: 24px 24px 0 0;
+  overflow: visible;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  min-height: 60px;
+  padding: 4px 0;
+  border-radius: 16px;
+  background: transparent;
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 48px);
+  height: 37px;
+  flex-shrink: 0;
+  border-radius: 19px;
+  background: transparent;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.nav-icon svg {
+  display: block;
+  width: 23px;
+  height: 23px;
+  flex-shrink: 0;
+}
+
+.nav-item.active {
+  background: transparent;
+  color: var(--blue);
+}
+
+.nav-item.active .nav-icon {
+  background: #e8f1ff;
+  color: var(--blue);
+}
+
+.nav-item > span:last-child {
+  display: block;
+  line-height: 1.3;
+  font-size: 10px;
+  text-align: center;
+}
+
+/* 2. 탐색 화면: 검색창과 목록 사이 여백 정리 */
+
+.hero.search-mode {
+  padding: 12px 20px 16px;
+}
+
+.hero.search-mode .hero-intro {
+  display: none;
+}
+
+.hero.search-mode .categories {
+  margin: 15px -20px 0;
+  padding: 0 20px 4px;
+}
+
+#search-page {
+  min-height: calc(100vh - 280px);
+  padding: 22px 18px 35px;
+  background: #ffffff;
+}
+
+#search-page .page-heading {
+  margin-bottom: 18px;
+}
+
+#search-page .page-heading h1 {
+  font-size: 23px;
+  margin-bottom: 5px;
+}
+
+#search-page .meeting-list {
+  gap: 12px;
+}
+
+/* 3. 친구 검색 */
+
+.friend-search {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  border: 1px solid #e5eaf2;
+  border-radius: 16px;
+  background: #f5f8fe;
+}
+
+.friend-search svg {
+  width: 20px;
+  height: 20px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.friend-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--navy);
+  font-family: var(--font);
+  font-size: 13px;
+}
+
+.friend-search input::placeholder {
+  color: #94a3b8;
+}
+
+.friend-empty {
+  padding: 25px 10px;
+  color: #64748b;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* 4. 모임 만들기: 하나의 큰 카드 */
+
+#create-page {
+  background: #f8faff;
+}
+
+#create-form {
+  display: block;
+  padding: 21px 19px;
+  border: 1px solid #edf1f7;
+  border-radius: 24px;
+  background: white;
+  box-shadow: 0 8px 24px rgba(30, 60, 110, 0.06);
+}
+
+#create-form .form-card {
+  padding: 0 0 22px;
+  margin: 0 0 22px;
+  border: 0;
+  border-bottom: 1px solid #edf1f7;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#create-form .form-card:last-of-type {
+  padding-bottom: 0;
+  margin-bottom: 20px;
+  border-bottom: 0;
+}
+
+#create-form .form-section-heading {
+  margin-bottom: 18px;
+}
+
+#create-form .field {
+  margin-bottom: 16px;
+}
+
+#create-form .field:last-child {
+  margin-bottom: 0;
+}
+
+#create-form .submit-button {
+  width: 100%;
+  margin-top: 5px;
+}
+
+/* 좁은 모바일에서도 선택 배경이 잘리지 않도록 */
+
+@media (max-width: 370px) {
+  .bottom-nav {
+    padding-inline: 5px;
+  }
+
+  .nav-icon {
+    width: min(100%, 42px);
+    height: 35px;
+  }
+
+  .nav-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+}
+
+#friend-list .friend-item[hidden],
+#friend-empty[hidden] {
+  display: none !important;
+}
+
+/* =========================================
+   InhaGo - Soft Blue Design v4
+   ========================================= */
+
+/* 홈·탐색 배경을 자연스럽게 연결 */
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse at 105% 25%,
+      rgba(130, 177, 255, 0.32) 0%,
+      rgba(194, 216, 255, 0.19) 42%,
+      transparent 78%
+    ),
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #f8fbff 58%,
+      #f4f8ff 100%
+    );
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -120px;
+  right: -190px;
+  width: 420px;
+  height: 350px;
+  border-radius: 50%;
+  background: rgba(126, 178, 255, 0.12);
+  transform: rotate(-20deg);
+  pointer-events: none;
+}
+
+/* 홈 지도 위쪽의 급격한 색상 경계 제거 */
+#home {
+  padding-top: 14px;
+  background: linear-gradient(
+    180deg,
+    #f4f8ff 0%,
+    #f8fbff 190px,
+    #ffffff 340px
+  );
+}
+
+#home .map {
+  margin-top: 0;
+}
+
+/* 탐색 탭도 동일한 배경 톤 적용 */
+.hero.search-mode {
+  background:
+    radial-gradient(
+      ellipse at 105% 10%,
+      rgba(130, 177, 255, 0.25),
+      transparent 75%
+    ),
+    linear-gradient(
+      180deg,
+      #ffffff,
+      #f5f9ff
+    );
+}
+
+#search-page {
+  background: linear-gradient(
+    180deg,
+    #f5f9ff 0%,
+    #ffffff 240px
+  );
+}
+
+/* 카테고리 기본 색상 */
+.category-chip {
+  border: 1px solid #e7eefb;
+  background: rgba(255, 255, 255, 0.94);
+  color: #263858;
+  box-shadow: 0 4px 12px rgba(38, 90, 160, 0.055);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* 선택된 카테고리는 부드러운 파란색 */
+.category-chip.active {
+  border-color: #78b1ff;
+  background: linear-gradient(
+    135deg,
+    #459bff,
+    #1677f2
+  );
+  color: white;
+  box-shadow: 0 5px 13px rgba(22, 119, 242, 0.16);
+}
+
+/* 카테고리별 아이콘 색상 통일 */
+.category-chip[data-category="food"]:not(.active) svg {
+  color: #f58a3b;
+}
+
+.category-chip[data-category="exercise"]:not(.active) svg {
+  color: #398cf0;
+}
+
+.category-chip[data-category="study"]:not(.active) svg {
+  color: #9765e8;
+}
+
+.category-chip[data-category="taxi"]:not(.active) svg {
+  color: #e9ad20;
+}
+
+/* 모임 만들기 카테고리 선택 영역 */
+.create-category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.create-category-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 12px;
+  border: 1px solid #e5ebf5;
+  border-radius: 15px;
+  background: #f8faff;
+  color: #25334d;
+  cursor: pointer;
+}
+
+.create-category-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.create-category-option svg {
+  width: 20px;
+  height: 20px;
+}
+
+.create-category-option:has(input:checked) {
+  border-color: #78b1ff;
+  background: #eaf3ff;
+  color: #0969e8;
+  box-shadow: 0 0 0 2px rgba(22, 119, 242, 0.07);
+}
+
+.create-category-option:has(input:focus-visible) {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.create-category-option[data-type="food"] svg {
+  color: #f58a3b;
+}
+
+.create-category-option[data-type="exercise"] svg {
+  color: #398cf0;
+}
+
+.create-category-option[data-type="study"] svg {
+  color: #9765e8;
+}
+
+.create-category-option[data-type="taxi"] svg {
+  color: #e9ad20;
+}
+
+
+/* =========================================
+   InhaGo - 탐색 화면 배경 통일
+   ========================================= */
+
+/* 탐색 화면: 파란 원형 장식 제거 */
+.hero.search-mode::before,
+.hero.search-mode::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* 검색 영역: 메인 화면과 같은 부드러운 배경 */
+.hero.search-mode {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  background: linear-gradient(
+    180deg,
+    #FFFFFF 0%,
+    #F9FBFF 25%,
+    #F4F8FF 65%,
+    #F2F7FF 100%
+  ) !important;
+}
+
+/* 탐색 페이지로 자연스럽게 연결 */
+#search-page {
+  background: linear-gradient(
+    180deg,
+    #F2F7FF 0%,
+    #F7FAFF 180px,
+    #FFFFFF 380px
+  ) !important;
+}
+
+/* 검색창 */
+.hero.search-mode .search {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #EDF2FA;
+  box-shadow: 0 5px 20px rgba(35, 85, 155, 0.045);
+}
+
+/* 카테고리 버튼 */
+.hero.search-mode .category-chip {
+  background: #FFFFFF;
+  border: 1px solid #E8EEF8;
+  box-shadow: 0 3px 12px rgba(35, 85, 155, 0.04);
+}
+
+/* 선택된 카테고리 */
+.hero.search-mode .category-chip.active {
+  background: linear-gradient(
+    135deg,
+    #459BFF,
+    #1677F2
+  );
+  border-color: #78B1FF;
+  color: #FFFFFF;
+}
+
+/* 배경 사이 불필요한 간격 방지 */
+#search-page {
+  margin-top: 0;
+  border-top: none;
+}
+
+
+/* =========================================
+   InhaGo - Category Design Fix
+   ========================================= */
+
+/* 주변 모임 아이콘: Apple Cool Tone */
+.meeting-icon.food {
+  background: #E7F3FF !important;
+  color: #1877D2 !important;
+}
+
+.meeting-icon.exercise {
+  background: #E9EDF4 !important;
+  color: #586D8B !important;
+}
+
+.meeting-icon.study {
+  background: #ECEEFF !important;
+  color: #6366C9 !important;
+}
+
+.meeting-icon.taxi {
+  background: #E0F3F4 !important;
+  color: #198D9B !important;
+}
+
+/* 카테고리 아이콘 색상 */
+.category-chip[data-category="food"]:not(.active) svg,
+.create-category-option[data-type="food"] svg {
+  color: #1877D2;
+}
+
+.category-chip[data-category="exercise"]:not(.active) svg,
+.create-category-option[data-type="exercise"] svg {
+  color: #586D8B;
+}
+
+.category-chip[data-category="study"]:not(.active) svg,
+.create-category-option[data-type="study"] svg {
+  color: #6366C9;
+}
+
+.category-chip[data-category="taxi"]:not(.active) svg,
+.create-category-option[data-type="taxi"] svg {
+  color: #198D9B;
+}
+
+/* 모임 만들기: 2열 카테고리 선택 */
+#create-form .create-category-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+#create-form .create-category-option {
+  position: relative;
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  min-height: 60px;
+  padding: 13px;
+  border: 1px solid #E5EBF5;
+  border-radius: 16px;
+  background: #F8FAFF;
+  color: #25334D;
+  cursor: pointer;
+}
+
+#create-form .create-category-option input[type="radio"] {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#create-form .create-category-option svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+#create-form .create-category-option:has(input:checked) {
+  border-color: #78B1FF;
+  background: #EAF3FF;
+  color: #0969E8;
+  box-shadow: 0 0 0 2px rgba(22, 119, 242, .07);
+}
+
+/* Integrated live map and chat/friend panels */
+#campus-map.map-container {height: min(60vh,540px);min-height:350px;position:relative;overflow:hidden;border-radius:20px;background:#eef3f8}
+#map {width:100%;height:100%;min-height:350px}
+#filters {position:absolute;top:14px;left:12px;right:12px;display:flex;gap:6px;overflow:auto;z-index:2}
+#filters button {white-space:nowrap;border:1px solid #e5e8eb;border-radius:20px;background:white;padding:9px 12px;font-size:12px;cursor:pointer}
+#filters button.active {background:#3182f6;color:white;border-color:#3182f6}
+#locationBtn {position:absolute;right:15px;bottom:15px;z-index:2;background:white;border:1px solid #e5e8eb;border-radius:12px;padding:12px}
+#status:not(:empty) {position:absolute;bottom:14px;left:14px;background:#fff;border-radius:10px;padding:8px;font-size:12px;z-index:2}
+#bottomSheet[hidden] {display:none}
+#bottomSheet {position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);padding:20px;background:#fff;z-index:50;border-radius:22px 22px 0 0;box-shadow:0 -10px 35px #0002}
+#auth-panel {z-index:9999}
+#chat-page .chat-container,#message-page .chat-container,#friend-page .friend-container {min-width:0}
+#chat-page .chat-section,#message-page .chat-section,#friend-page .friend-section {min-width:0}
+#chat-page .chat-messages,#message-page .chat-messages {max-height:50vh;overflow:auto}
+#chat-page input,#message-page input,#friend-page input {max-width:100%}
+
+/* Backend connection notice: keep the last loaded meetings visible. */
+.api-connection-banner:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;margin:10px 0;border:1px solid #f3c5a5;border-radius:12px;background:#fff8f1;color:#8a451a;font-size:14px}
+.api-connection-banner button{border:1px solid #dca376;border-radius:8px;background:#fff;padding:7px 12px;color:inherit;cursor:pointer;white-space:nowrap}
+
+/* Kakao T-style meeting pickup position selector */
+.location-picker-dialog{border:0;border-radius:20px;padding:0;width:min(94vw,620px);max-height:92vh;box-shadow:0 15px 60px #0004}
+.location-picker-dialog::backdrop{background:#142b48a8}
+.location-picker-panel{padding:18px;display:flex;flex-direction:column;gap:12px}
+.location-picker-header{display:flex;align-items:center;justify-content:space-between}
+.location-picker-header h2{margin:0}
+.location-picker-header button{border:0;background:transparent;font-size:24px;cursor:pointer}
+.location-picker-map-wrap{position:relative;height:min(55vh,440px);min-height:280px;border-radius:14px;overflow:hidden;background:#eaf0f4}
+#location-picker-map{width:100%;height:100%}
+.location-picker-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);font-size:38px;line-height:1;pointer-events:none;filter:drop-shadow(0 3px 2px #0005)}
+#selected-meeting-location{overflow-wrap:anywhere}
