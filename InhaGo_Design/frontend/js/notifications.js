@@ -81,12 +81,17 @@ async function refresh() {
     }
     const now = Date.now();
     const items = [];
-    const [requests, direct, memberships, created] = await Promise.all([
+    const results = await Promise.allSettled([
       query('friendships','id,requester_id', q=>q.eq('receiver_id',user.id).eq('status','pending')),
       query('direct_messages','id,sender_id,created_at',q=>q.eq('receiver_id',user.id).order('created_at',{ascending:false}).limit(100)),
       query('meeting_participants','meeting_id',q=>q.eq('user_id',user.id).eq('status','joined')),
       query('meetings','id,title,meeting_time,status',q=>q.eq('creator_id',user.id).eq('status','open'))
     ]);
+    const [requests, direct, memberships, created] = results.map((result, index) => {
+      if (result.status === 'fulfilled') return result.value;
+      console.warn('알림 소스 ' + index + ' 조회 실패:', result.reason);
+      return [];
+    });
     if (token !== refreshToken) return;
     for (const request of requests) items.push({id:'friend:'+request.id,type:'friend',title:'새 친구 요청',details:'친구 요청이 도착했습니다.',page:'friend'});
     for (const msg of direct) {
