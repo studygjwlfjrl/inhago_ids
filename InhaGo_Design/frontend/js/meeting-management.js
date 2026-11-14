@@ -27,6 +27,7 @@ function action(label, callback, danger=false) {
 }
 async function runChange(fn, message) {
   await fn();
+  meetings = meetings.filter(m => m.status !== 'cancelled');
   notify(message);
   window.dispatchEvent(new Event('inhaGoMeetingsChanged'));
   await load();
@@ -48,7 +49,12 @@ function render() {
       buttons.append(action('수정',()=>openEdit(m)));
       buttons.append(action('취소',async()=>{
         if(!confirm('이 모임을 취소할까요?'))return;
-        await runChange(()=>cancelMeeting(m.id),'모임을 취소했습니다.');
+        await cancelMeeting(m.id);
+        meetings = meetings.filter(item => String(item.id) !== String(m.id));
+        render();
+        notify('모임을 취소했습니다.');
+        window.dispatchEvent(new Event('inhaGoMeetingsChanged'));
+        await load();
       },true));
       if(new Date(m.meeting_time)<=new Date())buttons.append(action('완료 처리',()=>runChange(()=>completeMeeting(m.id),'모임을 완료했습니다. 이제 참여자를 평가할 수 있습니다.')));
     } else if(!mine && m.status==='open') {
