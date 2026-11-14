@@ -155,6 +155,16 @@ import { supabase as supabaseDev } from "./supabase.js";
   }
 
   function handleAction(action, userId) {
+    
+if (action === "open-direct-chat") {
+  window.dispatchEvent(
+    new CustomEvent("inhaGoOpenDirectChat", {
+      detail: { friendId: userId }
+    })
+  );
+  return;
+}
+
 
       // Supabase 친구 요청
      if (action === "request-supabase") {
@@ -609,13 +619,19 @@ import { supabase as supabaseDev } from "./supabase.js";
       })
     );
     
-    renderList("friend-list", friends, user => [
-      {
-        label: "친구 삭제",
-        action: "remove-supabase",
-        secondary: true
-      }
-    ]);
+    
+renderList("friend-list", friends, user => [
+  {
+    label: "1:1 채팅",
+    action: "open-direct-chat"
+  },
+  {
+    label: "친구 삭제",
+    action: "remove-supabase",
+    secondary: true
+  }
+]);
+
 
   }
 
