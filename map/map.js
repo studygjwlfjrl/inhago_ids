@@ -49,13 +49,12 @@ async function initMap() {
       streetViewControl: false
     });
 
-    await refreshMeetings();
     setupButtons();
+    // 모임 API 지연/실패가 위치 버튼 및 GPS 시작을 막지 않도록 비동기 실행
+    void refreshMeetings();
 
-    // 지도 생성 성공 후 자동 GPS 추적 시작
-    if (window.inhaGoLoggedIn === true) {
+    // 로그인과 무관하게 위치 권한 요청 및 현재 위치 표시
     startLocationTracking();
-    }
 
   } catch (error) {
     status.textContent = "지도를 불러오지 못했습니다.";
@@ -71,12 +70,19 @@ let currentPosition = null;
 
 function startLocationTracking() {
   if (!navigator.geolocation) {
-    console.error("이 브라우저는 위치 서비스를 지원하지 않습니다.");
+    status.textContent = "이 브라우저는 위치 서비스를 지원하지 않습니다.";
+    console.error(status.textContent);
+    return;
+  }
+
+  if (!window.isSecureContext) {
+    status.textContent = "위치 확인에는 HTTPS 연결이 필요합니다.";
     return;
   }
 
   // 중복 위치 추적 방지
   if (locationWatchId !== null) return;
+  status.textContent = "현재 위치를 확인하는 중입니다.";
 
   locationWatchId = navigator.geolocation.watchPosition(
     (position) => {
@@ -119,6 +125,7 @@ function startLocationTracking() {
     },
 
     (error) => {
+      locationWatchId = null;
       console.error("GPS 오류 코드:", error.code);
       console.error("GPS 오류 메시지:", error.message);
 
@@ -127,8 +134,10 @@ function startLocationTracking() {
       } else if (error.code === 2) {
         status.textContent = "현재 위치를 확인할 수 없습니다.";
       } else if (error.code === 3) {
-        status.textContent = "위치 확인 시간이 초과되었습니다.";
-  }
+        status.textContent = "위치 확인 시간이 초과되었습니다. 다시 시도해 주세요.";
+      } else {
+        status.textContent = "위치 확인에 실패했습니다.";
+      }
     },
 
     {
@@ -205,11 +214,11 @@ function getMyLocation() {
 
 // 버튼 이벤트
 function setupButtons() {
-  document.getElementById("locationBtn")
-    .addEventListener("click", getMyLocation);
+  const locationButton = document.getElementById("locationBtn");
+  if (locationButton) locationButton.addEventListener("click", getMyLocation);
 
   document.getElementById("closeBtn")
-    .addEventListener("click", () => {
+    ?.addEventListener("click", () => {
       document.getElementById("bottomSheet").hidden = true;
     });
 
