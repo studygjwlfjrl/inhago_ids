@@ -15,6 +15,16 @@
   <link rel="stylesheet" href="css/friend.css">
   <link rel="stylesheet" href="css/message.css">
   <link rel="stylesheet" href="css/chat.css">
+  <style>
+    .inha-badge{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;border-radius:12px;padding:0 5px;background:#e84657;color:white;font-size:11px;font-weight:800;line-height:1}
+    .inha-badge[hidden],.inha-notifications[hidden],.notification-dot[hidden]{display:none!important}
+    .inha-notifications{position:absolute;right:16px;top:78px;z-index:1200;width:min(340px,calc(100vw - 32px));max-height:420px;overflow:auto;background:white;border:1px solid #dce8f4;border-radius:18px;box-shadow:0 16px 40px #1634542b;padding:12px}
+    .inha-notifications-head{display:flex;align-items:center;justify-content:space-between;padding:8px}
+    .inha-notifications-head button{background:transparent;border:0;color:#2166b8;cursor:pointer}
+    .inha-notifications-list{display:grid;gap:6px}
+    .notification-entry{display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-align:left;padding:12px;border:0;border-radius:12px;background:#f2f7ff;cursor:pointer;color:#18365d}
+    .notification-entry small{color:#617c9c}
+  </style>
 
   <script
     src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"
@@ -40,7 +50,8 @@
           aria-label="알림"
         >
           <i data-lucide="bell"></i>
-          <span class="notification-dot"></span>
+          <span class="notification-dot" hidden></span>
+          <span id="notification-count" class="inha-badge" hidden>0</span>
         </button>
 
         <button
@@ -561,7 +572,7 @@
         <span class="nav-icon">
           <i data-lucide="message-circle"></i>
         </span>
-        <span>채팅</span>
+        <span>채팅</span><span id="chat-unread-count" class="inha-badge" hidden>0</span>
       </button>
 
       <button class="nav-item" data-page="friend">
@@ -762,6 +773,7 @@
     <script type="module" src="js/friend.js"></script>
     <script type="module" src="js/message.js"></script>
     <script type="module" src="js/chat.js"></script>
+    <script type="module" src="js/notifications.js"></script>
     <script type="module" src="js/login-features.js"></script>
     <script type="module" src="js/meeting-management.js"></script>
   
