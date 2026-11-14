@@ -259,17 +259,6 @@ function setupButtons() {
       document.getElementById("bottomSheet").hidden = true;
     });
 
-  document.querySelectorAll("#filters [data-category]")
-    .forEach(button => {
-      button.addEventListener("click", () => {
-        document.querySelectorAll("#filters [data-category]")
-          .forEach(b => b.classList.remove("active"));
-
-        button.classList.add("active");
-        showMarkers(button.dataset.category);
-        document.querySelectorAll(".category-chip[data-category]").forEach(chip => chip.classList.toggle("active", (chip.dataset.category === "food" ? "meal" : chip.dataset.category) === button.dataset.category));
-      });
-    });
 }
 
 // Google Maps API 로드
