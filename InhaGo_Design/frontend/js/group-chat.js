@@ -1,11 +1,16 @@
 
 import { supabase as supabaseDev } from "./supabase.js";
 
-// 1. 채팅 화면 전환
+/* =========================================
+   1. 채팅 화면 전환
+========================================= */
+
 const meetingTab = document.getElementById("meeting-chat-tab");
 const groupTab = document.getElementById("group-chat-tab");
 
-const meetingView = document.querySelector("#chat-page .chat-container");
+const meetingView = document.querySelector(
+  "#chat-page .chat-container"
+);
 const groupView = document.getElementById("group-chat-view");
 
 function switchChatTab(type) {
@@ -21,37 +26,55 @@ function switchChatTab(type) {
 }
 
 if (meetingTab && groupTab && meetingView && groupView) {
-  meetingTab.addEventListener("click", () => switchChatTab("meeting"));
-  groupTab.addEventListener("click", () => switchChatTab("group"));
+  meetingTab.addEventListener("click", () => {
+    switchChatTab("meeting");
+  });
+
+  groupTab.addEventListener("click", () => {
+    switchChatTab("group");
+  });
 }
 
-// 2. 친구 목록 조회
+/* =========================================
+   2. 친구 목록 조회
+========================================= */
+
 async function loadAcceptedFriends(userId) {
   const { data: friendships, error } = await supabaseDev
     .from("friendships")
     .select("requester_id, receiver_id")
     .eq("status", "accepted")
-    .or(`requester_id.eq.${userId},receiver_id.eq.${userId}`);
+    .or(
+      `requester_id.eq.${userId},receiver_id.eq.${userId}`
+    );
 
   if (error) throw error;
 
-  const friendIds = [...new Set(
-    (friendships || []).map(f =>
-      f.requester_id === userId ? f.receiver_id : f.requester_id
+  const friendIds = [
+    ...new Set(
+      (friendships || []).map(friend =>
+        friend.requester_id === userId
+          ? friend.receiver_id
+          : friend.requester_id
+      )
     )
-  )];
+  ];
 
   if (friendIds.length === 0) return [];
 
-  const { data: profiles, error: profileError } = await supabaseDev
-    .from("profiles")
-    .select("id, nickname, real_name")
-    .in("id", friendIds);
+  const { data: profiles, error: profileError } =
+    await supabaseDev
+      .from("profiles")
+      .select("id, nickname, real_name")
+      .in("id", friendIds);
 
   if (profileError) throw profileError;
 
   const profileMap = new Map(
-    (profiles || []).map(profile => [profile.id, profile])
+    (profiles || []).map(profile => [
+      profile.id,
+      profile
+    ])
   );
 
   return friendIds.map(id => ({
@@ -63,9 +86,13 @@ async function loadAcceptedFriends(userId) {
   }));
 }
 
-// 3. 단체 채팅방 만들기
-const createGroupChatBtn =
-  document.getElementById("create-group-chat-btn");
+/* =========================================
+   3. 단체 채팅방 만들기
+========================================= */
+
+const createGroupChatBtn = document.getElementById(
+  "create-group-chat-btn"
+);
 
 if (createGroupChatBtn) {
   createGroupChatBtn.addEventListener("click", async () => {
@@ -80,24 +107,31 @@ if (createGroupChatBtn) {
         return;
       }
 
-      const friends = await loadAcceptedFriends(userData.user.id);
+      const friends = await loadAcceptedFriends(
+        userData.user.id
+      );
 
       if (friends.length === 0) {
         alert("초대할 수 있는 친구가 없습니다.");
         return;
       }
 
-      const roomName = prompt("단체 채팅방 이름을 입력하세요.");
+      const roomName = prompt(
+        "단체 채팅방 이름을 입력하세요."
+      );
 
       if (roomName === null) return;
 
-      if (!roomName.trim() || roomName.trim().length > 100) {
+      if (
+        !roomName.trim() ||
+        roomName.trim().length > 100
+      ) {
         alert("채팅방 이름은 1~100자로 입력해주세요.");
         return;
       }
 
-      // 친구 선택 화면 생성
       const overlay = document.createElement("div");
+
       overlay.style.cssText = `
         position:fixed;
         inset:0;
@@ -109,6 +143,7 @@ if (createGroupChatBtn) {
       `;
 
       const panel = document.createElement("div");
+
       panel.style.cssText = `
         background:white;
         padding:24px;
@@ -126,8 +161,13 @@ if (createGroupChatBtn) {
 
       friends.forEach(friend => {
         const label = document.createElement("label");
-        label.style.cssText =
-          "display:flex;gap:10px;padding:10px;align-items:center;";
+
+        label.style.cssText = `
+          display:flex;
+          gap:10px;
+          padding:10px;
+          align-items:center;
+        `;
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
@@ -149,20 +189,29 @@ if (createGroupChatBtn) {
       confirmBtn.type = "button";
 
       const actions = document.createElement("div");
-      actions.style.cssText =
-        "display:flex;justify-content:flex-end;gap:12px;margin-top:20px;";
+
+      actions.style.cssText = `
+        display:flex;
+        justify-content:flex-end;
+        gap:12px;
+        margin-top:20px;
+      `;
 
       actions.append(cancelBtn, confirmBtn);
       panel.append(title, friendList, actions);
       overlay.appendChild(panel);
       document.body.appendChild(overlay);
 
-      cancelBtn.addEventListener("click", () => overlay.remove());
+      cancelBtn.addEventListener("click", () => {
+        overlay.remove();
+      });
 
       confirmBtn.addEventListener("click", async () => {
-        const selectedIds = [...friendList.querySelectorAll(
-          'input[type="checkbox"]:checked'
-        )].map(input => input.value);
+        const selectedIds = [
+          ...friendList.querySelectorAll(
+            'input[type="checkbox"]:checked'
+          )
+        ].map(input => input.value);
 
         if (selectedIds.length === 0) {
           alert("친구를 최소 1명 선택해주세요.");
@@ -171,28 +220,40 @@ if (createGroupChatBtn) {
 
         confirmBtn.disabled = true;
 
-        const { data: roomId, error: createError } =
-          await supabaseDev.rpc("create_group_chat", {
-            p_name: roomName.trim(),
-            p_friend_ids: selectedIds
-          });
+        try {
+          const { data: roomId, error: createError } =
+            await supabaseDev.rpc("create_group_chat", {
+              p_name: roomName.trim(),
+              p_friend_ids: selectedIds
+            });
 
-        if (createError) {
-          console.error(createError);
-          alert("채팅방 생성 실패: " + createError.message);
+          if (createError) throw createError;
+
+          overlay.remove();
+
+          alert("단체 채팅방 생성 성공!");
+
+          console.log("생성된 채팅방 ID:", roomId);
+
+          await loadGroupChatRooms();
+
+        } catch (error) {
+          console.error("채팅방 생성 오류:", error);
+          alert(
+            "채팅방 생성 실패: " + error.message
+          );
+        } finally {
           confirmBtn.disabled = false;
-          return;
         }
-
-        overlay.remove();
-        alert("단체 채팅방 생성 성공!");
-
-        console.log("생성된 채팅방 ID:", roomId);
       });
 
     } catch (error) {
       console.error(error);
-      alert("친구 목록 조회 실패: " + error.message);
+
+      alert(
+        "친구 목록 조회 실패: " + error.message
+      );
+
     } finally {
       createGroupChatBtn.disabled = false;
     }
@@ -200,43 +261,73 @@ if (createGroupChatBtn) {
 }
 
 /* =========================================
-   4. 친구 단체 채팅방 목록 및 메시지
+   4. 단체 채팅방 목록 및 메시지
 ========================================= */
 
-const groupRoomList = document.getElementById("group-chat-room-list");
-const groupListView = document.getElementById("group-chat-list-view");
-const groupRoomView = document.getElementById("group-chat-room-view");
-const groupBackBtn = document.getElementById("group-chat-back");
-const groupRoomTitle = document.getElementById("group-chat-room-title");
-const groupMessages = document.getElementById("group-chat-messages");
-const groupForm = document.getElementById("group-chat-form");
-const groupInput = document.getElementById("group-chat-input");
+const groupRoomList = document.getElementById(
+  "group-chat-room-list"
+);
+
+const groupListView = document.getElementById(
+  "group-chat-list-view"
+);
+
+const groupRoomView = document.getElementById(
+  "group-chat-room-view"
+);
+
+const groupBackBtn = document.getElementById(
+  "group-chat-back"
+);
+
+const groupRoomTitle = document.getElementById(
+  "group-chat-room-title"
+);
+
+const groupMessages = document.getElementById(
+  "group-chat-messages"
+);
+
+const groupForm = document.getElementById(
+  "group-chat-form"
+);
+
+const groupInput = document.getElementById(
+  "group-chat-input"
+);
 
 let activeGroupRoomId = null;
 let currentGroupUserId = null;
 
-// 현재 로그인 사용자 확인
+/* 현재 로그인 사용자 확인 */
+
 async function getGroupUserId() {
-  const { data, error } = await supabaseDev.auth.getUser();
+  const { data, error } =
+    await supabaseDev.auth.getUser();
 
   if (error) throw error;
 
   currentGroupUserId = data?.user?.id || null;
+
   return currentGroupUserId;
 }
 
-// 내가 참여한 단체 채팅방 목록 불러오기
+/* =========================================
+   5. 단체 채팅방 목록 불러오기
+========================================= */
 
 async function loadGroupChatRooms() {
   if (!groupRoomList) return;
 
-  groupRoomList.textContent = "채팅방을 불러오는 중...";
+  groupRoomList.textContent =
+    "채팅방을 불러오는 중...";
 
   try {
     const userId = await getGroupUserId();
 
     if (!userId) {
-      groupRoomList.textContent = "로그인 후 이용할 수 있습니다.";
+      groupRoomList.textContent =
+        "로그인 후 이용할 수 있습니다.";
       return;
     }
 
@@ -248,9 +339,11 @@ async function loadGroupChatRooms() {
 
     if (memberError) throw memberError;
 
-    const roomIds = [...new Set(
-      (memberships || []).map(m => m.room_id)
-    )];
+    const roomIds = [
+      ...new Set(
+        (memberships || []).map(m => m.room_id)
+      )
+    ];
 
     if (roomIds.length === 0) {
       groupRoomList.textContent =
@@ -258,25 +351,32 @@ async function loadGroupChatRooms() {
       return;
     }
 
-    const [roomsResult, membersResult, messagesResult] =
-      await Promise.all([
-        supabaseDev
-          .from("group_chat_rooms")
-          .select("id, name, created_at")
-          .in("id", roomIds),
+    const [
+      roomsResult,
+      membersResult,
+      messagesResult
+    ] = await Promise.all([
+      supabaseDev
+        .from("group_chat_rooms")
+        .select("id, name, created_at")
+        .in("id", roomIds),
 
-        supabaseDev
-          .from("group_chat_members")
-          .select("room_id, user_id")
-          .in("room_id", roomIds),
+      supabaseDev
+        .from("group_chat_members")
+        .select("room_id, user_id")
+        .in("room_id", roomIds),
 
-        supabaseDev
-          .from("group_chat_messages")
-          .select("room_id, sender_id, content, created_at")
-          .in("room_id", roomIds)
-          .order("created_at", { ascending: false })
-          .limit(1000)
-      ]);
+      supabaseDev
+        .from("group_chat_messages")
+        .select(
+          "room_id, sender_id, content, created_at"
+        )
+        .in("room_id", roomIds)
+        .order("created_at", {
+          ascending: false
+        })
+        .limit(1000)
+    ]);
 
     if (roomsResult.error) throw roomsResult.error;
     if (membersResult.error) throw membersResult.error;
@@ -295,7 +395,10 @@ async function loadGroupChatRooms() {
 
     for (const message of messagesResult.data || []) {
       if (!latestMessages.has(message.room_id)) {
-        latestMessages.set(message.room_id, message);
+        latestMessages.set(
+          message.room_id,
+          message
+        );
       }
     }
 
@@ -303,9 +406,12 @@ async function loadGroupChatRooms() {
 
     rooms.sort((a, b) => {
       const aTime =
-        latestMessages.get(a.id)?.created_at || a.created_at;
+        latestMessages.get(a.id)?.created_at ||
+        a.created_at;
+
       const bTime =
-        latestMessages.get(b.id)?.created_at || b.created_at;
+        latestMessages.get(b.id)?.created_at ||
+        b.created_at;
 
       return new Date(bTime) - new Date(aTime);
     });
@@ -314,7 +420,8 @@ async function loadGroupChatRooms() {
 
     for (const room of rooms) {
       const lastMessage = latestMessages.get(room.id);
-      const memberCount = memberCounts.get(room.id) || 0;
+      const memberCount =
+        memberCounts.get(room.id) || 0;
 
       const button = document.createElement("button");
       button.type = "button";
@@ -343,7 +450,11 @@ async function loadGroupChatRooms() {
       preview.className = "group-chat-list-preview";
 
       preview.textContent = lastMessage
-        ? `${lastMessage.sender_id === userId ? "나: " : ""}${lastMessage.content}`
+        ? `${
+            lastMessage.sender_id === userId
+              ? "나: "
+              : ""
+          }${lastMessage.content}`
         : "새로운 대화를 시작해 보세요.";
 
       info.append(title, preview);
@@ -352,7 +463,8 @@ async function loadGroupChatRooms() {
       time.className = "group-chat-list-time";
 
       const dateValue =
-        lastMessage?.created_at || room.created_at;
+        lastMessage?.created_at ||
+        room.created_at;
 
       if (dateValue) {
         const date = new Date(dateValue);
@@ -380,14 +492,20 @@ async function loadGroupChatRooms() {
     }
 
   } catch (error) {
-    console.error("단체 채팅방 목록 오류:", error);
+    console.error(
+      "단체 채팅방 목록 오류:",
+      error
+    );
+
     groupRoomList.textContent =
       "채팅방 목록을 불러오지 못했습니다.";
   }
 }
 
+/* =========================================
+   6. 단체 채팅방 열기
+========================================= */
 
-// 단체 채팅방 열기
 async function openGroupChatRoom(room) {
   activeGroupRoomId = room.id;
 
@@ -398,43 +516,63 @@ async function openGroupChatRoom(room) {
   await loadGroupMessages(room.id);
 }
 
-// 메시지 목록 불러오기
+/* =========================================
+   7. 메시지 목록 불러오기
+   실제 작성자 닉네임 표시
+========================================= */
 
 async function loadGroupMessages(roomId) {
   if (!groupMessages || !roomId) return;
 
-  const { data: messages, error } = await supabaseDev
-    .from("group_chat_messages")
-    .select("id, sender_id, content, created_at")
-    .eq("room_id", roomId)
-    .order("created_at", { ascending: true })
-    .limit(200);
+  const { data: messages, error } =
+    await supabaseDev
+      .from("group_chat_messages")
+      .select(
+        "id, sender_id, content, created_at"
+      )
+      .eq("room_id", roomId)
+      .order("created_at", {
+        ascending: true
+      })
+      .limit(200);
 
   if (error) {
     console.error("메시지 조회 오류:", error);
+
     if (activeGroupRoomId === roomId) {
       groupMessages.textContent =
         "메시지를 불러오지 못했습니다.";
     }
+
     return;
   }
 
   if (activeGroupRoomId !== roomId) return;
 
-  const senderIds = [...new Set(
-    (messages || []).map(message => message.sender_id)
-  )];
+  const senderIds = [
+    ...new Set(
+      (messages || []).map(
+        message => message.sender_id
+      )
+    )
+  ];
 
   let profiles = [];
 
   if (senderIds.length > 0) {
-    const { data, error: profileError } = await supabaseDev
+    const {
+      data,
+      error: profileError
+    } = await supabaseDev
       .from("profiles")
       .select("id, nickname, real_name")
       .in("id", senderIds);
 
     if (profileError) {
-      console.error("프로필 조회 오류:", profileError);
+      console.error(
+        "프로필 조회 오류:",
+        profileError
+      );
     } else {
       profiles = data || [];
     }
@@ -443,39 +581,53 @@ async function loadGroupMessages(roomId) {
   if (activeGroupRoomId !== roomId) return;
 
   const profileMap = new Map(
-    profiles.map(profile => [profile.id, profile])
+    profiles.map(profile => [
+      profile.id,
+      profile
+    ])
   );
 
   groupMessages.replaceChildren();
 
   if (!messages?.length) {
-    groupMessages.textContent = "아직 메시지가 없습니다.";
+    groupMessages.textContent =
+      "아직 메시지가 없습니다.";
     return;
   }
 
   for (const message of messages) {
     const item = document.createElement("div");
-    const isMine = message.sender_id === currentGroupUserId;
+
+    const isMine =
+      message.sender_id === currentGroupUserId;
 
     item.style.cssText = `
       padding:10px;
       margin:8px 0;
       border-radius:10px;
-      background:${isMine ? "#dceaff" : "#f1f1f1"};
+      background:${
+        isMine ? "#dceaff" : "#f1f1f1"
+      };
       color:#222;
-      text-align:${isMine ? "right" : "left"};
+      text-align:${
+        isMine ? "right" : "left"
+      };
       overflow-wrap:anywhere;
     `;
 
     const sender = document.createElement("strong");
-    const profile = profileMap.get(message.sender_id);
+
+    const profile = profileMap.get(
+      message.sender_id
+    );
 
     const senderName =
       profile?.nickname ||
       profile?.real_name ||
       "이름 미설정";
 
-    sender.textContent = isMine ? "나" : senderName;
+    sender.textContent =
+      isMine ? "나" : senderName;
 
     const content = document.createElement("div");
     content.textContent = message.content;
@@ -484,118 +636,92 @@ async function loadGroupMessages(roomId) {
     groupMessages.appendChild(item);
   }
 
-  groupMessages.scrollTop = groupMessages.scrollHeight;
+  groupMessages.scrollTop =
+    groupMessages.scrollHeight;
 }
 
-  if (!groupMessages || !roomId) return;
+/* =========================================
+   8. 메시지 전송
+========================================= */
 
-  const { data: messages, error } = await supabaseDev
-    .from("group_chat_messages")
-    .select("id, sender_id, content, created_at")
-    .eq("room_id", roomId)
-    .order("created_at", { ascending: true })
-    .limit(200);
-
-  if (error) {
-    console.error("메시지 조회 오류:", error);
-    groupMessages.textContent = "메시지를 불러오지 못했습니다.";
-    return;
-  }
-
-  // 다른 채팅방으로 이동한 경우 이전 요청 결과 무시
-  if (activeGroupRoomId !== roomId) return;
-
-  groupMessages.replaceChildren();
-
-  if (!messages?.length) {
-    groupMessages.textContent = "아직 메시지가 없습니다.";
-    return;
-  }
-
-  for (const message of messages) {
-    const item = document.createElement("div");
-    const isMine = message.sender_id === currentGroupUserId;
-
-    item.style.cssText = `
-      padding:10px;
-      margin:8px 0;
-      border-radius:10px;
-      background:${isMine ? "#dceaff" : "#f1f1f1"};
-      color:#222;
-      text-align:${isMine ? "right" : "left"};
-      overflow-wrap:anywhere;
-    `;
-
-    const sender = document.createElement("strong");
-    sender.textContent = isMine ? "나" : "참여자";
-
-    const content = document.createElement("div");
-    content.textContent = message.content;
-
-    item.append(sender, content);
-    groupMessages.appendChild(item);
-  }
-
-  groupMessages.scrollTop = groupMessages.scrollHeight;
-}
-
-// 메시지 전송
 if (groupForm && groupInput) {
-  groupForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
+  groupForm.addEventListener(
+    "submit",
+    async event => {
+      event.preventDefault();
 
-    const roomId = activeGroupRoomId;
-    const content = groupInput.value.trim();
+      const roomId = activeGroupRoomId;
+      const content = groupInput.value.trim();
 
-    if (!roomId || !content) return;
+      if (!roomId || !content) return;
 
-    const submitBtn = groupForm.querySelector(
-      'button[type="submit"]'
-    );
+      const submitBtn = groupForm.querySelector(
+        'button[type="submit"]'
+      );
 
-    if (submitBtn) submitBtn.disabled = true;
-
-    try {
-      const userId = await getGroupUserId();
-
-      if (!userId) {
-        alert("로그인이 필요합니다.");
-        return;
+      if (submitBtn) {
+        submitBtn.disabled = true;
       }
 
-      const { error } = await supabaseDev
-        .from("group_chat_messages")
-        .insert({
-          room_id: roomId,
-          sender_id: userId,
-          content
-        });
+      try {
+        const userId = await getGroupUserId();
 
-      if (error) throw error;
+        if (!userId) {
+          alert("로그인이 필요합니다.");
+          return;
+        }
 
-      groupInput.value = "";
+        const { error } = await supabaseDev
+          .from("group_chat_messages")
+          .insert({
+            room_id: roomId,
+            sender_id: userId,
+            content
+          });
 
-      await loadGroupMessages(roomId);
+        if (error) throw error;
 
-    } catch (error) {
-      console.error("메시지 전송 오류:", error);
-      alert("메시지 전송 실패: " + error.message);
-    } finally {
-      if (submitBtn) submitBtn.disabled = false;
+        groupInput.value = "";
+
+        await loadGroupMessages(roomId);
+
+      } catch (error) {
+        console.error(
+          "메시지 전송 오류:",
+          error
+        );
+
+        alert(
+          "메시지 전송 실패: " +
+          error.message
+        );
+
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+        }
+      }
     }
-  });
+  );
 }
 
-// 목록으로 돌아가기
+/* =========================================
+   9. 목록으로 돌아가기
+========================================= */
+
 groupBackBtn?.addEventListener("click", () => {
   activeGroupRoomId = null;
+
   groupRoomView.hidden = true;
   groupListView.hidden = false;
 
   loadGroupChatRooms();
 });
 
-// 단체 채팅 탭을 열면 채팅방 목록 새로고침
+/* =========================================
+   10. 단체 채팅 탭 새로고침
+========================================= */
+
 groupTab?.addEventListener("click", () => {
   if (activeGroupRoomId) {
     loadGroupMessages(activeGroupRoomId);
@@ -605,11 +731,12 @@ groupTab?.addEventListener("click", () => {
 });
 
 /* =========================================
-   5. 단체 채팅방 관리 메뉴
+   11. 단체 채팅방 관리 메뉴
 ========================================= */
 
-const groupMenuBtn =
-  document.getElementById("group-chat-menu-btn");
+const groupMenuBtn = document.getElementById(
+  "group-chat-menu-btn"
+);
 
 let groupMenuOverlay = null;
 
@@ -642,7 +769,9 @@ async function openGroupChatMenu() {
 
   const memberList = document.createElement("div");
   memberList.className = "group-chat-member-list";
-  memberList.textContent = "참여자를 불러오는 중...";
+
+  memberList.textContent =
+    "참여자를 불러오는 중...";
 
   const inviteBtn = document.createElement("button");
   inviteBtn.type = "button";
@@ -651,8 +780,10 @@ async function openGroupChatMenu() {
 
   const leaveBtn = document.createElement("button");
   leaveBtn.type = "button";
+
   leaveBtn.className =
     "group-chat-menu-action group-chat-leave-btn";
+
   leaveBtn.textContent = "채팅방 나가기";
 
   panel.append(
@@ -667,22 +798,37 @@ async function openGroupChatMenu() {
   document.body.appendChild(overlay);
 
   groupMenuOverlay = overlay;
-  groupMenuBtn?.setAttribute("aria-expanded", "true");
+
+  groupMenuBtn?.setAttribute(
+    "aria-expanded",
+    "true"
+  );
 
   function closeMenu() {
     overlay.remove();
 
     if (groupMenuOverlay === overlay) {
       groupMenuOverlay = null;
-      groupMenuBtn?.setAttribute("aria-expanded", "false");
+
+      groupMenuBtn?.setAttribute(
+        "aria-expanded",
+        "false"
+      );
     }
   }
 
-  closeBtn.addEventListener("click", closeMenu);
+  closeBtn.addEventListener(
+    "click",
+    closeMenu
+  );
 
   overlay.addEventListener("click", event => {
-    if (event.target === overlay) closeMenu();
+    if (event.target === overlay) {
+      closeMenu();
+    }
   });
+
+  /* 참여자 목록 불러오기 */
 
   try {
     const { data: members, error: memberError } =
@@ -693,24 +839,31 @@ async function openGroupChatMenu() {
 
     if (memberError) throw memberError;
 
-    const memberIds = (members || []).map(m => m.user_id);
+    const memberIds = (members || []).map(
+      member => member.user_id
+    );
 
     let profiles = [];
 
     if (memberIds.length > 0) {
-      const { data, error } = await supabaseDev
-        .from("profiles")
-        .select("id, nickname, real_name")
-        .in("id", memberIds);
+      const { data, error } =
+        await supabaseDev
+          .from("profiles")
+          .select("id, nickname, real_name")
+          .in("id", memberIds);
 
       if (error) throw error;
+
       profiles = data || [];
     }
 
     if (!overlay.isConnected) return;
 
     const profileMap = new Map(
-      profiles.map(p => [p.id, p])
+      profiles.map(profile => [
+        profile.id,
+        profile
+      ])
     );
 
     memberList.replaceChildren();
@@ -745,7 +898,10 @@ async function openGroupChatMenu() {
     }
 
   } catch (error) {
-    console.error("참여자 조회 오류:", error);
+    console.error(
+      "참여자 조회 오류:",
+      error
+    );
 
     if (overlay.isConnected) {
       memberList.textContent =
@@ -753,10 +909,13 @@ async function openGroupChatMenu() {
     }
   }
 
-  // 다음 단계에서 실제 친구 초대 기능 연결
-  
-  // 친구 초대하기
+  /* =====================================
+     12. 친구 초대하기
+  ===================================== */
+
   inviteBtn.addEventListener("click", async () => {
+    inviteBtn.disabled = true;
+
     try {
       const userId = await getGroupUserId();
 
@@ -776,7 +935,9 @@ async function openGroupChatMenu() {
       if (memberError) throw memberError;
 
       const memberIds = new Set(
-        (members || []).map(m => m.user_id)
+        (members || []).map(
+          member => member.user_id
+        )
       );
 
       const availableFriends = friends.filter(
@@ -788,29 +949,47 @@ async function openGroupChatMenu() {
         return;
       }
 
-      const inviteOverlay = document.createElement("div");
-      inviteOverlay.className = "group-chat-menu-overlay";
+      const inviteOverlay =
+        document.createElement("div");
 
-      const invitePanel = document.createElement("div");
-      invitePanel.className = "group-chat-menu-panel";
+      inviteOverlay.className =
+        "group-chat-menu-overlay";
 
-      const inviteTitle = document.createElement("h3");
+      const invitePanel =
+        document.createElement("div");
+
+      invitePanel.className =
+        "group-chat-menu-panel";
+
+      const inviteTitle =
+        document.createElement("h3");
+
       inviteTitle.textContent = "친구 초대하기";
 
-      const friendList = document.createElement("div");
-      friendList.className = "group-chat-member-list";
+      const friendList =
+        document.createElement("div");
+
+      friendList.className =
+        "group-chat-member-list";
 
       const checkboxes = [];
 
       for (const friend of availableFriends) {
-        const label = document.createElement("label");
-        label.className = "group-chat-member-item";
+        const label =
+          document.createElement("label");
 
-        const checkbox = document.createElement("input");
+        label.className =
+          "group-chat-member-item";
+
+        const checkbox =
+          document.createElement("input");
+
         checkbox.type = "checkbox";
         checkbox.value = friend.id;
 
-        const name = document.createElement("span");
+        const name =
+          document.createElement("span");
+
         name.textContent = friend.name;
 
         label.append(checkbox, name);
@@ -818,14 +997,23 @@ async function openGroupChatMenu() {
         checkboxes.push(checkbox);
       }
 
-      const confirmBtn = document.createElement("button");
-      confirmBtn.type = "button";
-      confirmBtn.className = "group-chat-menu-action";
-      confirmBtn.textContent = "선택한 친구 초대";
+      const confirmBtn =
+        document.createElement("button");
 
-      const cancelBtn = document.createElement("button");
+      confirmBtn.type = "button";
+      confirmBtn.className =
+        "group-chat-menu-action";
+
+      confirmBtn.textContent =
+        "선택한 친구 초대";
+
+      const cancelBtn =
+        document.createElement("button");
+
       cancelBtn.type = "button";
-      cancelBtn.className = "group-chat-menu-action";
+      cancelBtn.className =
+        "group-chat-menu-action";
+
       cancelBtn.textContent = "취소";
 
       invitePanel.append(
@@ -842,51 +1030,79 @@ async function openGroupChatMenu() {
         inviteOverlay.remove();
       });
 
-      confirmBtn.addEventListener("click", async () => {
-        const selectedIds = checkboxes
-          .filter(checkbox => checkbox.checked)
-          .map(checkbox => checkbox.value);
+      confirmBtn.addEventListener(
+        "click",
+        async () => {
+          const selectedIds = checkboxes
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
 
-        if (selectedIds.length === 0) {
-          alert("초대할 친구를 선택해주세요.");
-          return;
-        }
-
-        confirmBtn.disabled = true;
-
-        try {
-          for (const friendId of selectedIds) {
-            const { error } = await supabaseDev.rpc(
-              "invite_group_chat_friend",
-              {
-                p_room_id: roomId,
-                p_friend_id: friendId
-              }
-            );
-
-            if (error) throw error;
+          if (selectedIds.length === 0) {
+            alert("초대할 친구를 선택해주세요.");
+            return;
           }
 
-          inviteOverlay.remove();
-          closeMenu();
+          confirmBtn.disabled = true;
 
-          alert("친구 초대가 완료되었습니다.");
+          let invitedCount = 0;
 
-        } catch (error) {
-          console.error("친구 초대 오류:", error);
-          alert("친구 초대 중 오류: " + error.message);
-        } finally {
-          confirmBtn.disabled = false;
+          try {
+            for (const friendId of selectedIds) {
+              const { error } =
+                await supabaseDev.rpc(
+                  "invite_group_chat_friend",
+                  {
+                    p_room_id: roomId,
+                    p_friend_id: friendId
+                  }
+                );
+
+              if (error) throw error;
+
+              invitedCount++;
+            }
+
+            inviteOverlay.remove();
+            closeMenu();
+
+            alert("친구 초대가 완료되었습니다.");
+
+          } catch (error) {
+            console.error(
+              "친구 초대 오류:",
+              error
+            );
+
+            alert(
+              `${invitedCount}명 초대 완료. ` +
+              `나머지 초대 중 오류: ${error.message}`
+            );
+
+          } finally {
+            confirmBtn.disabled = false;
+          }
         }
-      });
+      );
 
     } catch (error) {
-      console.error("친구 목록 조회 오류:", error);
-      alert("친구 목록을 불러오지 못했습니다.");
+      console.error(
+        "친구 목록 조회 오류:",
+        error
+      );
+
+      alert(
+        "친구 목록을 불러오지 못했습니다."
+      );
+
+    } finally {
+      inviteBtn.disabled = false;
     }
   });
 
-  // 채팅방 나가기
+  /* =====================================
+     13. 채팅방 나가기
+  ===================================== */
+
   leaveBtn.addEventListener("click", async () => {
     const confirmed = confirm(
       "정말 채팅방을 나가시겠습니까?\n" +
@@ -900,43 +1116,56 @@ async function openGroupChatMenu() {
     try {
       const { error } = await supabaseDev.rpc(
         "leave_group_chat",
-        { p_room_id: roomId }
+        {
+          p_room_id: roomId
+        }
       );
 
       if (error) throw error;
 
-      // 현재 채팅방 종료
       activeGroupRoomId = null;
 
-      // 관리 메뉴 닫기
       closeMenu();
 
-      // 채팅방 목록 화면으로 이동
       groupRoomView.hidden = true;
       groupListView.hidden = false;
 
-      // 나간 채팅방이 사라지도록 목록 갱신
       await loadGroupChatRooms();
 
       alert("채팅방에서 나갔습니다.");
 
     } catch (error) {
-      console.error("채팅방 나가기 오류:", error);
-      alert("채팅방 나가기 실패: " + error.message);
+      console.error(
+        "채팅방 나가기 오류:",
+        error
+      );
+
+      alert(
+        "채팅방 나가기 실패: " +
+        error.message
+      );
+
     } finally {
       leaveBtn.disabled = false;
     }
   });
-
 }
+
+/* =========================================
+   14. 관리 메뉴 버튼 이벤트
+========================================= */
 
 groupMenuBtn?.addEventListener("click", () => {
   if (groupMenuOverlay) {
     groupMenuOverlay.remove();
     groupMenuOverlay = null;
-    groupMenuBtn.setAttribute("aria-expanded", "false");
+
+    groupMenuBtn.setAttribute(
+      "aria-expanded",
+      "false"
+    );
+
   } else {
     openGroupChatMenu();
   }
 });
-
