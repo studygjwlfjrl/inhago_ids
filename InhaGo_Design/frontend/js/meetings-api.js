@@ -74,10 +74,10 @@ export async function joinMeeting(id) {
 }
 export async function getMyMeetings() {
   const user = await currentUser();
-  const created = await run(supabase.from("meetings").select("*").eq("creator_id", user.id), "내 모임을 불러오지 못했습니다.");
+  const created = await run(supabase.from("meetings").select("*").eq("creator_id", user.id).neq("status", "cancelled"), "내 모임을 불러오지 못했습니다.");
   const memberships = await run(supabase.from("meeting_participants").select("meeting_id").eq("user_id", user.id).eq("status", "joined"), "내 참여 목록을 불러오지 못했습니다.");
   const ids = [...new Set((memberships || []).map(x => x.meeting_id))];
-  const joined = ids.length ? await run(supabase.from("meetings").select("*").in("id", ids), "내 모임을 불러오지 못했습니다.") : [];
+  const joined = ids.length ? await run(supabase.from("meetings").select("*").in("id", ids).neq("status", "cancelled"), "내 모임을 불러오지 못했습니다.") : [];
   return { meetings: [...new Map([...(created || []), ...(joined || [])].map(m => [m.id, m])).values()].sort((a,b) => String(b.meeting_time).localeCompare(String(a.meeting_time))) };
 }
 export async function updateMeeting(id, data) {
