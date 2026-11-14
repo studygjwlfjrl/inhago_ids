@@ -667,14 +667,180 @@ async function openGroupChatMenu() {
   }
 
   // 다음 단계에서 실제 친구 초대 기능 연결
-  inviteBtn.addEventListener("click", () => {
-    alert("다음 단계에서 친구 초대 기능을 연결할게요.");
+  
+  // 친구 초대하기
+  inviteBtn.addEventListener("click", async () => {
+    try {
+      const userId = await getGroupUserId();
+
+      if (!userId) {
+        alert("로그인이 필요합니다.");
+        return;
+      }
+
+      const friends = await loadAcceptedFriends(userId);
+
+      const { data: members, error: memberError } =
+        await supabaseDev
+          .from("group_chat_members")
+          .select("user_id")
+          .eq("room_id", roomId);
+
+      if (memberError) throw memberError;
+
+      const memberIds = new Set(
+        (members || []).map(m => m.user_id)
+      );
+
+      const availableFriends = friends.filter(
+        friend => !memberIds.has(friend.id)
+      );
+
+      if (availableFriends.length === 0) {
+        alert("초대할 수 있는 친구가 없습니다.");
+        return;
+      }
+
+      const inviteOverlay = document.createElement("div");
+      inviteOverlay.className = "group-chat-menu-overlay";
+
+      const invitePanel = document.createElement("div");
+      invitePanel.className = "group-chat-menu-panel";
+
+      const inviteTitle = document.createElement("h3");
+      inviteTitle.textContent = "친구 초대하기";
+
+      const friendList = document.createElement("div");
+      friendList.className = "group-chat-member-list";
+
+      const checkboxes = [];
+
+      for (const friend of availableFriends) {
+        const label = document.createElement("label");
+        label.className = "group-chat-member-item";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = friend.id;
+
+        const name = document.createElement("span");
+        name.textContent = friend.name;
+
+        label.append(checkbox, name);
+        friendList.appendChild(label);
+        checkboxes.push(checkbox);
+      }
+
+      const confirmBtn = document.createElement("button");
+      confirmBtn.type = "button";
+      confirmBtn.className = "group-chat-menu-action";
+      confirmBtn.textContent = "선택한 친구 초대";
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.type = "button";
+      cancelBtn.className = "group-chat-menu-action";
+      cancelBtn.textContent = "취소";
+
+      invitePanel.append(
+        inviteTitle,
+        friendList,
+        confirmBtn,
+        cancelBtn
+      );
+
+      inviteOverlay.appendChild(invitePanel);
+      document.body.appendChild(inviteOverlay);
+
+      cancelBtn.addEventListener("click", () => {
+        inviteOverlay.remove();
+      });
+
+      confirmBtn.addEventListener("click", async () => {
+        const selectedIds = checkboxes
+          .filter(checkbox => checkbox.checked)
+          .map(checkbox => checkbox.value);
+
+        if (selectedIds.length === 0) {
+          alert("초대할 친구를 선택해주세요.");
+          return;
+        }
+
+        confirmBtn.disabled = true;
+
+        try {
+          for (const friendId of selectedIds) {
+            const { error } = await supabaseDev.rpc(
+              "invite_group_chat_friend",
+              {
+                p_room_id: roomId,
+                p_friend_id: friendId
+              }
+            );
+
+            if (error) throw error;
+          }
+
+          inviteOverlay.remove();
+          closeMenu();
+
+          alert("친구 초대가 완료되었습니다.");
+
+        } catch (error) {
+          console.error("친구 초대 오류:", error);
+          alert("친구 초대 중 오류: " + error.message);
+        } finally {
+          confirmBtn.disabled = false;
+        }
+      });
+
+    } catch (error) {
+      console.error("친구 목록 조회 오류:", error);
+      alert("친구 목록을 불러오지 못했습니다.");
+    }
   });
 
-  // 다음 단계에서 채팅방 나가기 기능 연결
-  leaveBtn.addEventListener("click", () => {
-    alert("다음 단계에서 채팅방 나가기 기능을 연결할게요.");
+  // 채팅방 나가기
+  leaveBtn.addEventListener("click", async () => {
+    const confirmed = confirm(
+      "정말 채팅방을 나가시겠습니까?\n" +
+      "나가면 내 채팅 목록에서 이 방이 사라집니다."
+    );
+
+    if (!confirmed) return;
+
+    leaveBtn.disabled = true;
+
+    try {
+      const { error } = await supabaseDev.rpc(
+        "leave_group_chat",
+        { p_room_id: roomId }
+      );
+
+      if (error) throw error;
+
+      // 현재 채팅방 종료
+      activeGroupRoomId = null;
+
+      // 관리 메뉴 닫기
+      closeMenu();
+
+      // 채팅방 목록 화면으로 이동
+      groupRoomView.hidden = true;
+      groupListView.hidden = false;
+
+      // 나간 채팅방이 사라지도록 목록 갱신
+      await loadGroupChatRooms();
+
+      alert("채팅방에서 나갔습니다.");
+
+    } catch (error) {
+      console.error("채팅방 나가기 오류:", error);
+      alert("채팅방 나가기 실패: " + error.message);
+    } finally {
+      leaveBtn.disabled = false;
+    }
   });
+
 }
 
 groupMenuBtn?.addEventListener("click", () => {
