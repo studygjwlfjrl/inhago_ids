@@ -1054,7 +1054,15 @@
 <script type="module" src="js/friend.js"></script>
 <script type="module" src="js/message.js"></script>
 <script type="module" src="js/chat.js"></script>
-    <script type="module" src="js/notifications.js?v=notifications-fix-20261115"></script>
+    <script id="notification-panel-toggle">
+(() => {
+  const button = document.getElementById('notification-button');
+  const panel = document.getElementById('notification-panel');
+  if (!button || !panel) return;
+  button.addEventListener('click', () => { panel.hidden = !panel.hidden; });
+})();
+</script>
+<script type="module" src="js/notifications.js?v=notifications-fix-20261115"></script>
 <script type="module" src="js/login-features.js"></script>
 <script type="module" src="js/meeting-management.js"></script>
 <script type="module" src="./js/group-chat.js"></script>
