@@ -226,6 +226,7 @@ async function getGroupUserId() {
 }
 
 // 내가 참여한 단체 채팅방 목록 불러오기
+
 async function loadGroupChatRooms() {
   if (!groupRoomList) return;
 
@@ -247,41 +248,129 @@ async function loadGroupChatRooms() {
 
     if (memberError) throw memberError;
 
-    const roomIds = [
-      ...new Set((memberships || []).map(m => m.room_id))
-    ];
+    const roomIds = [...new Set(
+      (memberships || []).map(m => m.room_id)
+    )];
 
     if (roomIds.length === 0) {
-      groupRoomList.textContent = "참여 중인 단체 채팅방이 없습니다.";
+      groupRoomList.textContent =
+        "참여 중인 단체 채팅방이 없습니다.";
       return;
     }
 
-    const { data: rooms, error: roomError } = await supabaseDev
-      .from("group_chat_rooms")
-      .select("id, name, created_at")
-      .in("id", roomIds)
-      .order("created_at", { ascending: false });
+    const [roomsResult, membersResult, messagesResult] =
+      await Promise.all([
+        supabaseDev
+          .from("group_chat_rooms")
+          .select("id, name, created_at")
+          .in("id", roomIds),
 
-    if (roomError) throw roomError;
+        supabaseDev
+          .from("group_chat_members")
+          .select("room_id, user_id")
+          .in("room_id", roomIds),
+
+        supabaseDev
+          .from("group_chat_messages")
+          .select("room_id, sender_id, content, created_at")
+          .in("room_id", roomIds)
+          .order("created_at", { ascending: false })
+          .limit(1000)
+      ]);
+
+    if (roomsResult.error) throw roomsResult.error;
+    if (membersResult.error) throw membersResult.error;
+    if (messagesResult.error) throw messagesResult.error;
+
+    const memberCounts = new Map();
+
+    for (const member of membersResult.data || []) {
+      memberCounts.set(
+        member.room_id,
+        (memberCounts.get(member.room_id) || 0) + 1
+      );
+    }
+
+    const latestMessages = new Map();
+
+    for (const message of messagesResult.data || []) {
+      if (!latestMessages.has(message.room_id)) {
+        latestMessages.set(message.room_id, message);
+      }
+    }
+
+    const rooms = [...(roomsResult.data || [])];
+
+    rooms.sort((a, b) => {
+      const aTime =
+        latestMessages.get(a.id)?.created_at || a.created_at;
+      const bTime =
+        latestMessages.get(b.id)?.created_at || b.created_at;
+
+      return new Date(bTime) - new Date(aTime);
+    });
 
     groupRoomList.replaceChildren();
 
-    for (const room of rooms || []) {
+    for (const room of rooms) {
+      const lastMessage = latestMessages.get(room.id);
+      const memberCount = memberCounts.get(room.id) || 0;
+
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = room.name;
-      button.style.cssText = `
-        display:block;
-        width:100%;
-        padding:15px;
-        margin:8px 0;
-        text-align:left;
-        background:#f3f6fc;
-        color:#222;
-        border:1px solid #ddd;
-        border-radius:10px;
-        cursor:pointer;
-      `;
+      button.className = "group-chat-list-item";
+
+      const avatar = document.createElement("div");
+      avatar.className = "group-chat-list-avatar";
+      avatar.textContent = "👥";
+
+      const info = document.createElement("div");
+      info.className = "group-chat-list-info";
+
+      const title = document.createElement("div");
+      title.className = "group-chat-list-title";
+
+      const name = document.createElement("span");
+      name.textContent = room.name;
+
+      const count = document.createElement("span");
+      count.className = "group-chat-member-count";
+      count.textContent = `${memberCount}명`;
+
+      title.append(name, count);
+
+      const preview = document.createElement("div");
+      preview.className = "group-chat-list-preview";
+
+      preview.textContent = lastMessage
+        ? `${lastMessage.sender_id === userId ? "나: " : ""}${lastMessage.content}`
+        : "새로운 대화를 시작해 보세요.";
+
+      info.append(title, preview);
+
+      const time = document.createElement("span");
+      time.className = "group-chat-list-time";
+
+      const dateValue =
+        lastMessage?.created_at || room.created_at;
+
+      if (dateValue) {
+        const date = new Date(dateValue);
+        const today = new Date();
+
+        time.textContent =
+          date.toDateString() === today.toDateString()
+            ? date.toLocaleTimeString("ko-KR", {
+                hour: "numeric",
+                minute: "2-digit"
+              })
+            : date.toLocaleDateString("ko-KR", {
+                month: "numeric",
+                day: "numeric"
+              });
+      }
+
+      button.append(avatar, info, time);
 
       button.addEventListener("click", () => {
         openGroupChatRoom(room);
@@ -296,6 +385,7 @@ async function loadGroupChatRooms() {
       "채팅방 목록을 불러오지 못했습니다.";
   }
 }
+
 
 // 단체 채팅방 열기
 async function openGroupChatRoom(room) {
