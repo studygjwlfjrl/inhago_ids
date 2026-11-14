@@ -202,19 +202,77 @@ overlay.querySelector(".friend-profile-score").textContent =
   `${score}점`;
 overlay.querySelector(".friend-profile-grade").textContent = grade;
 
-overlay.querySelector(".friend-profile-close").onclick =
-  () => overlay.remove();
 
 overlay.addEventListener("click", (event) => {
   if (event.target === overlay) overlay.remove();
 });
 
+
 overlay.querySelector(".friend-profile-message").onclick = () => {
   overlay.remove();
+
+  const friendPage = document.getElementById("friend-page");
+  if (friendPage) {
+    while (previousContent.firstChild) {
+      friendPage.appendChild(previousContent.firstChild);
+    }
+  }
+
   handleAction("open-direct-chat", userId);
 };
 
-document.body.appendChild(overlay);
+
+
+const friendPage = document.getElementById("friend-page");
+
+if (!friendPage) {
+  console.error("친구 페이지를 찾을 수 없습니다.");
+  return;
+}
+
+// 기존 친구 목록을 보관
+const previousContent = document.createDocumentFragment();
+while (friendPage.firstChild) {
+  previousContent.appendChild(friendPage.firstChild);
+}
+
+// 친구 프로필 전용 화면 표시
+friendPage.appendChild(overlay);
+
+// 팝업이 아니라 페이지 내부에 표시
+overlay.style.position = "relative";
+overlay.style.inset = "auto";
+overlay.style.background = "transparent";
+overlay.style.padding = "24px";
+overlay.style.minHeight = "100%";
+overlay.style.zIndex = "auto";
+
+
+const profileCard = overlay.querySelector(".friend-profile-card");
+
+// 친구 페이지 영역 전체를 사용하는 프로필 화면
+overlay.style.width = "100%";
+overlay.style.boxSizing = "border-box";
+overlay.style.display = "block";
+overlay.style.padding = "0";
+
+profileCard.style.width = "100%";
+profileCard.style.maxWidth = "none";
+profileCard.style.margin = "0";
+profileCard.style.borderRadius = "20px";
+profileCard.style.boxShadow = "none";
+
+
+// 닫기 버튼을 뒤로 가기 버튼으로 변경
+const backButton = overlay.querySelector(".friend-profile-close");
+backButton.textContent = "←";
+backButton.setAttribute("aria-label", "친구 목록으로 돌아가기");
+
+backButton.onclick = () => {
+  overlay.remove();
+  friendPage.appendChild(previousContent);
+};
+
 
 }
 
