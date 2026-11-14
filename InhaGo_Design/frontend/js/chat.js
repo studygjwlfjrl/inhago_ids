@@ -120,6 +120,7 @@ import { supabase as supabaseDev } from "./supabase.js";
       await supabaseDev
         .from("meetings")
         .select("id, title, location_name, creator_id")
+        .neq("status", "cancelled")
         .eq("creator_id", user.id);
 
     if (createdError) {
