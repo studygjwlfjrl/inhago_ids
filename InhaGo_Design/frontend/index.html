@@ -331,6 +331,11 @@
           type="button">
     친구 단체 채팅
   </button>
+  
+<button id="direct-chat-tab" type="button">
+  친구 채팅
+</button>
+
 
 <div id="group-chat-view" hidden>
 
@@ -838,5 +843,18 @@
     <script type="module" src="js/meeting-management.js"></script>
   
 <script type="module" src="./js/group-chat.js"></script>
+  
+<script>
+  document.getElementById("direct-chat-tab")
+    ?.addEventListener("click", () => {
+      document.querySelectorAll(".page").forEach(page => {
+        page.classList.remove("active");
+      });
+
+      document.getElementById("message-page")
+        ?.classList.add("active");
+    });
+</script>
+
 </body>
 </html>
