@@ -100,3 +100,54 @@
 .dm-back-btn{border:1px solid #d6e4f4;background:white;color:#152f56;padding:9px 12px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer}
 .dm-sender-name{display:block;font-size:12px;color:#365576;margin-bottom:5px}
 #dm-room .chat-messages{height:min(58vh,580px);min-height:300px}
+
+/* 카카오톡 스타일 1:1 채팅 목록 */
+#dm-friend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#dm-friend-list .dm-chat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 16px;
+  border-radius: 14px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#dm-friend-list .dm-chat-row:hover {
+  background: #f0f5ff;
+}
+
+.dm-chat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dm-chat-info strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #17233b;
+}
+
+.dm-last-preview {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #8b95a7;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dm-last-time {
+  flex-shrink: 0;
+  align-self: flex-start;
+  font-size: 11px;
+  color: #9aa4b2;
+}
