@@ -161,23 +161,12 @@
 
   <!-- 홈과 탐색에서만 표시 -->
   <section class="hero" id="hero">
-    <div class="hero-intro">
-      <h1>
-        캠퍼스에서<br>
-        함께하는 <span>새로운 만남</span>
-      </h1>
-      <p>
-        밥약, 운동, 스터디, 택시팟까지<br>
-        지금, 가까운 곳의 친구들과 모임을 시작해요.
-      </p>
-    </div>
-
     <label class="search" for="search">
       <i data-lucide="search"></i>
       <input
         id="search"
         type="search"
-        placeholder="장소, 모임, 사람을 검색해보세요"
+        placeholder="장소, 모임을 검색해보세요"
         autocomplete="off"
       >
     </label>
@@ -207,15 +196,7 @@
     <section id="home" class="page active">
       <div class="map-container" id="campus-map">
         <div id="map"></div>
-        <button id="locationBtn" type="button">📍 내 위치</button>
         <div id="status" role="status"></div>
-        <div id="filters">
-          <button data-category="all" class="active">전체</button>
-          <button data-category="meal">🍚 밥약</button>
-          <button data-category="taxi">🚕 택시팟</button>
-          <button data-category="study">📚 스터디</button>
-          <button data-category="exercise">🏃 운동</button>
-        </div>
       </div>
 
       <section class="nearby">
