@@ -425,6 +425,7 @@ messages.forEach(message => {
 
     subscribeRealtime(friendId);
     await renderMessages();
+    window.dispatchEvent(new CustomEvent('inhaGoRoomRead', {detail:{type:'dm',id:String(friendId)}}));
   }
 
   async function sendMessage(event) {
